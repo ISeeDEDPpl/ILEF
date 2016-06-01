@@ -699,12 +699,19 @@ namespace EveComFramework.SimpleDrone
             // Fighter management
             if(Fighters.Tubes.Any())
             {
+                if(!Fighters.Bay.IsPrimed)
+                {
+                    Console.Log("Prime() call to FighterBay", LogType.DEBUG);
+                    Fighters.Bay.Prime();
+                    return false;
+                }
+
                 // Send drones to attack
                 List<Fighters.Fighter> Attack = Fighters.Active.Where(a => !FighterCooldown.Contains(a) && FighterReady(a) && !a.Attacking.Contains(ActiveTarget)).ToList();
                 if (Attack.Any())
                 {
-                    Console.Log("|oSending scout drones to attack");
-                    Attack.ForEach(a => a.ActivateSlotOnTarget(0, ActiveTarget));
+                    Console.Log("|oSending fighters to attack");
+                    Attack.ForEach(a => a.ActivateSlotOnTarget(0, ActiveTarget)); // @TODO: KFighter.AbilitySlot() -> int?
                     Attack.ForEach(a => NextFighterCommand.AddOrUpdate(a, DateTime.Now.AddSeconds(3)));
                     return false;
                 }
@@ -720,7 +727,20 @@ namespace EveComFramework.SimpleDrone
                 // Wait for drones on cooldown
                 if (Fighters.Tubes.Any(a => !a.InSpace && FighterReady(a.Fighter) && FighterCooldown.Contains(a.Fighter)))
                 {
-                    Fighters.Tubes.Where(a => !a.InSpace && FighterReady(a.Fighter) && FighterCooldown.Contains(a.Fighter)).ForEach(m => { NextFighterCommand.AddOrUpdate(m.Fighter, DateTime.Now.AddSeconds(6)); FighterCooldown.Remove(m.Fighter); });
+                    Fighters.Tubes.Where(a => !a.InSpace && FighterReady(a.Fighter) && FighterCooldown.Contains(a.Fighter)).ForEach(m => {
+                        if(m.Fighter.SquadronSize < m.Fighter.MaxSquadronSize())
+                        {
+                            Item FightersToReload = Fighters.Bay.Items.FirstOrDefault(a => a.TypeID == m.Fighter.TypeID);
+                            if (FightersToReload != null)
+                            {
+                                m.LoadFightersToTube(FightersToReload);
+                                NextFighterCommand.AddOrUpdate(m.Fighter, DateTime.Now.AddSeconds(5 * Math.Min(Math.Abs(FightersToReload.Quantity), m.Fighter.MaxSquadronSize() - m.Fighter.SquadronSize)));
+                                return;
+                            }
+                        }
+                        NextFighterCommand.AddOrUpdate(m.Fighter, DateTime.Now.AddSeconds(6));
+                        FighterCooldown.Remove(m.Fighter);
+                    });
                     return false;
                 }
 

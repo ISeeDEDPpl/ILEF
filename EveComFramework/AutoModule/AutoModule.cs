@@ -406,11 +406,11 @@ namespace EveComFramework.AutoModule
                 List<Module> droneControlUnits = MyShip.Modules.Where(a => (int) a.GroupID == 1706 && a.IsOnline).ToList();
                 if (droneControlUnits.Any())
                 {
-                    if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapDroneControlUnits)
+                    if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapDroneControlUnits && !Entity.All.Any(a => a.LockingTarget))
                     {
                         droneControlUnits.Where(a => a.AllowsActivate()).ForEach(m => m.Activate());
                     }
-                    if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapDroneControlUnits)
+                    if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapDroneControlUnits || !Entity.All.Any(a => a.LockingTarget))
                     {
                         droneControlUnits.Where(a => a.AllowsDeactivate()).ForEach(m => m.Deactivate());
                     }
