@@ -711,7 +711,11 @@ namespace EveComFramework.SimpleDrone
                 if (Attack.Any())
                 {
                     Console.Log("|oSending fighters to attack");
-                    Attack.ForEach(a => a.ActivateSlotOnTarget(0, ActiveTarget)); // @TODO: KFighter.AbilitySlot() -> int?
+                    Attack.ForEach(a => {
+                        int? slot = a.AbilitySlot(KFighter.AbilityType.Attack);
+                        if(slot.HasValue)
+                            a.ActivateSlotOnTarget(slot.Value, ActiveTarget);
+                    });
                     Attack.ForEach(a => NextFighterCommand.AddOrUpdate(a, DateTime.Now.AddSeconds(3)));
                     return false;
                 }
@@ -728,13 +732,13 @@ namespace EveComFramework.SimpleDrone
                 if (Fighters.Tubes.Any(a => !a.InSpace && FighterReady(a.Fighter) && FighterCooldown.Contains(a.Fighter)))
                 {
                     Fighters.Tubes.Where(a => !a.InSpace && FighterReady(a.Fighter) && FighterCooldown.Contains(a.Fighter)).ForEach(m => {
-                        if(m.Fighter.SquadronSize < m.Fighter.MaxSquadronSize())
+                        Item FightersToReload = Fighters.Bay.Items.FirstOrDefault(a => a.TypeID == m.Fighter.TypeID);
+                        if (FightersToReload != null)
                         {
-                            Item FightersToReload = Fighters.Bay.Items.FirstOrDefault(a => a.TypeID == m.Fighter.TypeID);
-                            if (FightersToReload != null)
+                            if (m.Fighter.SquadronSize < (int) FightersToReload["fighterSquadronMaxSize"])
                             {
                                 m.LoadFightersToTube(FightersToReload);
-                                NextFighterCommand.AddOrUpdate(m.Fighter, DateTime.Now.AddSeconds(5 * Math.Min(Math.Abs(FightersToReload.Quantity), m.Fighter.MaxSquadronSize() - m.Fighter.SquadronSize)));
+                                NextFighterCommand.AddOrUpdate(m.Fighter, DateTime.Now.AddSeconds(5 * Math.Min(Math.Abs(FightersToReload.Quantity), ((int)FightersToReload["fighterSquadronMaxSize"]) - m.Fighter.SquadronSize)));
                                 return;
                             }
                         }

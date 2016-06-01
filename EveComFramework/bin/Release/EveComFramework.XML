@@ -773,11 +773,6 @@
             Is this entity dockable
             </summary>
         </member>
-        <member name="M:EveComFramework.KanedaToolkit.KFighter.MaxSquadronSize(EveCom.Fighters.Fighter)">
-            <summary>
-            Max squadron size for a given fighter type
-            </summary>
-        </member>
         <member name="M:EveComFramework.KanedaToolkit.KFighter.AbilitySlot(EveCom.Fighters.Fighter,EveComFramework.KanedaToolkit.KFighter.AbilityType)">
             <summary>
             Slot number for a given AbilityType

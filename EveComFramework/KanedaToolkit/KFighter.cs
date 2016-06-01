@@ -1,24 +1,24 @@
 ﻿using EveCom;
+using System.Collections.Generic;
 
 namespace EveComFramework.KanedaToolkit
 {
     static class KFighter
     {
-
+        public static List<long> lightFightersAttack = new List<long>() { 23057, 40557, 23055, 40556, 23059, 40558, 23061, 40559 };
+        public static List<long> lightFightersSuperiority = new List<long>() { 40358, 40552, 40361, 40553, 40359, 40554, 40555, 40360 };
+        public static List<long> heavyFightersAttack = new List<long>() { 0 };
+        public static List<long> heavyFightersLongRange = new List<long>() { 40362, 40560, 40365, 40564, 40363, 40566, 40364, 40562 };
+        public static List<long> supportFighters = new List<long>() { 37599, 40568, 40347, 40571, 40570, 40346, 40569, 40345 };
+        public static List<long> shadowFighters = new List<long>() { };
         public enum AbilityType
         {
             Attack,
-            Propmod,
-            MJD
-        }
-
-        /// <summary>
-        /// Max squadron size for a given fighter type
-        /// </summary>
-        public static int MaxSquadronSize(this Fighters.Fighter fighter)
-        {
-            // @TODO
-            return 0;
+            SecondaryAttack,
+            Afterburner,
+            MicroWarpDrive,
+            MicroJumpDrive,
+            AOEBomb
         }
 
         /// <summary>
@@ -28,7 +28,13 @@ namespace EveComFramework.KanedaToolkit
         {
             if (ability == AbilityType.Attack) return 0;
 
-            // @TODO
+            if (ability == AbilityType.Afterburner && lightFightersSuperiority.Contains(fighter.TypeID)) return 1;
+            if (ability == AbilityType.MicroJumpDrive && heavyFightersLongRange.Contains(fighter.TypeID)) return 1;
+            if (ability == AbilityType.MicroWarpDrive && (lightFightersAttack.Contains(fighter.TypeID) || heavyFightersAttack.Contains(fighter.TypeID) || supportFighters.Contains(fighter.TypeID))) return 1;
+
+            if (ability == AbilityType.SecondaryAttack && (lightFightersAttack.Contains(fighter.TypeID) || lightFightersSuperiority.Contains(fighter.TypeID) || heavyFightersAttack.Contains(fighter.TypeID))) return 2;
+            if (ability == AbilityType.AOEBomb && heavyFightersLongRange.Contains(fighter.TypeID)) return 2;
+
             return null;
         }
 
