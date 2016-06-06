@@ -710,7 +710,7 @@ namespace EveComFramework.SimpleDrone
                 List<Fighters.Fighter> Attack = Fighters.Active.Where(a => !FighterCooldown.Contains(a) && FighterReady(a) && !a.Attacking.Contains(ActiveTarget)).ToList();
                 if (Attack.Any())
                 {
-                    Console.Log("|oSending fighters to attack");
+                    Console.Log("|oSending fighters to attack "+Attack.Count);
                     Attack.ForEach(a => {
                         int? slot = a.AbilitySlot(KFighter.AbilityType.Attack);
                         if(slot.HasValue)
