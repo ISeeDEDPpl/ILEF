@@ -715,6 +715,7 @@ namespace EveComFramework.SimpleDrone
                         int? slot = a.AbilitySlot(KFighter.AbilityType.Attack);
                         if(slot.HasValue)
                             a.ActivateSlotOnTarget(slot.Value, ActiveTarget);
+                        Console.Log("Fighter Attack "+slot.Value+" "+a.ID+" "+ActiveTarget.Name, LogType.DEBUG);
                     });
                     Attack.ForEach(a => NextFighterCommand.AddOrUpdate(a, DateTime.Now.AddSeconds(3)));
                     return false;
