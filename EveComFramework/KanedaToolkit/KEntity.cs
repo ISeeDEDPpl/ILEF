@@ -50,6 +50,15 @@ namespace EveComFramework.KanedaToolkit
             return false;
         }
 
+        /// <summary>
+        /// Does the entity have a forcefield we are in?
+        /// </summary>
+        public static bool InsideForcefield(this Entity entity)
+        {
+            if (entity.GroupID != Group.ControlTower) return false;
+            return (entity.Distance < (double) entity["shieldRadius"]);
+        }
+
     }
 
 }
