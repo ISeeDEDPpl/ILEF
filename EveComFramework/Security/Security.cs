@@ -472,9 +472,9 @@ namespace EveComFramework.Security
             {
                 if (Session.InFleet)
                 {
-                    return Entity.All.FirstOrDefault(a => ScramblingEntities.Contains(a.ID) && !a.Exploded && !a.Released);
+                    return Entity.All.FirstOrDefault(a => ScramblingEntities.Contains(a.ID) && !a.Exploded && !a.Released && a.GroupID != Group.EncounterSurveillanceSystem);
                 }
-                return Entity.All.FirstOrDefault(a => a.IsWarpScrambling && !a.Exploded && !a.Released);
+                return Entity.All.FirstOrDefault(a => a.IsWarpScrambling && !a.Exploded && !a.Released && a.GroupID != Group.EncounterSurveillanceSystem);
             }
         }
 
