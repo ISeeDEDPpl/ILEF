@@ -1,4 +1,5 @@
-﻿using EveCom;
+﻿using System;
+using EveCom;
 
 namespace EveComFramework.KanedaToolkit
 {
@@ -10,17 +11,19 @@ namespace EveComFramework.KanedaToolkit
         /// <summary>
         /// Is this module in a state where it can be activated?
         /// </summary>
+        [Obsolete("Not required anymore.")]
         public static bool AllowsActivate(this Module module)
         {
-            return module.IsOnline && !module.IsActive && !module.IsActivating && !module.IsDeactivating && (module.CapacitorNeed() < MyShip.Capacitor);
+            return module.AllowsActivate;
         }
 
         /// <summary>
         /// Is this module in a state where it can be deactivated?
         /// </summary>
+        [Obsolete("Not required anymore.")]
         public static bool AllowsDeactivate(this Module module)
         {
-            return module.IsOnline && module.IsActive && !module.IsDeactivating;
+            return module.AllowsDeactivate;
         }
 
         /// <summary>

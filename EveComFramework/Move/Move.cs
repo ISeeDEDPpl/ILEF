@@ -924,10 +924,10 @@ namespace EveComFramework.Move
             List<Module> propulsionModules = MyShip.Modules.Where(a => a.GroupID == Group.PropulsionModule && a.IsOnline).ToList();
             if (propulsionModules.Any())
             {
-                if (propulsionModules.Any(a => a.AllowsActivate()))
+                if (propulsionModules.Any(a => a.AllowsActivate))
                 {
                     Log.Log("|g  InstaWarp turned on the propmod.");
-                    propulsionModules.Where(a => a.AllowsActivate()).ForEach(m => m.Activate());
+                    propulsionModules.Where(a => a.AllowsActivate).ForEach(m => m.Activate());
                 }
             }
             return true;
