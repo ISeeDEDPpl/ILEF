@@ -714,6 +714,7 @@ namespace EveComFramework.SimpleDrone
                     foreach (KeyValuePair<int, List<Fighters.Fighter>> kvp in usableFighters)
                     {
                         kvp.Value.ActivateSlotOnTarget(kvp.Key, ActiveTarget);
+                        Console.Log("Group of "+kvp.Value.Count+" "+kvp.Value.First().Type + " attacking target "+ActiveTarget.Name+" with slot " + kvp.Key, LogType.DEBUG);
                     }
 
                     Attack.ForEach(a => NextFighterCommand.AddOrUpdate(a, DateTime.Now.AddSeconds(5)));
