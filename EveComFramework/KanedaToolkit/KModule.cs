@@ -1,4 +1,5 @@
-﻿using EveCom;
+﻿using System;
+using EveCom;
 
 namespace EveComFramework.KanedaToolkit
 {
@@ -10,17 +11,19 @@ namespace EveComFramework.KanedaToolkit
         /// <summary>
         /// Is this module in a state where it can be activated?
         /// </summary>
+        [Obsolete("Not required anymore.")]
         public static bool AllowsActivate(this Module module)
         {
-            return module.IsOnline && !module.IsActive && !module.IsActivating && !module.IsDeactivating && (module.CapacitorNeed() < MyShip.Capacitor);
+            return module.AllowsActivate;
         }
 
         /// <summary>
         /// Is this module in a state where it can be deactivated?
         /// </summary>
+        [Obsolete("Not required anymore.")]
         public static bool AllowsDeactivate(this Module module)
         {
-            return module.IsOnline && module.IsActive && !module.IsDeactivating;
+            return module.AllowsDeactivate;
         }
 
         /// <summary>
@@ -28,7 +31,23 @@ namespace EveComFramework.KanedaToolkit
         /// </summary>
         public static double CapacitorNeed(this Module module)
         {
-            return (double) module["capacitorNeed"];
+            return GetDogmaDouble(module, "capacitorNeed");
+        }
+
+        /// <summary>
+        /// Get module attribute as integer
+        /// </summary>
+        public static int GetDogmaInt(this Module module, string keyName)
+        {
+            return (int) module[keyName];
+        }
+
+        /// <summary>
+        /// Get module attribute as double
+        /// </summary>
+        public static double GetDogmaDouble(this Module module, string keyName)
+        {
+            return (double) module[keyName];
         }
 
         /// <summary>

@@ -773,6 +773,11 @@
             Is this entity dockable
             </summary>
         </member>
+        <member name="M:EveComFramework.KanedaToolkit.KEntity.InsideForcefield(EveCom.Entity)">
+            <summary>
+            Does the entity have a forcefield we are in?
+            </summary>
+        </member>
         <member name="M:EveComFramework.KanedaToolkit.KFighter.AbilitySlot(EveCom.Fighters.Fighter,EveComFramework.KanedaToolkit.KFighter.AbilityType)">
             <summary>
             Slot number for a given AbilityType
@@ -823,6 +828,16 @@
         <member name="M:EveComFramework.KanedaToolkit.KModule.CapacitorNeed(EveCom.Module)">
             <summary>
             Capacitor required to enable the module
+            </summary>
+        </member>
+        <member name="M:EveComFramework.KanedaToolkit.KModule.GetDogmaInt(EveCom.Module,System.String)">
+            <summary>
+            Get module attribute as integer
+            </summary>
+        </member>
+        <member name="M:EveComFramework.KanedaToolkit.KModule.GetDogmaDouble(EveCom.Module,System.String)">
+            <summary>
+            Get module attribute as double
             </summary>
         </member>
         <member name="M:EveComFramework.KanedaToolkit.KModule.ValidTarget(EveCom.Module,EveCom.Entity)">

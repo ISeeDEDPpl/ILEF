@@ -182,7 +182,7 @@ namespace EveComFramework.SimpleDrone
             if(RecallFighters.Any())
             {
                 Console.Log("|oRecalling fighters");
-                RecallFighters.ForEach(a => a.RecallToTube());
+                RecallFighters.RecallToTube();
                 RecallFighters.ForEach(a => NextFighterCommand.AddOrUpdate(a, DateTime.Now.AddSeconds(5)));
                 RecallFighters.Where(a => !FighterCooldown.Contains(a)).ForEach(a => FighterCooldown.Add(a));
             }
@@ -243,7 +243,7 @@ namespace EveComFramework.SimpleDrone
                 {
                     Console.Log("|oRecalling fighters");
                     Console.Log(" |-gNo rats available");
-                    RecallFighters.ForEach(a => a.RecallToTube());
+                    RecallFighters.RecallToTube();
                     RecallFighters.ForEach(a => NextFighterCommand.AddOrUpdate(a, DateTime.Now.AddSeconds(5)));
                     RecallFighters.Where(a => !FighterCooldown.Contains(a)).ForEach(a => FighterCooldown.Add(a));
                     return false;
@@ -287,15 +287,14 @@ namespace EveComFramework.SimpleDrone
                 return false;
             }
 
-            foreach (Fighters.Fighter f in Fighters.Active)
+            List<Fighters.Fighter> recallFighters = Fighters.Active.Where(a => a.Health < Config.FighterCriticalHealth).ToList();
+            if (recallFighters.Any())
             {
-                if (f.Health < Config.FighterCriticalHealth)
-                {
-                    f.RecallToTube();
+                recallFighters.RecallToTube();
+                recallFighters.ForEach(f => {
                     NextFighterCommand.AddOrUpdate(f, DateTime.Now.AddSeconds(5));
                     if (!FighterCooldown.Contains(f)) FighterCooldown.Add(f);
-                    return false;
-                }
+                });
             }
 
             Entity WarpScrambling = SecurityCore.ValidScramble;
@@ -440,7 +439,7 @@ namespace EveComFramework.SimpleDrone
                     if(RecallFighters.Any() && !Config.StayDeployedWithNoTargets)
                     {
                         Console.Log("|oRecalling fighters");
-                        RecallFighters.ForEach(a => a.RecallToTube());
+                        RecallFighters.RecallToTube();
                         RecallFighters.ForEach(a => NextFighterCommand.AddOrUpdate(a, DateTime.Now.AddSeconds(5)));
                         RecallFighters.Where(a => !FighterCooldown.Contains(a)).ForEach(a => FighterCooldown.Add(a));
                     }
@@ -706,18 +705,18 @@ namespace EveComFramework.SimpleDrone
                     return false;
                 }
 
-                // Send drones to attack
-                List<Fighters.Fighter> Attack = Fighters.Active.Where(a => !FighterCooldown.Contains(a) && FighterReady(a) && !a.Attacking.Contains(ActiveTarget)).ToList();
+                // Send fighters to attack, given they have the ability to
+                List<Fighters.Fighter> Attack = Fighters.Active.Where(a => !FighterCooldown.Contains(a) && FighterReady(a) && !a.Attacking.Contains(ActiveTarget) && a.AbilitySlot(KFighter.AbilityType.Attack).HasValue).ToList();
                 if (Attack.Any())
                 {
                     Console.Log("|oSending fighters to attack "+Attack.Count);
-                    Attack.ForEach(a => {
-                        int? slot = a.AbilitySlot(KFighter.AbilityType.Attack);
-                        if(slot.HasValue)
-                            a.ActivateSlotOnTarget(slot.Value, ActiveTarget);
-                        Console.Log("Fighter Attack "+slot.Value+" "+a.ID+" "+ActiveTarget.Name, LogType.DEBUG);
-                    });
-                    Attack.ForEach(a => NextFighterCommand.AddOrUpdate(a, DateTime.Now.AddSeconds(3)));
+                    Dictionary<int, List<Fighters.Fighter>> usableFighters = Attack.GroupBy(f => f.AbilitySlot(KFighter.AbilityType.Attack).Value).ToDictionary(slot => slot.Key, fighters => fighters.ToList());
+                    foreach (KeyValuePair<int, List<Fighters.Fighter>> kvp in usableFighters)
+                    {
+                        kvp.Value.ActivateSlotOnTarget(kvp.Key, ActiveTarget);
+                    }
+
+                    Attack.ForEach(a => NextFighterCommand.AddOrUpdate(a, DateTime.Now.AddSeconds(5)));
                     return false;
                 }
 
