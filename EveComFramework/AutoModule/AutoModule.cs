@@ -25,7 +25,7 @@ namespace EveComFramework.AutoModule
         public bool TrackingComputers = true;
         public bool ECCMs = true;
         public bool ECMBursts = false;
-        public bool DroneControlUnits = true;
+        public bool NetworkedSensorArray = true;
         public bool DroneTrackingModules = true;
         public bool AutoTargeters = true;
         public bool PropulsionModules = false;
@@ -42,7 +42,7 @@ namespace EveComFramework.AutoModule
         public int CapTrackingComputers = 30;
         public int CapECCMs = 30;
         public int CapECMBursts = 30;
-        public int CapDroneControlUnits = 30;
+        public int CapNetworkedSensorArray = 30;
         public int CapAutoTargeters = 30;
         public int CapPropulsionModules = 30;
         public int CapDroneTrackingModules = 30;
@@ -401,18 +401,18 @@ namespace EveComFramework.AutoModule
 
             #region Networked Sensor Array
 
-            if (Config.DroneControlUnits && MyShip.ToEntity.Mode != EntityMode.Warping)
+            if (Config.NetworkedSensorArray && MyShip.ToEntity.Mode != EntityMode.Warping)
             {
-                List<Module> droneControlUnits = MyShip.Modules.Where(a => (int) a.GroupID == 1706 && a.IsOnline).ToList();
-                if (droneControlUnits.Any())
+                List<Module> networkedSensorArrays = MyShip.Modules.Where(a => (int) a.GroupID == 1706 && a.IsOnline).ToList();
+                if (networkedSensorArrays.Any())
                 {
-                    if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapDroneControlUnits)
+                    if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapNetworkedSensorArray)
                     {
-                        droneControlUnits.Where(a => a.AllowsActivate).ForEach(m => m.Activate());
+                        networkedSensorArrays.Where(a => a.AllowsActivate).ForEach(m => m.Activate());
                     }
-                    if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapDroneControlUnits)
+                    if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapNetworkedSensorArray)
                     {
-                        droneControlUnits.Where(a => a.AllowsDeactivate).ForEach(m => m.Deactivate());
+                        networkedSensorArrays.Where(a => a.AllowsDeactivate).ForEach(m => m.Deactivate());
                     }
                 }
             }

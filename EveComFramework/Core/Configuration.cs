@@ -97,10 +97,10 @@ namespace EveComFramework.Core
                 numericDroneTrackingModule.Value = AutoModuleConfig.CapDroneTrackingModules;
                 numericDroneTrackingModule.ValueChanged += (s, a) => { AutoModuleConfig.CapDroneTrackingModules = (int)numericDroneTrackingModule.Value; AutoModuleConfig.Save(); };
 
-                checkDroneControlUnits.Checked = AutoModuleConfig.DroneControlUnits;
-                checkDroneControlUnits.CheckedChanged += (s, a) => { AutoModuleConfig.DroneControlUnits = checkDroneControlUnits.Checked; AutoModuleConfig.Save(); };
-                numericDroneControlUnitCap.Value = AutoModuleConfig.CapDroneControlUnits;
-                numericDroneControlUnitCap.ValueChanged += (s, a) => { AutoModuleConfig.CapDroneControlUnits = (int)numericDroneControlUnitCap.Value; AutoModuleConfig.Save(); };
+                checkNetworkedSensorArray.Checked = AutoModuleConfig.NetworkedSensorArray;
+                checkNetworkedSensorArray.CheckedChanged += (s, a) => { AutoModuleConfig.NetworkedSensorArray = checkNetworkedSensorArray.Checked; AutoModuleConfig.Save(); };
+                numericNetworkedSensorArrayCap.Value = AutoModuleConfig.CapNetworkedSensorArray;
+                numericNetworkedSensorArrayCap.ValueChanged += (s, a) => { AutoModuleConfig.CapNetworkedSensorArray = (int)numericNetworkedSensorArrayCap.Value; AutoModuleConfig.Save(); };
 
                 checkAutoTargeters.Checked = AutoModuleConfig.AutoTargeters;
                 checkAutoTargeters.CheckedChanged += (s, a) => { AutoModuleConfig.AutoTargeters = checkAutoTargeters.Checked; AutoModuleConfig.Save(); };
