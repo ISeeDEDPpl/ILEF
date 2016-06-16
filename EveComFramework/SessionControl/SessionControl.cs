@@ -33,9 +33,18 @@ namespace EveComFramework.SessionControl
     }
 
     /// <summary>
-    /// Profile-based settings for SessionControl class
+    /// Session state persistence
     /// </summary>
-    public class LoginLocalSettings : Settings
+    public class LoginGlobalState : Settings {
+        public LoginGlobalState() : base("Login.State") { }
+        public SerializableDictionary<long, DateTime> SessionStart = new SerializableDictionary<long, DateTime>();
+        public SerializableDictionary<long, bool> Reconnect = new SerializableDictionary<long, bool>();
+    }
+
+/// <summary>
+/// Profile-based settings for SessionControl class
+/// </summary>
+public class LoginLocalSettings : Settings
     {
         public string Mode = "Duration";
         public int LoginDelta = 0;
@@ -45,8 +54,6 @@ namespace EveComFramework.SessionControl
         public int DowntimeDelta = 10;
         public DateTime PeriodStart = DateTime.Now;
         public DateTime PeriodEnd = DateTime.Now.AddHours(2);
-        public SerializableDictionary<long, DateTime> SessionStart = new SerializableDictionary<long, DateTime>();
-        public SerializableDictionary<long, bool> Reconnect = new SerializableDictionary<long, bool>();
     }
 
     /// <summary>
@@ -88,6 +95,10 @@ namespace EveComFramework.SessionControl
         /// Global config containing all login information
         /// </summary>
         public LoginGlobalSettings GlobalConfig = new LoginGlobalSettings();
+        /// <summary>
+        /// Global state
+        /// </summary>
+        public LoginGlobalState GlobalState = new LoginGlobalState();
         /// <summary>
         /// Config for this class
         /// </summary>
@@ -224,16 +235,16 @@ namespace EveComFramework.SessionControl
             {
                 if (_curProfile != null)
                 {
-                    if (Config.Reconnect == null || !Config.Reconnect.ContainsKey(_curProfile.CharacterID) || !Config.Reconnect[_curProfile.CharacterID])
+                    if (GlobalState.Reconnect == null || !GlobalState.Reconnect.ContainsKey(_curProfile.CharacterID) || !GlobalState.Reconnect[_curProfile.CharacterID])
                     {
-                        Config.SessionStart.AddOrUpdate(_curProfile.CharacterID, DateTime.Now);
-                        Config.Reconnect.AddOrUpdate(_curProfile.CharacterID, false);
-                        Config.Save();
+                        GlobalState.SessionStart.AddOrUpdate(_curProfile.CharacterID, DateTime.Now);
+                        GlobalState.Reconnect.AddOrUpdate(_curProfile.CharacterID, false);
+                        GlobalState.Save();
                     }
                     else
                     {
-                        Config.Reconnect.AddOrUpdate(_curProfile.CharacterID, false);
-                        Config.Save();
+                        GlobalState.Reconnect.AddOrUpdate(_curProfile.CharacterID, false);
+                        GlobalState.Save();
                     }
                 }
                 DowntimeDelta = random.Next(Config.DowntimeDelta);
@@ -287,7 +298,7 @@ namespace EveComFramework.SessionControl
             {
                 if (_curProfile != null)
                 {
-                    if (DateTime.Now > Config.SessionStart[_curProfile.CharacterID].AddHours(Config.LogoutHours).AddMinutes(LogoutDelta) ||
+                    if (DateTime.Now > GlobalState.SessionStart[_curProfile.CharacterID].AddHours(Config.LogoutHours).AddMinutes(LogoutDelta) ||
                     Session.Now.AddMinutes(Config.Downtime + DowntimeDelta) > Session.NextDowntime)
                     {
                         if (LogOut != null)

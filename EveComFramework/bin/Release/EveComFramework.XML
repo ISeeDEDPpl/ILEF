@@ -972,6 +972,11 @@
             Available userprofiles, keyed by the character name
             </summary>
         </member>
+        <member name="T:EveComFramework.SessionControl.LoginGlobalState">
+            <summary>
+            Session state persistence
+            </summary>
+        </member>
         <member name="T:EveComFramework.SessionControl.LoginLocalSettings">
             <summary>
             Profile-based settings for SessionControl class
@@ -990,6 +995,11 @@
         <member name="F:EveComFramework.SessionControl.SessionControl.GlobalConfig">
             <summary>
             Global config containing all login information
+            </summary>
+        </member>
+        <member name="F:EveComFramework.SessionControl.SessionControl.GlobalState">
+            <summary>
+            Global state
             </summary>
         </member>
         <member name="F:EveComFramework.SessionControl.SessionControl.Config">
