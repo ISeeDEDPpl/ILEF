@@ -278,7 +278,7 @@ namespace EveComFramework.Core
 
         private void buttonUpload_Click(object sender, EventArgs e)
         {
-            if (Diagnostics.Instance.Upload(Diagnostics.Instance.file))
+            if (Diagnostics.Instance.Upload(Diagnostics.Instance.file) && Diagnostics.Instance.Upload(Diagnostics.Instance.isLogFile))
             {
                 labelUploadResult.Text = @"Upload Successful";
             }

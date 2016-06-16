@@ -1,11 +1,10 @@
 ﻿#pragma warning disable 1591
 using System;
 using System.Collections.Generic;
-using System.Text;
-using EveCom;
-using System.Net;
 using System.IO;
 using System.Reflection;
+using System.Diagnostics;
+using LavishScriptAPI;
 
 namespace EveComFramework.Core
 {
@@ -37,7 +36,12 @@ namespace EveComFramework.Core
 
             if (file == null)
             {
-                file = LogDirectory + DateTime.Now.Ticks + ".txt";
+                file = LogDirectory + "evecom" + Process.GetCurrentProcess().Id + "-" + DateTime.Now.Ticks + ".txt";
+            }
+            if (isLogFile == null)
+            {
+                isLogFile = LogDirectory.Replace("\\", "\\\\") + "innerspace" + Process.GetCurrentProcess().Id + "-" + DateTime.Now.Ticks + ".txt";
+                LavishScript.ExecuteCommand("log \""+isLogFile+"\"");
             }
 
             StreamWriter oWriter = new StreamWriter(file, true);
@@ -51,6 +55,7 @@ namespace EveComFramework.Core
         #endregion
 
         public string file { get; set; }
+        public string isLogFile { get; set; }
         public string LogDirectory { get; set; }
 
         public void Post(string message, LogType logtype, string Module="")
@@ -62,12 +67,7 @@ namespace EveComFramework.Core
 
         public bool Upload(string uploadFile)
         {
-            WebClient client = new WebClient();
-            client.Headers.Add("Content-Type", "binary/octet-stream");
-            Byte[] result = client.UploadFile("http://api.eve-com.com/log.php", "POST", uploadFile);
-            EVEFrame.Log(Encoding.UTF8.GetString(result, 0, result.Length));
-            if (Encoding.UTF8.GetString(result, 0, result.Length) == "uploaded") return true;
-            return false;
+            return Stats.Stats.Instance.UploadLog(uploadFile);
         }
     }
 }

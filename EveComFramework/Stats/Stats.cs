@@ -152,6 +152,24 @@ namespace EveComFramework.Stats
             return false;
         }
         #endregion
-    }
 
+        #region Helper Methods
+        public bool UploadLog(string uploadFile)
+        {
+            try
+            {
+                WebClient client = new WebClient();
+                client.Headers.Add("Content-Type", "binary/octet-stream");
+                Byte[] result = client.UploadFile(StatsHost + "uploadlog.php", "POST", uploadFile);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+                return false;
+            }
+        }
+        #endregion
+
+    }
 }
