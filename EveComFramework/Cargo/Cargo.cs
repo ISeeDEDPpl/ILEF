@@ -245,9 +245,9 @@ namespace EveComFramework.Cargo
                     InventoryContainer Target = CurrentCargoAction.Target();
                     foreach (Item item in CurrentCargoAction.Source().Items.Where(CurrentCargoAction.QueryString))
                     {
-                        if (item.Quantity < DesiredQuantity)
+                        if (Math.Abs(item.Quantity) < DesiredQuantity)
                         {
-                            DesiredQuantity -= item.Quantity;
+                            DesiredQuantity -= Math.Abs(item.Quantity);
                             Target.Add(item);
                         }
                         else
@@ -262,10 +262,10 @@ namespace EveComFramework.Cargo
                     double AvailableSpace = CurrentCargoAction.Target().MaxCapacity - CurrentCargoAction.Target().UsedCapacity;
                     foreach (Item item in CurrentCargoAction.Source().Items.Where(CurrentCargoAction.QueryString))
                     {
-                        if (item.Quantity * item.Volume <= AvailableSpace)
+                        if (Math.Abs(item.Quantity) * item.Volume <= AvailableSpace)
                         {
                             CurrentCargoAction.Target().Add(item);
-                            AvailableSpace = AvailableSpace - item.Quantity * item.Volume;
+                            AvailableSpace = AvailableSpace - Math.Abs(item.Quantity) * item.Volume;
                         }
                         else
                         {
@@ -306,9 +306,9 @@ namespace EveComFramework.Cargo
                     InventoryContainer Target = CurrentCargoAction.Source();
                     foreach (Item item in CurrentCargoAction.Target().Items.Where(CurrentCargoAction.QueryString))
                     {
-                        if (item.Quantity < DesiredQuantity)
+                        if (Math.Abs(item.Quantity) < DesiredQuantity)
                         {
-                            DesiredQuantity -= item.Quantity;
+                            DesiredQuantity -= Math.Abs(item.Quantity);
                             Target.Add(item);
                         }
                         else
