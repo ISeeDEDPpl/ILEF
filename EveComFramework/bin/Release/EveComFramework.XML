@@ -226,6 +226,23 @@
             the contents of this method with the code editor.
             </summary>
         </member>
+        <member name="F:EveComFramework.Core.Console.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:EveComFramework.Core.Console.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:EveComFramework.Core.Console.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
         <member name="T:EveComFramework.Core.LoggerHelper">
             <summary>
             This class manages a richtextbox for you, to use as a console output
@@ -287,6 +304,14 @@
             <param name="Module">The module sending the message</param>
             <param name="Message">Message that is being logged</param>
         </member>
+        <member name="T:EveComFramework.Core.Logger.ConsoleLogEvent">
+            <summary>
+            Delegate for console events
+            </summary>
+            <param name="Module">The module sending the message</param>
+            <param name="LogLevel">LogLevel for the message</param>
+            <param name="Message">Message that is being logged</param>
+        </member>
         <member name="E:EveComFramework.Core.Logger.Event">
             <summary>
             Event using LogEvent delegate
@@ -309,6 +334,11 @@
         <member name="E:EveComFramework.Core.Logger.RichEvent">
             <summary>
             Event using RichLogEvent delegate
+            </summary>
+        </member>
+        <member name="E:EveComFramework.Core.Logger.ConsoleEvent">
+            <summary>
+            Event using ConsoleLogEvent delegate
             </summary>
         </member>
         <member name="T:EveComFramework.Core.Settings">

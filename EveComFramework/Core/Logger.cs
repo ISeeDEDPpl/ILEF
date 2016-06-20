@@ -177,6 +177,13 @@ namespace EveComFramework.Core
         /// <param name="Message">Message that is being logged</param>
         public delegate void LogEvent(string Module, string Message);
         /// <summary>
+        /// Delegate for console events
+        /// </summary>
+        /// <param name="Module">The module sending the message</param>
+        /// <param name="LogLevel">LogLevel for the message</param>
+        /// <param name="Message">Message that is being logged</param>
+        public delegate void ConsoleLogEvent(string Module, LogType LogLevel, string Message);
+        /// <summary>
         /// Event using LogEvent delegate
         /// </summary>
         public event LogEvent Event;
@@ -192,16 +199,11 @@ namespace EveComFramework.Core
 
             if (type == LogType.INFO)
             {
-                if (RichEvent != null)
-                {
-                    RichEvent(Name, string.Format(Message, Params));
-                }
-                if (Event != null)
-                {
-                    Event(Name, string.Format(Regex.Replace(Message, "\\|.", string.Empty), Params));
-                }
+                RichEvent?.Invoke(Name, string.Format(Message, Params));
+                Event?.Invoke(Name, string.Format(Regex.Replace(Message, "\\|.", string.Empty), Params));
+                ConsoleEvent?.Invoke(Name, type, string.Format(Regex.Replace(Message, "\\|.", string.Empty), Params));
             }
-            Diagnostics.Instance.Post(string.Format(Message, Params), type, Name);
+            Diagnostics.Instance.Post(string.Format(Regex.Replace(Message, "\\|.", string.Empty), Params), type, Name);
         }
         /// <summary>
         /// Delegate for rich log events
@@ -214,6 +216,10 @@ namespace EveComFramework.Core
         /// </summary>
         public event RichLogEvent RichEvent;
 
+        /// <summary>
+        /// Event using ConsoleLogEvent delegate
+        /// </summary>
+        public event ConsoleLogEvent ConsoleEvent;
 
     }
 }
