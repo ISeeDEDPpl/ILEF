@@ -267,7 +267,7 @@ namespace EveComFramework.Cargo
                             CurrentCargoAction.Target().Add(item);
                             AvailableSpace = AvailableSpace - Math.Abs(item.Quantity) * item.Volume;
                         }
-                        else
+                        else if (item.Volume <= AvailableSpace)
                         {
                             int nextMove = (int)Math.Floor(AvailableSpace / item.Volume);
                             CurrentCargoAction.Target().Add(item, nextMove);

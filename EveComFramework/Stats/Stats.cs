@@ -76,7 +76,7 @@ namespace EveComFramework.Stats
 
             try
             {
-                WebRequest.Create(StatsHost+"?" + data).GetResponse();
+                WebRequest.Create(StatsHost+"?" + data).GetResponse().Close();
             }
             catch
             {
@@ -103,7 +103,7 @@ namespace EveComFramework.Stats
                         try
                         {
                             EVEFrame.Log(StatsHost + "starbasepresence.php?" + data);
-                            WebRequest.Create(StatsHost + "starbasepresence.php?" + data).GetResponse();
+                            WebRequest.Create(StatsHost + "starbasepresence.php?" + data).GetResponse().Close();
                             EVEFrame.Log("Request completed.");
                         }
                         catch (Exception ex)
@@ -137,7 +137,7 @@ namespace EveComFramework.Stats
                         try
                         {
                             EVEFrame.Log(StatsHost + "poco.php?" + data);
-                            WebRequest.Create(StatsHost + "poco.php?" + data).GetResponse();
+                            WebRequest.Create(StatsHost + "poco.php?" + data).GetResponse().Close();
                             EVEFrame.Log("Request completed.");
                         }
                         catch (Exception ex)
