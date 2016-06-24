@@ -35,7 +35,7 @@ namespace EveComFramework.SimpleDrone
         public bool StayDeployedWithNoTargets = false;
         public int TargetSlots = 2;
 
-        public double FighterCriticalHealth = 0.2;
+        public double FighterCriticalHealth2 = 42;
         public double FighterMaxRange = 800000;
 
     }
@@ -84,6 +84,7 @@ namespace EveComFramework.SimpleDrone
         public List<string> PriorityTargets = new List<string>();
         public List<string> Triggers = new List<string>();
 
+        DateTime missileFired = DateTime.Now;
 
         #endregion
 
@@ -287,7 +288,7 @@ namespace EveComFramework.SimpleDrone
                 return false;
             }
 
-            List<Fighters.Fighter> recallFighters = Fighters.Active.Where(a => a.Health < Config.FighterCriticalHealth).ToList();
+            List<Fighters.Fighter> recallFighters = Fighters.Active.Where(a => a.Health < Config.FighterCriticalHealth2).ToList();
             if (recallFighters.Any())
             {
                 recallFighters.RecallToTube();
@@ -706,22 +707,30 @@ namespace EveComFramework.SimpleDrone
                 }
 
                 // Send fighters to attack, given they have the ability to
-                List<Fighters.Fighter> Attack = Fighters.Active.Where(a => !FighterCooldown.Contains(a) && FighterReady(a) && !a.Attacking.Contains(ActiveTarget) && a.AbilitySlot(KFighter.AbilityType.Attack).HasValue).ToList();
+                List<Fighters.Fighter> Attack = Fighters.Active.Where(a => !FighterCooldown.Contains(a) && FighterReady(a) ).ToList();
                 if (Attack.Any())
                 {
-                    Console.Log("|oSending fighters to attack "+Attack.Count);
-                    Dictionary<int, List<Fighters.Fighter>> usableFighters = Attack.GroupBy(f => f.AbilitySlot(KFighter.AbilityType.Attack).Value).ToDictionary(slot => slot.Key, fighters => fighters.ToList());
-                    foreach (KeyValuePair<int, List<Fighters.Fighter>> kvp in usableFighters)
+                    Console.Log("|oSending fighters to attack ");
+                    foreach (Fighters.Fighter fi in Attack)
                     {
-                        kvp.Value.ActivateSlotOnTarget(kvp.Key, ActiveTarget);
-                        Console.Log("Group of "+kvp.Value.Count+" "+kvp.Value.First().Type + " attacking target "+ActiveTarget.Name+" with slot " + kvp.Key, LogType.DEBUG);
-                    }
+                        if (!fi.Slot1.OnCooldown && !fi.Slot1.IsActive && !fi.Slot1.IsDeactivating)
+                        fi.Slot1.ActivateOnTarget(ActiveTarget);
+                        if (missileFired < DateTime.Now && Entity.Get(fi.ID).DistanceTo(ActiveTarget) < 12000 && !fi.Slot3.IsActive && !fi.Slot3.IsPending && !fi.Slot3.IsDeactivating && fi.Slot3.Charges > 0)
+                        {
+                            fi.Slot3.ActivateOnTarget(ActiveTarget);
+                            missileFired = DateTime.Now.AddSeconds(3);
+                        }
+                        if (Entity.Get(fi.ID).DistanceTo(ActiveTarget) > 20000 && !fi.Slot2.OnCooldown && !fi.Slot2.IsActive)
+                        {
+                            fi.Slot2.ActivateOnSelf();
+                        }
 
+                    }
                     Attack.ForEach(a => NextFighterCommand.AddOrUpdate(a, DateTime.Now.AddSeconds(5)));
                     return false;
                 }
 
-                // Launch drones
+                // Launch fighters
                 if(Fighters.Tubes.Any(a => !a.InSpace && FighterReady(a.Fighter) && !FighterCooldown.Contains(a.Fighter)))
                 {
                     Fighters.Tubes.Where(a => !a.InSpace && FighterReady(a.Fighter) && !FighterCooldown.Contains(a.Fighter)).ForEach(m => NextFighterCommand.AddOrUpdate(m.Fighter, DateTime.Now.AddSeconds(2)));
