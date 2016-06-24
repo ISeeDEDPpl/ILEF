@@ -680,6 +680,9 @@ namespace EveComFramework.Move
 
         bool QueueAutoPilotDeactivation;
         public bool SunMidpoint = false;
+        public bool MoonPatrol = false;
+        List<long> checkedMoons = new List<long>();
+
         bool AutoPilot(object[] Params)
         {
             if (Route.Path == null || Route.Path[0] == -1 || QueueAutoPilotDeactivation)
@@ -694,6 +697,33 @@ namespace EveComFramework.Move
                 if (UndockWarp.Instance != null && !UndockWarp.Instance.Idle && UndockWarp.Instance.CurState.ToString() != "WaitStation") return false;
                 if (MyShip.ToEntity.Mode == EntityMode.Warping) return false;
                 Entity Sun = Entity.All.FirstOrDefault(a => a.GroupID == Group.Sun);
+                if (MoonPatrol)
+                {
+                    Entity moon = Entity.All.OrderBy(a => a.Distance).FirstOrDefault(a => a.GroupID == Group.Moon && !checkedMoons.Contains(a.ID));
+                    if (moon != null)
+                    {
+                        if (Bubbled())
+                        {
+                            if (MyShip.Mode == EntityMode.Stopped)
+                            {
+                                Log.Log("|rBubble detected!");
+                                Log.Log("|oAligning to |-g{0}", moon.Name);
+                                moon.AlignTo();
+                                InsertState(AutoPilot);
+                                WaitFor(10, () => MyShip.ToEntity.Mode != EntityMode.Stopped);
+                                return true;
+                            }
+                            return false;
+                        }
+                        Log.Log("|oWarping to |-g{0} |w(|y40 km|w)", moon.Name);
+                        moon.WarpTo(40000);
+                        checkedMoons.Add(moon.ID);
+                        InsertState(AutoPilot);
+                        WaitFor(10, () => MyShip.ToEntity.Mode != EntityMode.Stopped);
+                        return true;
+                    }
+                }
+
                 if (SunMidpoint && Sun != null && Sun.Distance < 1000000000)
                 {
                     if (Bubbled())
