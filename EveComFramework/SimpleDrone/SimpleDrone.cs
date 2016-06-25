@@ -74,7 +74,7 @@ namespace EveComFramework.SimpleDrone
 
         public Logger Console = new Logger("SimpleDrone");
         public SimpleDroneSettings Config = new SimpleDroneSettings();
-        Targets.Targets Rats = new Targets.Targets();
+        public Targets.Targets Rats = new Targets.Targets();
         Security.Security SecurityCore = Security.Security.Instance;
         HashSet<Drone> DroneCooldown = new HashSet<Drone>();
         Dictionary<Drone, double> DroneHealthCache = new Dictionary<Drone, double>();

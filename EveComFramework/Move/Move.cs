@@ -153,36 +153,7 @@ namespace EveComFramework.Move
             }
         }
 
-        int LastOrbitDistance;
-        /// <summary>
-        /// Orbit an entity
-        /// </summary>
-        /// <param name="Target">The entity to orbit</param>
-        /// <param name="Distance">The distance from the entity to orbit</param>
-        public void Orbit(Entity Target, int Distance = 1000)
-        {
-            // If we're not doing anything, just start OrbitState
-            if (Idle)
-            {
-                LastOrbitDistance = Distance;
-                QueueState(OrbitState, -1, Target, Distance, false);
-                return;
-            }
-            // If we're orbiting something else or approaching something, change to orbiting the new target - retain collision information!
-            if ((CurState.State == OrbitState && (Entity)CurState.Params[0] != Target) || CurState.State == ApproachState)
-            {
-                Clear();
-                LastOrbitDistance = Distance;
-                QueueState(OrbitState, -1, Target, Distance, false);
-            }
 
-            if (Distance != LastOrbitDistance && LastOrbitDistance != 0 && Distance != 0)
-            {
-                Clear();
-                LastOrbitDistance = Distance;
-                QueueState(OrbitState, -1, Target, Distance, false);
-            }
-        }
 
 
         #endregion
@@ -571,6 +542,37 @@ namespace EveComFramework.Move
 
         #endregion
 
+        int LastOrbitDistance;
+        /// <summary>
+        /// Orbit an entity
+        /// </summary>
+        /// <param name="Target">The entity to orbit</param>
+        /// <param name="Distance">The distance from the entity to orbit</param>
+        public void Orbit(Entity Target, int Distance = 1000)
+        {
+            // If we're not doing anything, just start OrbitState
+            if (Idle)
+            {
+                LastOrbitDistance = Distance;
+                QueueState(OrbitState, -1, Target, Distance, false);
+                return;
+            }
+            // If we're orbiting something else or approaching something, change to orbiting the new target - retain collision information!
+            if ((CurState.State == OrbitState && (Entity)CurState.Params[0] != Target) || CurState.State == ApproachState)
+            {
+                Clear();
+                LastOrbitDistance = Distance;
+                QueueState(OrbitState, -1, Target, Distance, false);
+            }
+
+            if (Distance != LastOrbitDistance && LastOrbitDistance != 0 && Distance != 0)
+            {
+                Clear();
+                LastOrbitDistance = Distance;
+                QueueState(OrbitState, -1, Target, Distance, false);
+            }
+        }
+
         bool OrbitState(object[] Params)
         {
             Entity Target = ((Entity)Params[0]);
@@ -595,8 +597,8 @@ namespace EveComFramework.Move
             }
             else
             {
-                Entity LCO = Entity.All.FirstOrDefault(a => a.Collidable() && a.SurfaceDistance <= (double)(Config.WarpCollisionTrigger * 900));
-                Entity LCO2 = Entity.All.FirstOrDefault(a => a.Collidable() && a.SurfaceDistance <= (double)(Config.WarpCollisionTrigger * 500));
+                Entity LCO = Entity.All.FirstOrDefault(a => a.Collidable() && a.SurfaceDistance <= (double)(Config.OrbitCollisionTrigger * 900));
+                Entity LCO2 = Entity.All.FirstOrDefault(a => a.Collidable() && a.SurfaceDistance <= (double)(Config.OrbitCollisionTrigger * 500));
                 // Else, if we're in trigger of a structure and aren't already orbiting a structure, orbit it and set it as our collision target
                 if (Config.OrbitCollisionPrevention)
                 {
@@ -624,12 +626,16 @@ namespace EveComFramework.Move
                         Log.Log(" |-g{0}(|w{1} km|-g)", Target.Name, Distance / 1000);
                         Target.Orbit(Distance);
                         InsertState(OrbitState, -1, Target, Distance, true);
-                        WaitFor(10, () => MyShip.ToEntity.Mode == EntityMode.Warping);
+                        WaitFor(10, () => MyShip.ToEntity.Mode == EntityMode.Orbiting);
+                    }
+                    else
+                    {
+                        InsertState(OrbitState, -1, Target, Distance, true);
                     }
                 }
                 else
                 {
-                    InsertState(OrbitState, -1, Target, Distance, true, Collision);
+                    InsertState(OrbitState, -1, Target, Distance, true);
                 }
             }
             return true;
