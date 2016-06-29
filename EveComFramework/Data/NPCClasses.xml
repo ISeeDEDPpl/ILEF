@@ -163,4 +163,14 @@
   <Group ID="1690" Class="Capital" Group="Asteroid Serpentis Titan" />
   <Group ID="1691" Class="Capital" Group="Asteroid Rogue Drone Carrier" />
   <Group ID="1692" Class="Capital" Group="Asteroid Rogue Drone Supercarrier" />
+  <!-- Shadow of the Serpent: Signal the Dawn -->
+  <Group ID="1720" Class="Battleship" Group="Roaming Serpentis Battleship" />
+  <Group ID="1721" Class="Cruiser" Group="Roaming Serpentis Cruiser" />
+  <Group ID="1722" Class="Frigate" Group="Roaming Serpentis Frigate" />
+  <Group ID="1724" Class="Frigate" Group="Angel Cartel Event Frigate" />
+  <Group ID="1725" Class="Cruiser" Group="Angel Cartel Event Cruiser" />
+  <Group ID="1726" Class="Battlecruiser" Group="Angel Cartel Event Battlecruiser" />
+  <Group ID="1727" Class="Battleship" Group="Roaming Angel Cartel Battleship" />
+  <Group ID="1728" Class="Cruiser" Group="Roaming Angel Cartel Cruiser" />
+  <Group ID="1729" Class="Frigate" Group="Roaming Angel Cartel Frigate" />
 </NPCClasses>
