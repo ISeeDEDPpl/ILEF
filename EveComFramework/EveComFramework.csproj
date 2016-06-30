@@ -34,6 +34,12 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\EveComFramework.XML</DocumentationFile>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>evecomframework.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="EveCom">
       <HintPath>..\..\EveCom\EveCom.dll</HintPath>
@@ -100,6 +106,7 @@
     <Compile Include="KanedaToolkit\KAgent.cs" />
     <Compile Include="KanedaToolkit\KBookmark.cs" />
     <Compile Include="KanedaToolkit\KEntity.cs" />
+    <Compile Include="KanedaToolkit\KFighter.cs" />
     <Compile Include="KanedaToolkit\RouteToolkit.cs" />
     <Compile Include="KanedaToolkit\KSystemScanResult.cs" />
     <Compile Include="KanedaToolkit\KInventoryContainer.cs" />
@@ -167,6 +174,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="evecomframework.snk" />
     <None Include="packages.config" />
     <None Include="Resources\action_delete.png" />
   </ItemGroup>

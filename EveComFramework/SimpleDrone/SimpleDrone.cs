@@ -34,6 +34,10 @@ namespace EveComFramework.SimpleDrone
         public bool SharedTargets = false;
         public bool StayDeployedWithNoTargets = false;
         public int TargetSlots = 2;
+
+        public double FighterCriticalHealth2 = 42;
+        public double FighterMaxRange = 800000;
+
     }
 
     #endregion
@@ -73,12 +77,14 @@ namespace EveComFramework.SimpleDrone
         Targets.Targets Rats = new Targets.Targets();
         Security.Security SecurityCore = Security.Security.Instance;
         HashSet<Drone> DroneCooldown = new HashSet<Drone>();
+        HashSet<Fighters.Fighter> FighterCooldown = new HashSet<Fighters.Fighter>();
         Dictionary<Drone, double> DroneHealthCache = new Dictionary<Drone, double>();
         IPC IPC = IPC.Instance;
 
         public List<string> PriorityTargets = new List<string>();
         public List<string> Triggers = new List<string>();
 
+        DateTime missileFired = DateTime.Now;
 
         #endregion
 
@@ -112,10 +118,17 @@ namespace EveComFramework.SimpleDrone
         Dictionary<Entity, DateTime> TargetCooldown = new Dictionary<Entity, DateTime>();
         bool OutOfTargets = false;
         Dictionary<Drone, DateTime> NextDroneCommand = new Dictionary<Drone, DateTime>();
+        Dictionary<long, DateTime> NextFighterCommand = new Dictionary<long, DateTime>();
         bool DroneReady(Drone drone)
         {
             if (!NextDroneCommand.ContainsKey(drone)) return true;
             if (NextDroneCommand[drone] < DateTime.Now) return true;
+            return false;
+        }
+        bool FighterReady(long fighter)
+        {
+            if (!NextFighterCommand.ContainsKey(fighter)) return true;
+            if (NextFighterCommand[fighter] < DateTime.Now) return true;
             return false;
         }
 
@@ -153,8 +166,9 @@ namespace EveComFramework.SimpleDrone
         bool Recall(object[] Params)
         {
             if (Session.InStation) return true;
-            List<Drone> Recall = Drone.AllInSpace.Where(a => DroneReady(a) && a.State != EntityState.Departing).ToList();
+
             // Recall drones
+            List<Drone> Recall = Drone.AllInSpace.Where(a => DroneReady(a) && a.State != EntityState.Departing).ToList();
             if (Recall.Any())
             {
                 Console.Log("|oRecalling drones");
@@ -162,14 +176,45 @@ namespace EveComFramework.SimpleDrone
                 Recall.ForEach(a => NextDroneCommand.AddOrUpdate(a, DateTime.Now.AddSeconds(5)));
                 return false;
             }
-
             if (Drone.AllInSpace.Any()) return false;
+
+            // Recall fighters
+            List<Fighters.Fighter> RecallFighters = Fighters.Active.Where(a => FighterReady(a.ID) && a.State != Fighters.States.RECALLING).ToList();
+            if(RecallFighters.Any())
+            {
+                Console.Log("|oRecalling fighters");
+                //RecallFighters.RecallToTube();
+                //RecallFighters.ForEach(a => NextFighterCommand.AddOrUpdate(a, DateTime.Now.AddSeconds(5)));
+                //RecallFighters.Where(a => !FighterCooldown.Contains(a)).ForEach(a => FighterCooldown.Add(a));
+                Fighters.RecallAllFightersToTubes();
+            }
+            // Speed up Returning Fighters
+            List<Fighters.Fighter> ReturningFighter = Fighters.Active.Where(a => !FighterCooldown.Contains(a) && a.State == Fighters.States.RECALLING && a.Slot2.AllowsActivate).ToList();
+            if (ReturningFighter.Any())
+            {
+                Console.Log("|oSpeed up Returning Fighters");
+                foreach (Fighters.Fighter fi in ReturningFighter)
+                {
+                    if (!fi.Slot2.OnCooldown && !fi.Slot2.IsActive && fi.Slot2.AllowsActivate)
+                    {
+                        fi.Slot2.ActivateOnSelf();
+                        NextFighterCommand.AddOrUpdate(fi.ID, DateTime.Now.AddSeconds(1));
+                    }
+                }
+            }
+            if (Fighters.Active.Any()) return false;
+
             return true;
         }
 
         bool Control(object[] Params)
         {
-            if (!Session.InSpace || Config.Mode == Mode.None)
+            if (!Session.InSpace)
+            {
+                return false;
+            }
+
+            if(Config.Mode == Mode.None && !Fighters.Tubes.Any())
             {
                 return false;
             }
@@ -178,6 +223,13 @@ namespace EveComFramework.SimpleDrone
             if (MyShip.ToEntity.Mode == EntityMode.Warping && Drone.AllInSpace.Any())
             {
                 Drone.AllInSpace.ReturnToDroneBay();
+                return true;
+            }
+
+            // If we're warping and fighters are in space, queue delayed stop of the module
+            if (MyShip.ToEntity.Mode == EntityMode.Warping && Fighters.Active.Any())
+            {
+                QueueState(FighterShutdown);
                 return true;
             }
 
@@ -191,14 +243,26 @@ namespace EveComFramework.SimpleDrone
 
             if (!Rats.TargetList.Any() && !Entity.All.Any(a => PriorityTargets.Contains(a.Name)) && !Config.StayDeployedWithNoTargets)
             {
-                List<Drone> Recall = Drone.AllInSpace.Where(a => DroneReady(a) && a.State != EntityState.Departing).ToList();
                 // Recall drones
+                List<Drone> Recall = Drone.AllInSpace.Where(a => DroneReady(a) && a.State != EntityState.Departing).ToList();
                 if (Recall.Any())
                 {
                     Console.Log("|oRecalling drones");
                     Console.Log(" |-gNo rats available");
                     Recall.ReturnToDroneBay();
                     Recall.ForEach(a => NextDroneCommand.AddOrUpdate(a, DateTime.Now.AddSeconds(5)));
+                    return false;
+                }
+                // Recall fighters
+                List<Fighters.Fighter> RecallFighters = Fighters.Active.Where(a => FighterReady(a.ID) && a.State != Fighters.States.RECALLING).ToList();
+                if(RecallFighters.Any())
+                {
+                    Console.Log("|oRecalling fighters");
+                    Console.Log(" |-gNo rats available");
+                    //RecallFighters.RecallToTube();
+                    //RecallFighters.ForEach(a => NextFighterCommand.AddOrUpdate(a, DateTime.Now.AddSeconds(5)));
+                    //RecallFighters.Where(a => !FighterCooldown.Contains(a)).ForEach(a => FighterCooldown.Add(a));
+                    Fighters.RecallAllFightersToTubes();
                     return false;
                 }
             }
@@ -240,12 +304,27 @@ namespace EveComFramework.SimpleDrone
                 return false;
             }
 
+            List<Fighters.Fighter> recallFighters = Fighters.Active.Where(a => a.Health < Config.FighterCriticalHealth2 && a.State != Fighters.States.RECALLING).ToList();
+            if (recallFighters.Any())
+            {
+                Console.Log("|oRecalling damaged fighter");
+                //Fighters.RecallAllFightersToTubes(); // Recall all for now Single Recall seems not to work
+                
+                recallFighters.ForEach(f => 
+                {
+                    f.RecallToTube();
+                    NextFighterCommand.AddOrUpdate(f.ID, DateTime.Now.AddSeconds(5));
+                    if (!FighterCooldown.Contains(f))
+                        FighterCooldown.Add(f);
+                });
+            }
+
             Entity WarpScrambling = SecurityCore.ValidScramble;
             Entity Neuting = SecurityCore.ValidNeuter;
 
             #region ActiveTarget selection
 
-            Double MaxRange = (Config.Mode == Mode.PointDefense) ? 20000 : Me.DroneControlDistance;
+            Double MaxRange = Fighters.Tubes.Any() ? Math.Min(Config.FighterMaxRange, MyShip.MaxTargetRange) : ((Config.Mode == Mode.PointDefense) ? 20000 : Me.DroneControlDistance);
 
             if (WarpScrambling != null)
             {
@@ -359,7 +438,7 @@ namespace EveComFramework.SimpleDrone
             // Make sure ActiveTarget is locked.  If so, make sure it's the active target, if not, return.
             if (ActiveTarget != null && ActiveTarget.Exists && ActiveTarget.LockedTarget)
             {
-                if (!ActiveTarget.IsActiveTarget)
+                if (!Fighters.Tubes.Any() && !ActiveTarget.IsActiveTarget)
                 {
                     ActiveTarget.MakeActive();
                     return false;
@@ -369,13 +448,23 @@ namespace EveComFramework.SimpleDrone
             {
                 if (ActiveTarget == null)
                 {
-                    List<Drone> Recall = Drone.AllInSpace.Where(a => !DroneCooldown.Contains(a) && DroneReady(a) && a.State != EntityState.Departing).ToList();
                     // Recall drones if in point defense and no frig/destroyers in range
+                    List<Drone> Recall = Drone.AllInSpace.Where(a => !DroneCooldown.Contains(a) && DroneReady(a) && a.State != EntityState.Departing).ToList();
                     if (Recall.Any() && !Config.StayDeployedWithNoTargets)
                     {
                         Console.Log("|oRecalling drones");
                         Recall.ReturnToDroneBay();
                         Recall.ForEach(a => NextDroneCommand.AddOrUpdate(a, DateTime.Now.AddSeconds(5)));
+                    }
+
+                    List<Fighters.Fighter> RecallFighters = Fighters.Active.Where(a => FighterReady(a.ID) && a.State != Fighters.States.RECALLING).ToList();
+                    if(RecallFighters.Any() && !Config.StayDeployedWithNoTargets)
+                    {
+                        Console.Log("|oRecalling fighters");
+                        //RecallFighters.RecallToTube();
+                        //RecallFighters.ForEach(a => NextFighterCommand.AddOrUpdate(a, DateTime.Now.AddSeconds(5)));
+                        //RecallFighters.Where(a => !FighterCooldown.Contains(a)).ForEach(a => FighterCooldown.Add(a));
+                        Fighters.RecallAllFightersToTubes();
                     }
                 }
                 return false;
@@ -629,7 +718,103 @@ namespace EveComFramework.SimpleDrone
                 }
             }
 
+            // Fighter management
+            if(Fighters.Tubes.Any())
+            {
+                if(!Fighters.Bay.IsPrimed)
+                {
+                    Console.Log("Prime() call to FighterBay", LogType.DEBUG);
+                    Fighters.Bay.Prime();
+                    return false;
+                }
+
+                // Launch fighters
+                if (Fighters.Tubes.Any(a => !a.InSpace && FighterReady(a.Fighter.ID) && !FighterCooldown.Contains(a.Fighter) && a.Fighter.State == Fighters.States.READY))
+                {
+                    Fighters.Tubes.Where(a => !a.InSpace && FighterReady(a.Fighter.ID) && !FighterCooldown.Contains(a.Fighter)).ForEach(m => NextFighterCommand.AddOrUpdate(m.Fighter.ID, DateTime.Now.AddSeconds(2)));
+                    Fighters.LaunchAllFighters();
+                    return false;
+                }
+
+                // Speed up Returning Fighters
+                List<Fighters.Fighter> ReturningFighter = Fighters.Active.Where(a => !FighterCooldown.Contains(a) && a.State == Fighters.States.RECALLING && a.Slot2.AllowsActivate).ToList();
+                if (ReturningFighter.Any())
+                {
+                    Console.Log("|oSpeed up Returning Fighters");
+                    foreach (Fighters.Fighter fi in ReturningFighter)
+                    {
+                        if (!fi.Slot2.OnCooldown && !fi.Slot2.IsActive && fi.Slot2.AllowsActivate)
+                        {
+                            fi.Slot2.ActivateOnSelf();
+                            NextFighterCommand.AddOrUpdate(fi.ID, DateTime.Now.AddSeconds(1));
+                        }
+                    }
+                }
+
+                // Send fighters to attack, given they have the ability to
+                List<Fighters.Fighter> Attack = Fighters.Active.Where(a => FighterReady(a.ID) && !FighterCooldown.Contains(a) && a.State != Fighters.States.RECALLING).ToList();
+                if (Attack.Any())
+                {
+                    Console.Log("|oSending fighters to attack. Count: " + Attack.Count().ToString());
+                    foreach (Fighters.Fighter fi in Attack)
+                    {
+                        if (!FighterCooldown.Contains(fi) && !fi.Slot1.OnCooldown && !fi.Slot1.IsActive && !fi.Slot1.IsDeactivating && fi.Slot1.AllowsActivate)
+                        {
+                            fi.Slot1.ActivateOnTarget(ActiveTarget);
+                            NextFighterCommand.AddOrUpdate(fi.ID, DateTime.Now.AddSeconds(2));
+                            return false;
+                        }                        
+                        if (missileFired < DateTime.Now && SmallTarget(ActiveTarget) && !FighterCooldown.Contains(fi) && Entity.Get(fi.ID).DistanceTo(ActiveTarget) < 12000 && !fi.Slot3.IsActive && !fi.Slot3.IsPending && !fi.Slot3.IsDeactivating && fi.Slot3.Charges > 0 && fi.Slot3.AllowsActivate)
+                        {
+                            fi.Slot3.ActivateOnTarget(ActiveTarget);
+                            missileFired = DateTime.Now.AddSeconds(3);
+                            NextFighterCommand.AddOrUpdate(fi.ID, DateTime.Now.AddSeconds(2));
+                            return false;
+                        }
+                        if (!FighterCooldown.Contains(fi) && Entity.Get(fi.ID).DistanceTo(ActiveTarget) > 20000 && !fi.Slot2.OnCooldown && !fi.Slot2.IsActive)
+                        {
+                            fi.Slot2.ActivateOnSelf();
+                            NextFighterCommand.AddOrUpdate(fi.ID, DateTime.Now.AddSeconds(2));
+                            return false;
+                        }
+                    }
+                    return false;
+                }
+                
+                // Wait for drones on cooldown
+                if (Fighters.Tubes.Any(a => !a.InSpace && FighterReady(a.Fighter.ID) && FighterCooldown.Contains(a.Fighter)))
+                {
+                    Fighters.Tubes.Where(a => !a.InSpace && FighterReady(a.Fighter.ID) && FighterCooldown.Contains(a.Fighter)).ForEach(m => {
+                        Item FightersToReload = Fighters.Bay.Items.FirstOrDefault(a => a.TypeID == m.Fighter.TypeID);
+                        if (FightersToReload != null)
+                        {
+                            if (m.Fighter.SquadronSize < (int) FightersToReload["fighterSquadronMaxSize"])
+                            {
+                                m.LoadFightersToTube(FightersToReload);
+                                NextFighterCommand.AddOrUpdate(m.Fighter.ID, DateTime.Now.AddSeconds(5 * Math.Min(Math.Abs(FightersToReload.Quantity), ((int)FightersToReload["fighterSquadronMaxSize"]) - m.Fighter.SquadronSize)));
+                                return;
+                            }
+                        }
+                        NextFighterCommand.AddOrUpdate(m.Fighter.ID, DateTime.Now.AddSeconds(6));
+                        FighterCooldown.Remove(m.Fighter);
+                    });
+                    return false;
+                }
+
+            }
+
             return false;
+        }
+
+        bool FighterShutdown(object[] Params)
+        {
+            if (!Session.InSpace) return true;
+
+            if (MyShip.ToEntity.Mode == EntityMode.Warping) return false;
+
+            Fighters.RecallAllFightersToTubes();
+
+            return true;
         }
 
         #endregion
