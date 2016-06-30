@@ -212,4 +212,14 @@
   <Type Name="Asteroid Serpentis Titan">1690</Type>
   <Type Name="Asteroid Rogue Drone Carrier">1691</Type>
   <Type Name="Asteroid Rogue Drone Supercarrier">1692</Type>
+  <!-- Shadow of the Serpent: Signal the Dawn -->
+  <Type Name="Roaming Serpentis Battleship">1720</Type>
+  <Type Name="Roaming Serpentis Cruiser">1721</Type>
+  <Type Name="Roaming Serpentis Frigate">1722</Type>
+  <Type Name="Angel Cartel Event Frigate">1724</Type>
+  <Type Name="Angel Cartel Event Cruiser">1725</Type>
+  <Type Name="Angel Cartel Event Battlecruiser">1726</Type>
+  <Type Name="Roaming Angel Cartel Battleship">1727</Type>
+  <Type Name="Roaming Angel Cartel Cruiser">1728</Type>
+  <Type Name="Roaming Angel Cartel Frigate">1729</Type>
 </Targets>
