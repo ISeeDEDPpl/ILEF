@@ -707,7 +707,7 @@ namespace EveComFramework.SimpleDrone
                 }
 
                 // Send fighters to attack, given they have the ability to
-                List<Fighters.Fighter> Attack = Fighters.Active.Where(a => !FighterCooldown.Contains(a) && FighterReady(a) ).ToList();
+                List<Fighters.Fighter> Attack = Fighters.Active.Where(a => !FighterCooldown.Contains(a) && FighterReady(a)).ToList();
                 if (Attack.Any())
                 {
                     Console.Log("|oSending fighters to attack ");
@@ -715,7 +715,7 @@ namespace EveComFramework.SimpleDrone
                     {
                         if (!fi.Slot1.OnCooldown && !fi.Slot1.IsActive && !fi.Slot1.IsDeactivating)
                         fi.Slot1.ActivateOnTarget(ActiveTarget);
-                        if (missileFired < DateTime.Now && Entity.Get(fi.ID).DistanceTo(ActiveTarget) < 12000 && !fi.Slot3.IsActive && !fi.Slot3.IsPending && !fi.Slot3.IsDeactivating && fi.Slot3.Charges > 0)
+                        if (missileFired < DateTime.Now && Entity.Get(fi.ID).DistanceTo(ActiveTarget) < (double)fi.ToItem["fighterAbilityMissilesRange"] && !fi.Slot3.IsActive && !fi.Slot3.IsPending && !fi.Slot3.IsDeactivating && fi.Slot3.Charges > 0)
                         {
                             fi.Slot3.ActivateOnTarget(ActiveTarget);
                             missileFired = DateTime.Now.AddSeconds(3);

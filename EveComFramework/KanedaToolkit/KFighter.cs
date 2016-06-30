@@ -14,29 +14,81 @@ namespace EveComFramework.KanedaToolkit
         public enum AbilityType
         {
             Attack,
-            SecondaryAttack,
+
             Afterburner,
+            EvasiveManuevers,
             MicroWarpDrive,
             MicroJumpDrive,
+
+            MissileAttack,
             AOEBomb,
             Suicide
         }
 
-        /// <summary>
-        /// Slot number for a given AbilityType
-        /// </summary>
-        public static int? AbilitySlot(this Fighters.Fighter fighter, AbilityType ability)
+        public static bool HasAfterburner(this Fighters.Fighter fighter)
         {
-            if (ability == AbilityType.Attack) return 0;
+            return fighter.ToItem["fighterAbilityAfterburnerSpeedBonus"] != null;
+        }
 
-            if (ability == AbilityType.Afterburner && lightFightersSuperiority.Contains(fighter.TypeID)) return 1;
-            if (ability == AbilityType.MicroJumpDrive && heavyFightersLongRange.Contains(fighter.TypeID)) return 1;
-            if (ability == AbilityType.MicroWarpDrive && (lightFightersAttack.Contains(fighter.TypeID) || heavyFightersAttack.Contains(fighter.TypeID) || supportFighters.Contains(fighter.TypeID))) return 1;
+        public static bool HasEvasiveManeuvers(this Fighters.Fighter fighter)
+        {
+            return fighter.ToItem["fighterAbilityEvasiveManeuversSpeedBonus"] != null;
+        }
 
-            if (ability == AbilityType.SecondaryAttack && (lightFightersAttack.Contains(fighter.TypeID) || lightFightersSuperiority.Contains(fighter.TypeID) || heavyFightersAttack.Contains(fighter.TypeID))) return 2;
-            if (ability == AbilityType.AOEBomb && heavyFightersLongRange.Contains(fighter.TypeID)) return 2;
+        public static bool HasMWD(this Fighters.Fighter fighter)
+        {
+            return fighter.ToItem["fighterAbilityMicroWarpDriveSpeedBonus"] != null;
+        }
 
-            return null;
+        public static bool HasMissiles(this Fighters.Fighter fighter)
+        {
+            return fighter.ToItem["fighterAbilityMissilesRange"] != null;
+        }
+
+        public static bool HasKamikaze(this Fighters.Fighter fighter)
+        {
+            return fighter.ToItem["fighterAbilityKamikazeRange"] != null;
+        }
+
+        public static bool HasBomb(this Fighters.Fighter fighter)
+        {
+            return fighter.ToItem["fighterAbilityLaunchBombType"] != null;
+        }
+
+        public static void ActivateAfterburner(this Fighters.Fighter fighter)
+        {
+            if(fighter.HasAfterburner())
+            {
+                Fighters.AbilitySlot slot = fighter.Slot2;
+                if(slot.AllowsActivate)
+                {
+                    slot.ActivateOnSelf();
+                }
+            }
+        }
+
+        public static void ActivateEvasiveManuevers(this Fighters.Fighter fighter)
+        {
+            if(fighter.HasEvasiveManeuvers())
+            {
+                Fighters.AbilitySlot slot = fighter.Slot2;
+                if (slot.AllowsActivate)
+                {
+                    slot.ActivateOnSelf();
+                }
+            }
+        }
+
+        public static void ActivateMWD(this Fighters.Fighter fighter)
+        {
+            if(fighter.HasMWD())
+            {
+                Fighters.AbilitySlot slot = fighter.Slot2;
+                if(slot.AllowsActivate)
+                {
+                    slot.ActivateOnSelf();
+                }
+            }
         }
 
     }
