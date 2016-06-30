@@ -971,6 +971,7 @@ namespace EveComFramework.Move
     /// </summary>
     public class UndockWarpSettings : Settings
     {
+        public long MaxDistance = 30000000;
         public string Substring = "Undock";
         public bool Enabled = false;
     }
@@ -1048,7 +1049,7 @@ namespace EveComFramework.Move
             }
             if (Session.InSpace)
             {
-                Bookmark undock = Bookmark.All.FirstOrDefault(a => a.Title.Contains(Config.Substring) && a.LocationID == Session.SolarSystemID && a.Distance < 2000000);
+                Bookmark undock = Bookmark.All.FirstOrDefault(a => a.Title.Contains(Config.Substring) && a.LocationID == Session.SolarSystemID && a.Distance < Config.MaxDistance);
                 if (undock != null) undock.WarpTo(0);
                 QueueState(WaitStation);
                 return true;
