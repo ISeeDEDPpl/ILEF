@@ -125,7 +125,7 @@ namespace EveComFramework.SimpleDrone
 
         bool FighterMissileTarget(Entity target)
         {
-            return (Data.NPCClasses.All.Any(a => a.Key == target.GroupID && (a.Value == "Frigate" || a.Value == "Destroyer" || a.Value == "BattleCruiser")));
+            return (Data.NPCClasses.All.Any(a => a.Key == target.GroupID && (a.Value == "Destroyer" || a.Value == "BattleCruiser")));
         }
 
             bool SmallTarget(Entity target)
@@ -205,12 +205,6 @@ namespace EveComFramework.SimpleDrone
             if(Config.Mode == Mode.None && !Fighters.Tubes.Any())
             {
                 return false;
-            }
-
-            // @TODO: Might help with rate limits
-            if (Fighters.Tubes.Any())
-            {
-                // DefaultFrequency = 3000;
             }
 
             // If we're warping and drones are in space, recall them and stop the module
