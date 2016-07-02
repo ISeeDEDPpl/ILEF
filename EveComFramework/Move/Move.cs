@@ -4,6 +4,7 @@ using System.Linq;
 using EveCom;
 using EveComFramework.Core;
 using EveComFramework.KanedaToolkit;
+using System;
 
 namespace EveComFramework.Move
 {
@@ -775,7 +776,7 @@ namespace EveComFramework.Move
                             return false;
                         }
                     }
-                    if (!Entity.All.Any(a => a.GroupID == Group.Station && a.Distance < 150000)) DoInstaWarp();
+                    if (!Entity.All.Any(a => a.Dockable() && a.Distance < 150000)) DoInstaWarp();
                     Log.Log("|oJumping through to |-g{0}", Route.NextWaypoint.Name);
                     Route.NextWaypoint.Jump();
                     if (Route.Path != null && Route.Waypoints != null)
@@ -787,7 +788,7 @@ namespace EveComFramework.Move
                     WaitFor(10, () => Session.SolarSystemID != CurSystem, () => MyShip.ToEntity.Mode != EntityMode.Stopped);
                     return true;
                 }
-                if (Route.NextWaypoint.GroupID == Group.Station)
+                if (Route.NextWaypoint.GroupID == Group.Station || Route.NextWaypoint.GroupID == Group.MediumCitadel || Route.NextWaypoint.GroupID == Group.LargeCitadel || Route.NextWaypoint.GroupID == Group.XLargeCitadel || Route.NextWaypoint.GroupID == Group.XXLargeCitadel)
                 {
                     if (Bubbled() && Route.NextWaypoint.Distance > 2000)
                     {
@@ -837,9 +838,16 @@ namespace EveComFramework.Move
             }
             if (!Config.WarpCollisionPrevention)
             {
-                if (!Entity.All.Any(a => a.GroupID == Group.Station && a.Distance < 150000)) DoInstaWarp();
+                if (!Entity.All.Any(a => a.Dockable() && a.Distance < 150000)) DoInstaWarp();
                 Log.Log("|oDocking");
-                Log.Log(" |-g{0}", Target.Name);
+                try
+                {
+                    Log.Log(" |-g{0}", Target.Name);
+                }
+                catch (Exception ex)
+                {
+                    Log.Log("Entity name not ready yet? " + ex.ToString(), LogType.DEBUG);
+                }
                 Target.Dock();
                 InsertState(Dock, -1, Target);
                 WaitFor(10, () => Session.InStation, () => MyShip.ToEntity.Mode == EntityMode.Warping);
@@ -868,7 +876,7 @@ namespace EveComFramework.Move
             }
             else if (LCO == null)
             {
-                if (!Entity.All.Any(a => a.GroupID == Group.Station && a.Distance < 150000)) DoInstaWarp();
+                if (!Entity.All.Any(a => a.Dockable() && a.Distance < 150000)) DoInstaWarp();
                 Log.Log("|oDocking");
                 Log.Log(" |-g{0}", Target.Name);
                 Target.Dock();

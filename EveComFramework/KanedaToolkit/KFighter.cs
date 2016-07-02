@@ -27,68 +27,42 @@ namespace EveComFramework.KanedaToolkit
 
         public static bool HasAfterburner(this Fighters.Fighter fighter)
         {
-            return fighter.ToItem["fighterAbilityAfterburnerSpeedBonus"] != null;
+            return fighter["fighterAbilityAfterburnerSpeedBonus"] != null;
         }
 
         public static bool HasEvasiveManeuvers(this Fighters.Fighter fighter)
         {
-            return fighter.ToItem["fighterAbilityEvasiveManeuversSpeedBonus"] != null;
+            return fighter["fighterAbilityEvasiveManeuversSpeedBonus"] != null;
         }
 
         public static bool HasMWD(this Fighters.Fighter fighter)
         {
-            return fighter.ToItem["fighterAbilityMicroWarpDriveSpeedBonus"] != null;
+            return fighter["fighterAbilityMicroWarpDriveSpeedBonus"] != null;
+        }
+
+        public static bool HasMJD(this Fighters.Fighter fighter)
+        {
+            return fighter["fighterAbilityMicroJumpDriveDistance"] != null;
         }
 
         public static bool HasMissiles(this Fighters.Fighter fighter)
         {
-            return fighter.ToItem["fighterAbilityMissilesRange"] != null;
+            return fighter["fighterAbilityMissilesRange"] != null;
         }
 
         public static bool HasKamikaze(this Fighters.Fighter fighter)
         {
-            return fighter.ToItem["fighterAbilityKamikazeRange"] != null;
+            return fighter["fighterAbilityKamikazeRange"] != null;
         }
 
         public static bool HasBomb(this Fighters.Fighter fighter)
         {
-            return fighter.ToItem["fighterAbilityLaunchBombType"] != null;
+            return fighter["fighterAbilityLaunchBombType"] != null;
         }
 
-        public static void ActivateAfterburner(this Fighters.Fighter fighter)
+        public static bool HasPropmod(this Fighters.Fighter fighter)
         {
-            if(fighter.HasAfterburner())
-            {
-                Fighters.AbilitySlot slot = fighter.Slot2;
-                if(slot.AllowsActivate)
-                {
-                    slot.ActivateOnSelf();
-                }
-            }
-        }
-
-        public static void ActivateEvasiveManuevers(this Fighters.Fighter fighter)
-        {
-            if(fighter.HasEvasiveManeuvers())
-            {
-                Fighters.AbilitySlot slot = fighter.Slot2;
-                if (slot.AllowsActivate)
-                {
-                    slot.ActivateOnSelf();
-                }
-            }
-        }
-
-        public static void ActivateMWD(this Fighters.Fighter fighter)
-        {
-            if(fighter.HasMWD())
-            {
-                Fighters.AbilitySlot slot = fighter.Slot2;
-                if(slot.AllowsActivate)
-                {
-                    slot.ActivateOnSelf();
-                }
-            }
+            return fighter.HasAfterburner() || fighter.HasEvasiveManeuvers() || fighter.HasMWD();
         }
 
     }
