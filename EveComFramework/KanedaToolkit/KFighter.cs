@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace EveComFramework.KanedaToolkit
 {
-    static class KFighter
+    public static class KFighter
     {
         public static List<long> lightFightersAttack = new List<long>() { 23057, 40557, 23055, 40556, 23059, 40558, 23061, 40559 };
         public static List<long> lightFightersSuperiority = new List<long>() { 40358, 40552, 40361, 40553, 40359, 40554, 40555, 40360 };

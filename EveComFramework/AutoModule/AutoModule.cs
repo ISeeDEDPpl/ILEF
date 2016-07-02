@@ -406,11 +406,11 @@ namespace EveComFramework.AutoModule
                 List<Module> networkedSensorArrays = MyShip.Modules.Where(a => (int) a.GroupID == 1706 && a.IsOnline).ToList();
                 if (networkedSensorArrays.Any())
                 {
-                    if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapNetworkedSensorArray)
+                    if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapNetworkedSensorArray && Entity.All.Any(a => a.IsNPC) && !Entity.All.Any(a => a.GroupID == Group.ControlTower))
                     {
                         networkedSensorArrays.Where(a => a.AllowsActivate).ForEach(m => m.Activate());
                     }
-                    if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapNetworkedSensorArray)
+                    if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapNetworkedSensorArray || Entity.All.All(a => !a.IsNPC) || Entity.All.Any(a => a.GroupID == Group.ControlTower))
                     {
                         networkedSensorArrays.Where(a => a.AllowsDeactivate).ForEach(m => m.Deactivate());
                     }
