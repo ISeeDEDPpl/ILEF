@@ -791,6 +791,86 @@
             Does the entity have a forcefield we are in?
             </summary>
         </member>
+        <member name="T:EveComFramework.KanedaToolkit.KFighter">
+            <summary>
+            Extension methods for fighters
+            </summary>
+        </member>
+        <member name="F:EveComFramework.KanedaToolkit.KFighter.lightFightersAttack">
+            <summary>
+            Light attack fighter types
+            </summary>
+        </member>
+        <member name="F:EveComFramework.KanedaToolkit.KFighter.lightFightersSuperiority">
+            <summary>
+            Light superiority fighter types
+            </summary>
+        </member>
+        <member name="F:EveComFramework.KanedaToolkit.KFighter.heavyFightersAttack">
+            <summary>
+            Heavy attack fighter types
+            </summary>
+        </member>
+        <member name="F:EveComFramework.KanedaToolkit.KFighter.heavyFightersLongRange">
+            <summary>
+            Heavy long-range attack fighter types
+            </summary>
+        </member>
+        <member name="F:EveComFramework.KanedaToolkit.KFighter.supportFighters">
+            <summary>
+            Support fighter types
+            </summary>
+        </member>
+        <member name="F:EveComFramework.KanedaToolkit.KFighter.shadowFighters">
+            <summary>
+            shadow fighters
+            </summary>
+        </member>
+        <member name="M:EveComFramework.KanedaToolkit.KFighter.HasAfterburner(EveCom.Fighters.Fighter)">
+            <summary>
+            Does this fighter have afterburner ability?
+            </summary>
+        </member>
+        <member name="M:EveComFramework.KanedaToolkit.KFighter.HasEvasiveManeuvers(EveCom.Fighters.Fighter)">
+            <summary>
+            Does this fighter have evasive maneuvers ability?
+            </summary>
+        </member>
+        <member name="M:EveComFramework.KanedaToolkit.KFighter.HasMWD(EveCom.Fighters.Fighter)">
+            <summary>
+            Does this fighter have MWD ability?
+            </summary>
+        </member>
+        <member name="M:EveComFramework.KanedaToolkit.KFighter.HasMJD(EveCom.Fighters.Fighter)">
+            <summary>
+            Does this fighter have MJD ability?
+            </summary>
+        </member>
+        <member name="M:EveComFramework.KanedaToolkit.KFighter.HasMissiles(EveCom.Fighters.Fighter)">
+            <summary>
+            Does this fighter have missile ability?
+            </summary>
+        </member>
+        <member name="M:EveComFramework.KanedaToolkit.KFighter.HasKamikaze(EveCom.Fighters.Fighter)">
+            <summary>
+            Does this fighter have kamikaze ability?
+            </summary>
+        </member>
+        <member name="M:EveComFramework.KanedaToolkit.KFighter.HasBomb(EveCom.Fighters.Fighter)">
+            <summary>
+            Does this fighter have bomb ability?
+            </summary>
+        </member>
+        <member name="M:EveComFramework.KanedaToolkit.KFighter.HasPropmod(EveCom.Fighters.Fighter)">
+            <summary>
+            Does this fighter have any propmod ability?
+            </summary>
+        </member>
+        <member name="M:EveComFramework.KanedaToolkit.KFighter.RequiresAmmo(EveCom.Fighters.Fighter)">
+            <summary>
+            Does this fighter require ammo and is out of ammo?
+            </summary>
+        </member>
         <member name="T:EveComFramework.KanedaToolkit.RouteToolkit">
             <summary>
             Route Toolkit

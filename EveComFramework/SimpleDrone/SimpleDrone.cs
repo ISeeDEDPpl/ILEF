@@ -80,6 +80,7 @@ namespace EveComFramework.SimpleDrone
         Dictionary<Drone, double> DroneHealthCache = new Dictionary<Drone, double>();
         IPC IPC = IPC.Instance;
         Dictionary<long, DateTime> missileFired = new Dictionary<long, DateTime>();
+        List<long> offgridFighters = new List<long>();
 
         public List<string> PriorityTargets = new List<string>();
         public List<string> Triggers = new List<string>();
@@ -176,20 +177,25 @@ namespace EveComFramework.SimpleDrone
 
             // Recall fighters
             List<Fighters.Fighter> RecallFighters = Fighters.Active.Where(a => a.State != Fighters.States.RECALLING).ToList();
-            if(RecallFighters.Any())
+            if(RecallFighters.Any() && MyShip.ToEntity.Mode != EntityMode.Warping)
             {
                 Console.Log("|oRecalling fighters");
                 Fighters.RecallAllFightersToTubes();
                 return false;
             }
-            // Speed up Returning Fighters
-            IEnumerable<Fighters.Fighter> ReturningFighters = Fighters.Active.Where(a => a.State == Fighters.States.RECALLING && a.HasPropmod() && a.Slot2.AllowsActivate);
-            if (ReturningFighters.Any())
+
+            if (!Entity.All.Any(b => b.GroupID == Group.ForceField))
             {
-                Console.Log("|oSpeed up Returning Fighters");
-                ReturningFighters.ActivateAbilitySlotOnSelf(1);
-                return false;
+                // Speed up Returning Fighters
+                IEnumerable<Fighters.Fighter> ReturningFighters = Fighters.Active.Where(a => a.State == Fighters.States.RECALLING && a.HasPropmod() && a.Slot2.AllowsActivate);
+                if (ReturningFighters.Any())
+                {
+                    Console.Log("|oSpeed up Returning Fighters");
+                    ReturningFighters.ActivateAbilitySlotOnSelf(1);
+                    return false;
+                }
             }
+
             if (Fighters.Active.Any()) return false;
 
             return true;
@@ -214,8 +220,8 @@ namespace EveComFramework.SimpleDrone
                 return true;
             }
 
-            // If we're warping and fighters are in space, queue delayed stop of the module
-            if (MyShip.ToEntity.Mode == EntityMode.Warping && Fighters.Active.Any())
+            // If we're in a POS and fighters are in space, queue delayed stop of the module
+            if (Entity.All.Any(a => a.GroupID == Group.ForceField) && Fighters.Active.Any())
             {
                 QueueState(FighterShutdown);
                 return true;
@@ -243,7 +249,7 @@ namespace EveComFramework.SimpleDrone
                 }
                 // Recall fighters
                 List<Fighters.Fighter> RecallFighters = Fighters.Active.Where(a => a.State != Fighters.States.RECALLING).ToList();
-                if(RecallFighters.Any())
+                if(RecallFighters.Any() && MyShip.ToEntity.Mode != EntityMode.Warping)
                 {
                     Console.Log("|oRecalling fighters");
                     Console.Log(" |-gNo rats available");
@@ -295,7 +301,8 @@ namespace EveComFramework.SimpleDrone
                 if (recallFighters.Any())
                 {
                     Console.Log("|oRecalling damaged fighter(s)");
-                    recallFighters.RecallToTube();
+                    recallFighters.ForEach(m => m.RecallToTube());
+                    return false;
                 }
             }
             catch (Exception ex)
@@ -442,7 +449,7 @@ namespace EveComFramework.SimpleDrone
                     }
 
                     IEnumerable<Fighters.Fighter> RecallFighters = Fighters.Active.Where(a => a.State != Fighters.States.RECALLING);
-                    if(RecallFighters.Any() && !Config.StayDeployedWithNoTargets)
+                    if(RecallFighters.Any() && !Config.StayDeployedWithNoTargets && MyShip.ToEntity.Mode != EntityMode.Warping)
                     {
                         Console.Log("|oRecalling fighters");
                         Fighters.RecallAllFightersToTubes();
@@ -718,18 +725,29 @@ namespace EveComFramework.SimpleDrone
                     return false;
                 }
 
+                // Flag offgridFighters
+                offgridFighters.AddRange(Fighters.Tubes.Where(a => a.InSpace && a.Fighter.ToEntity == null && !offgridFighters.Contains(a.Fighter.ID)).Select(a => a.Fighter.ID));
+
+                // Remove offgridFighters flagging if fighters are on grid and state is != returning
+                Fighters.Tubes.Where(a => a.InSpace && a.Fighter.ToEntity != null && a.Fighter.State != Fighters.States.RECALLING && offgridFighters.Contains(a.Fighter.ID)).Select(a => a.Fighter.ID).ForEach(m => offgridFighters.Remove(m));
+
+                // If offgridFighters appeared on grid: command orbit
+                Fighters.Tubes.Where(a => a.InSpace && a.Fighter.ToEntity != null && a.Fighter.State == Fighters.States.RECALLING && offgridFighters.Contains(a.Fighter.ID)).Select(a => a.Fighter).ReturnAndOrbit();
+
                 // Speed up Returning Fighters
-                IEnumerable<Fighters.Fighter> ReturningFighter = Fighters.Active.Where(a => a.State == Fighters.States.RECALLING && a.HasPropmod() && a.Slot2.AllowsActivate);
-                if (ReturningFighter.Any())
+                if (!Entity.All.Any(b => b.GroupID == Group.ForceField))
                 {
-                    Console.Log("|oSpeed up Returning Fighters");
-                    ReturningFighter.ActivateAbilitySlotOnSelf(1);
-                    return false;
+                    IEnumerable<Fighters.Fighter> ReturningFighter = Fighters.Active.Where(a => a.State == Fighters.States.RECALLING && a.HasPropmod() && a.Slot2.AllowsActivate);
+                    if (ReturningFighter.Any())
+                    {
+                        Console.Log("|oSpeed up Returning Fighters");
+                        ReturningFighter.ActivateAbilitySlotOnSelf(1);
+                        return false;
+                    }
                 }
 
                 // Activate propmod for fighters outside fighterSquadronOrbitRange
-                IEnumerable<Fighters.Fighter> Propmod = Fighters.Active.Where(a => a.State != Fighters.States.RECALLING && a.HasPropmod() && a.ToEntity.DistanceTo(ActiveTarget) > (double)a["fighterSquadronOrbitRange"] && a.Slot2.AllowsActivate);
-
+                IEnumerable<Fighters.Fighter> Propmod = Fighters.Active.Where(a => a.State != Fighters.States.RECALLING && a.HasPropmod() && a.ToEntity.DistanceTo(ActiveTarget) > ((double)a["fighterAbilityAttackMissileRangeOptimal"]+ (double)a["fighterAbilityAttackMissileRangeFalloff"]) && a.Slot2.AllowsActivate);
                 if (Propmod.Any())
                 {
                     Console.Log("|oActivating propmod for {0} fighters", Propmod.Count());
@@ -743,7 +761,7 @@ namespace EveComFramework.SimpleDrone
                 {
                     foreach (Fighters.Fighter fi in MissileAttack)
                     {
-                        Entity MissileTarget = Entity.All.Where(a => a.LockedTarget && !a.Exploded && !a.Released && FighterMissileTarget(a) && fi.ToEntity.DistanceTo(a) < (double)fi["fighterAbilityMissilesRange"] && (!missileFired.ContainsKey(a.ID) || missileFired[a.ID].AddSeconds(8) < DateTime.Now)).OrderBy(a => a == ActiveTarget).FirstOrDefault();
+                        Entity MissileTarget = Entity.All.Where(a => a.LockedTarget && !a.Exploded && !a.Released && FighterMissileTarget(a) && fi.ToEntity.DistanceTo(a) < (double)fi["fighterAbilityMissilesRange"] - 10 && (!missileFired.ContainsKey(a.ID) || missileFired[a.ID].AddSeconds((double)fi["fighterAbilityAttackMissileDuration"]/1000) < DateTime.Now)).OrderBy(a => a == ActiveTarget).FirstOrDefault();
                         if (MissileTarget != null)
                         {
                             Console.Log("|oMissile attack on {0}", MissileTarget.Name);
@@ -755,7 +773,7 @@ namespace EveComFramework.SimpleDrone
                 }
 
                 // Send fighters to attack, given they have the ability to
-                IEnumerable<Fighters.Fighter> Attack = Fighters.Active.Where(a => a.State != Fighters.States.RECALLING && a.Slot1.AllowsActivate);
+                IEnumerable<Fighters.Fighter> Attack = Fighters.Active.Where(a => (a.State != Fighters.States.RECALLING || (a.ToEntity != null && offgridFighters.Contains(a.ID))) && a.Slot1.AllowsActivate && a.ToEntity.DistanceTo(ActiveTarget) < (double)a["maxTargetRange"] - 10);
                 if (Attack.Any())
                 {
                     Console.Log("|oAttacking {0} with {1} fighters", ActiveTarget.Name, Attack.Count());
