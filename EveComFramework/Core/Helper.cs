@@ -8,6 +8,7 @@ namespace EveComFramework.Core
     {
         Cache Cache = Cache.Instance;
 
+        bool RepairComplete = false;
         public bool RepairShip(Logger Console)
         {
             // If ship needs to be repaired, do so
@@ -27,6 +28,13 @@ namespace EveComFramework.Core
                     }
                     return false;
                 }
+                if (RepairComplete)
+                {
+                    Cache.ArmorPercent = 1;
+                    Cache.HullPercent = 1;
+                    Cache.DamagedDrones = false;
+                    return false;
+                }
                 if (!Window.All.Any(a => a.Name != null && a.Name == "repairshop"))
                 {
                     Console.Log("|oShip needs to be repaired");
@@ -41,12 +49,14 @@ namespace EveComFramework.Core
                     {
                         repairShopWindow.ClickButton(Window.Button.RepairAll);
                     }
+                    RepairComplete = true;
                 }
                 return false;
             }
             repairShopWindow = Window.All.FirstOrDefault(a => a.Name != null && a.Name == "repairshop");
             if (repairShopWindow != null)
             {
+                RepairComplete = true;
                 repairShopWindow.Close();
                 return false;
             }
