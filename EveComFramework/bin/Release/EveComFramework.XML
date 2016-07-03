@@ -1198,19 +1198,19 @@
             Jump through an entity (ex: Jump portal array)
             </summary>
         </member>
-        <member name="M:EveComFramework.Move.Move.Orbit(EveCom.Entity,System.Int32)">
-            <summary>
-            Orbit an entity
-            </summary>
-            <param name="Target">The entity to orbit</param>
-            <param name="Distance">The distance from the entity to orbit</param>
-        </member>
         <member name="M:EveComFramework.Move.Move.Approach(EveCom.Entity,System.Int32)">
             <summary>
             Approach an entity
             </summary>
             <param name="Target">The entity to approach</param>
             <param name="Distance">What distance from the entity to stop at</param>
+        </member>
+        <member name="M:EveComFramework.Move.Move.Orbit(EveCom.Entity,System.Int32)">
+            <summary>
+            Orbit an entity
+            </summary>
+            <param name="Target">The entity to orbit</param>
+            <param name="Distance">The distance from the entity to orbit</param>
         </member>
         <member name="P:EveComFramework.Move.InstaWarp.Instance">
             <summary>
