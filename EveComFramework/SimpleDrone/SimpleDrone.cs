@@ -746,7 +746,7 @@ namespace EveComFramework.SimpleDrone
                     }
                 }
 
-                // Activate propmod for fighters outside fighterSquadronOrbitRange
+                // Activate propmod for fighters outside optimal range
                 IEnumerable<Fighters.Fighter> Propmod = Fighters.Active.Where(a => a.State != Fighters.States.RECALLING && a.HasPropmod() && a.ToEntity.DistanceTo(ActiveTarget) > ((double)a["fighterAbilityAttackMissileRangeOptimal"]+ (double)a["fighterAbilityAttackMissileRangeFalloff"]) && a.Slot2.AllowsActivate);
                 if (Propmod.Any())
                 {
@@ -778,6 +778,16 @@ namespace EveComFramework.SimpleDrone
                 {
                     Console.Log("|oAttacking {0} with {1} fighters", ActiveTarget.Name, Attack.Count());
                     Attack.ActivateSlotOnTarget(0, ActiveTarget);
+                    return false;
+                }
+
+                // Send fighters to orbit if they are out of range
+                IEnumerable<Fighters.Fighter> Orbit = Fighters.Active.Where(a => (a.State != Fighters.States.RECALLING || (a.ToEntity != null && offgridFighters.Contains(a.ID))) && a.Slot1.AllowsActivate && a.ToEntity.DistanceTo(ActiveTarget) > (double)a["maxTargetRange"] - 10);
+                if (Orbit.Any())
+                {
+                    Console.Log("|oOrbiting {0} with {1} fighters", ActiveTarget.Name, Orbit.Count());
+                    Orbit.Orbit(ActiveTarget, Convert.ToInt32((double)Orbit.First()["fighterAbilityAttackMissileRangeOptimal"] + (double)Orbit.First()["fighterAbilityAttackMissileRangeFalloff"]) - 10);
+                    Orbit.Where(a => a.HasPropmod() && a.Slot2.AllowsActivate).ActivateAbilitySlotOnSelf(1);
                     return false;
                 }
 
