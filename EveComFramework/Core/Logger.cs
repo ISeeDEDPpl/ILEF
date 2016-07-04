@@ -57,6 +57,13 @@ namespace EveComFramework.Core
         public Color DefaultForegroundColor = Color.White;
         internal Color CurrentBackColor;
 
+        internal static DateTime RoundDown(DateTime time)
+        {
+            return time.Subtract(
+                new TimeSpan(0, 0, 0, time.Second, time.Millisecond));
+        }
+
+        string LastUpdate = RoundDown(DateTime.Now).AddMinutes(-1).ToString("HH:mm");
         /// <summary>
         /// Use this method to update your richtextbox
         /// </summary>
@@ -65,12 +72,19 @@ namespace EveComFramework.Core
         /// <param name="Message">The log message</param>
         public void RichTextboxUpdater(RichTextBox Console, string Module, string Message)
         {
+            if (RoundDown(DateTime.Now).ToString("HH:mm") != LastUpdate)
+            {
+                Console.SelectionBackColor = Color.DarkBlue;
+                LastUpdate = RoundDown(DateTime.Now).ToString("HH:mm");
+                Console.AppendText(String.Format("{0}", LastUpdate));
+                Console.AppendText(new string(' ', 1000) + Environment.NewLine);
+            }
             if (Console.WordWrap) Console.WordWrap = false;
             Console.SelectionStart = Console.TextLength;
             Console.SelectionColor = DefaultForegroundColor;
             Console.SelectionBackColor = CurrentBackColor;
             CurrentBackColor = (CurrentBackColor == BackColor1)?BackColor2:BackColor1;
-            Console.AppendText(String.Format("{0} {1}", DateTime.Now.ToString("HH:mm"), Module.PadRight(12)));
+            Console.AppendText(String.Format("{0}", Module.PadRight(12)));
             Queue<char> StringReader = new Queue<char>(Message);
             while (StringReader.Any())
             {
@@ -139,6 +153,7 @@ namespace EveComFramework.Core
             Console.SelectionStart = Console.TextLength;
             Console.ScrollToCaret();
         }
+
     }
 
     public enum LogType

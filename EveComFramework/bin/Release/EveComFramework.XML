@@ -179,6 +179,11 @@
             Array of bookmark titles
             </summary>
         </member>
+        <member name="P:EveComFramework.Core.Cache.CitadelBookmarks">
+            <summary>
+            Array of bookmark titles
+            </summary>
+        </member>
         <member name="P:EveComFramework.Core.Cache.FleetMembers">
             <summary>
             Array of fleet member names

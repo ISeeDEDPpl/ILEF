@@ -162,6 +162,7 @@ namespace EveComFramework.Move
 
         bool BookmarkPrep(object[] Params)
         {
+
             Bookmark Bookmark = (Bookmark)Params[0];
             int Distance = (int)Params[1];
 
@@ -229,12 +230,20 @@ namespace EveComFramework.Move
             if (!Config.WarpCollisionPrevention)
             {
                 DoInstaWarp();
-                Log.Log("|oWarping");
-                Log.Log(" |-g{0} (|w{1} km|-g)", Destination.Title, Distance);
-                Destination.WarpTo(Distance);
-                InsertState(BookmarkWarp, -1, Destination, Distance);
-                WaitFor(10, () => MyShip.ToEntity.Mode == EntityMode.Warping);
-                return true;
+                if (Destination.Dockable() && Destination.LocationID == Session.SolarSystemID)
+                {
+                    QueueState(Dock, -1, Entity.All.FirstOrDefault(a => a.ID == Destination.ItemID));
+                    return true;
+                }
+                else
+                {
+                    Log.Log("|oWarping");
+                    Log.Log(" |-g{0} (|w{1} km|-g)", Destination.Title, Distance);
+                    Destination.WarpTo(Distance);
+                    InsertState(BookmarkWarp, -1, Destination, Distance);
+                    WaitFor(10, () => MyShip.ToEntity.Mode == EntityMode.Warping);
+                    return true;
+                }
             }
 
             Entity LCO = Entity.All.FirstOrDefault(a => a.Collidable() && a.SurfaceDistance <= (double)(Config.WarpCollisionTrigger * 900));
@@ -444,8 +453,9 @@ namespace EveComFramework.Move
                 return;
             }
             // If we're approaching something else or orbiting something, change to approaching the new target - retain collision information!
-            if ((CurState.State == ApproachState && ApproachTarget != Target) || CurState.State == OrbitState)
+            if ((CurState.State == ApproachState && ApproachTarget != Target) || (CurState.State == OrbitState && ApproachCollision == null))
             {
+                Approaching = false;
                 ApproachTarget = Target;
                 ApproachDistance = Distance;
                 Clear();
@@ -472,8 +482,9 @@ namespace EveComFramework.Move
 
             if ((ApproachTarget.CategoryID == Category.Asteroid ? ApproachTarget.SurfaceDistance : ApproachTarget.Distance) > ApproachDistance)
             {
+
                 // Start approaching our approach target if we're not currently approaching anything
-                if (!Approaching || (MyShip.ToEntity.Mode != EntityMode.Orbiting && MyShip.ToEntity.Mode != EntityMode.Approaching))
+                if (!Approaching && ApproachCollision == null)
                 {
                     if (ApproachTarget.SurfaceDistance > 150000 && ApproachTarget.Warpable())
                     {

@@ -57,6 +57,10 @@ namespace EveComFramework.Core
         /// </summary>
         public string[] Bookmarks { get; set; }
         /// <summary>
+        /// Array of bookmark titles
+        /// </summary>
+        public string[] CitadelBookmarks { get; set; }
+        /// <summary>
         /// Array of fleet member names
         /// </summary>
         public string[] FleetMembers { get; set; }
@@ -104,6 +108,7 @@ namespace EveComFramework.Core
             if (Bookmarks == null || BookmarkUpdate < DateTime.Now)
             {
                 Bookmarks = Bookmark.All.Select(a => a.Title).ToArray();
+                CitadelBookmarks = Bookmark.All.Where(a => a.GroupID == Group.MediumCitadel || a.GroupID == Group.LargeCitadel || a.GroupID == Group.XLargeCitadel || a.GroupID == Group.XXLargeCitadel).Select(a => a.Title).ToArray();
                 BookmarkUpdate = DateTime.Now.AddMinutes(1);
             }
             if (Session.InFleet) FleetMembers = Fleet.Members.Select(a => a.Name).ToArray();
