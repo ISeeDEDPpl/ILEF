@@ -117,6 +117,8 @@ namespace EveComFramework.Targets
 
         public bool GetLocks(int Count = 2)
         {
+            if (MyShip.ToEntity.Mode == EntityMode.Warping) return false;
+
             if (Delays.Keys.Union(LockedAndLockingTargetList).Count() < Count)
             {
                 Entity TryLock = UnlockedTargetList.FirstOrDefault(ent => !Delays.ContainsKey(ent));
