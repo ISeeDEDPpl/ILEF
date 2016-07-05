@@ -734,11 +734,11 @@ namespace EveComFramework.Security
                         Log.Log("Warning: Bookmark not found!");
                         break;
                     case FleeType.SafeBookmarks:
-                        if (!SafeSpots.Any())
+                        if (SafeSpots != null && !SafeSpots.Any())
                         {
                             SafeSpots = Bookmark.All.Where(a => a.Title.Contains(Config.SafeSubstring) && a.LocationID == Session.SolarSystemID).ToList();
                         }
-                        if (SafeSpots.Any())
+                        if (SafeSpots != null && SafeSpots.Any())
                         {
                             Move.Bookmark(SafeSpots.FirstOrDefault());
                             SafeSpots.Remove(SafeSpots.FirstOrDefault());
@@ -930,13 +930,20 @@ namespace EveComFramework.Security
                 }
             }
 
-            if (Config.Local && LocalCache != LocalChat.Messages.Count)
+            try
             {
-                if (LocalChat.Messages.Last().SenderID > 1)
+                if (Config.Local && LocalChat.Messages != null && LocalCache != LocalChat.Messages.Count)
                 {
-                    SpeechQueue.Enqueue("Local chat");
+                    if (LocalChat.Messages.Last().SenderID > 1)
+                    {
+                        SpeechQueue.Enqueue("Local chat");
+                    }
+                    LocalCache = LocalChat.Messages.Count;
                 }
-                LocalCache = LocalChat.Messages.Count;
+            }
+            catch (Exception ex)
+            {
+                //Log.Log("Exception [" + ex + "]");
             }
 
             if (Session.InSpace)
