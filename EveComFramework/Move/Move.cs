@@ -270,11 +270,20 @@ namespace EveComFramework.Move
                 if (Destination.Exists && Destination.CanWarpTo)
                 {
                     DoInstaWarp();
-                    Log.Log("|oWarping");
-                    Log.Log(" |-g{0} (|w{1} km|-g)", Destination.Title, Distance);
-                    Destination.WarpTo(Distance);
-                    InsertState(BookmarkWarp, -1, Destination, Distance);
-                    WaitFor(10, () => MyShip.ToEntity.Mode == EntityMode.Warping);
+                    if (Destination.Dockable() && Destination.LocationID == Session.SolarSystemID)
+                    {
+                        QueueState(Dock, -1, Entity.All.FirstOrDefault(a => a.ID == Destination.ItemID));
+                        return true;
+                    }
+                    else
+                    {
+                        Log.Log("|oWarping");
+                        Log.Log(" |-g{0} (|w{1} km|-g)", Destination.Title, Distance);
+                        Destination.WarpTo(Distance);
+                        InsertState(BookmarkWarp, -1, Destination, Distance);
+                        WaitFor(10, () => MyShip.ToEntity.Mode == EntityMode.Warping);
+                        return true;
+                    }
                 }
             }
             else if (Collision == LCO)
@@ -420,6 +429,7 @@ namespace EveComFramework.Move
                 Clear();
                 ApproachTarget = Target;
                 ApproachDistance = 2500;
+                Approaching = false;
                 QueueState(ApproachState);
                 QueueState(ActivateEntity, -1, Target);
                 return false;
