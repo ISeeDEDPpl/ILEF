@@ -401,7 +401,7 @@ namespace EveComFramework.AutoModule
 
             #region Networked Sensor Array
 
-            if (Config.NetworkedSensorArray && MyShip.ToEntity.Mode != EntityMode.Warping)
+            if (Config.NetworkedSensorArray && MyShip.ToEntity.Mode != EntityMode.Warping && Security.Security.Instance != null && !Security.Security.Instance.IsPanic)
             {
                 List<Module> networkedSensorArrays = MyShip.Modules.Where(a => (int) a.GroupID == 1706 && a.IsOnline).ToList();
                 if (networkedSensorArrays.Any())
