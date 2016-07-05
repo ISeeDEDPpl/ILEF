@@ -297,7 +297,7 @@ namespace EveComFramework.SimpleDrone
 
             try
             {
-                List<Fighters.Fighter> recallFighters = Fighters.Active.Where(a => a.Health < Config.FighterCriticalHealthLevel && a.State != Fighters.States.RECALLING).ToList();
+                List<Fighters.Fighter> recallFighters = Fighters.Active.Where(a => a.ToEntity != null && a.Health < Config.FighterCriticalHealthLevel && a.State != Fighters.States.RECALLING).ToList();
                 if (recallFighters.Any())
                 {
                     Console.Log("|oRecalling damaged fighter(s)");
@@ -746,8 +746,11 @@ namespace EveComFramework.SimpleDrone
                     }
                 }
 
+                IEnumerable<Fighters.Fighter> availableFighters =
+                    Fighters.Active.Where(a => a.ToEntity != null && a.State != Fighters.States.RECALLING);
+
                 // Activate propmod for fighters outside optimal range
-                IEnumerable<Fighters.Fighter> Propmod = Fighters.Active.Where(a => a.State != Fighters.States.RECALLING && a.HasPropmod() && a.ToEntity.DistanceTo(ActiveTarget) > ((double)a["fighterAbilityAttackMissileRangeOptimal"]+ (double)a["fighterAbilityAttackMissileRangeFalloff"]) && a.Slot2.AllowsActivate);
+                IEnumerable<Fighters.Fighter> Propmod = availableFighters.Where(a => a.HasPropmod() && a.ToEntity.DistanceTo(ActiveTarget) > ((double)a["fighterAbilityAttackMissileRangeOptimal"] + (double)a["fighterAbilityAttackMissileRangeFalloff"]) && a.Slot2.AllowsActivate);
                 if (Propmod.Any())
                 {
                     Console.Log("|oActivating propmod for {0} fighters", Propmod.Count());
@@ -756,12 +759,12 @@ namespace EveComFramework.SimpleDrone
                 }
 
                 // Use missile, given they have the ability to
-                IEnumerable<Fighters.Fighter> MissileAttack = Fighters.Active.Where(a => a.State != Fighters.States.RECALLING && a.HasMissiles() && a.Slot3.AllowsActivate);
+                IEnumerable<Fighters.Fighter> MissileAttack = availableFighters.Where(a => a.HasMissiles() && a.Slot3.AllowsActivate);
                 if (MissileAttack.Any())
                 {
                     foreach (Fighters.Fighter fi in MissileAttack)
                     {
-                        Entity MissileTarget = Entity.All.Where(a => a.LockedTarget && !a.Exploded && !a.Released && FighterMissileTarget(a) && fi.ToEntity.DistanceTo(a) < (double)fi["fighterAbilityMissilesRange"] - 10 && (!missileFired.ContainsKey(a.ID) || missileFired[a.ID].AddSeconds((double)fi["fighterAbilityAttackMissileDuration"]/1000) < DateTime.Now)).OrderBy(a => a == ActiveTarget).FirstOrDefault();
+                        Entity MissileTarget = Entity.All.Where(a => a.LockedTarget && !a.Exploded && !a.Released && FighterMissileTarget(a) && fi.ToEntity.DistanceTo(a) < (double)fi["fighterAbilityMissilesRange"] - 10 && (!missileFired.ContainsKey(a.ID) || missileFired[a.ID].AddSeconds((double)fi["fighterAbilityAttackMissileDuration"] / 1000) < DateTime.Now)).OrderBy(a => a == ActiveTarget).FirstOrDefault();
                         if (MissileTarget != null)
                         {
                             Console.Log("|oMissile attack on {0}", MissileTarget.Name);
@@ -772,8 +775,11 @@ namespace EveComFramework.SimpleDrone
                     }
                 }
 
+                IEnumerable<Fighters.Fighter> availableFightersWithReturningFromOffgrid =
+                    Fighters.Active.Where(a => a.ToEntity != null && (a.State != Fighters.States.RECALLING || offgridFighters.Contains(a.ID)));
+
                 // Send fighters to attack, given they have the ability to
-                IEnumerable<Fighters.Fighter> Attack = Fighters.Active.Where(a => (a.State != Fighters.States.RECALLING || (a.ToEntity != null && offgridFighters.Contains(a.ID))) && a.Slot1.AllowsActivate && a.ToEntity.DistanceTo(ActiveTarget) < (double)a["maxTargetRange"] - 10);
+                IEnumerable<Fighters.Fighter> Attack = availableFightersWithReturningFromOffgrid.Where(a => a.Slot1.AllowsActivate && a.ToEntity.DistanceTo(ActiveTarget) < (double)a["maxTargetRange"] - 10);
                 if (Attack.Any())
                 {
                     Console.Log("|oAttacking {0} with {1} fighters", ActiveTarget.Name, Attack.Count());
