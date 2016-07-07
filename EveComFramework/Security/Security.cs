@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Speech.Synthesis;
 using EveCom;
+using EveComFramework.AutoModule;
 using EveComFramework.Core;
 using EveComFramework.KanedaToolkit;
 using LavishScriptAPI;
@@ -638,6 +639,7 @@ namespace EveComFramework.Security
         }
 
         bool Decloak;
+        bool NetworkedSensorArray;
 
         bool CheckClear(object[] Params)
         {
@@ -645,6 +647,7 @@ namespace EveComFramework.Security
             FleeTrigger Trigger = (FleeTrigger)Params[0];
             int FleeWait = (Trigger == FleeTrigger.ArmorLow || Trigger == FleeTrigger.CapacitorLow || Trigger == FleeTrigger.ShieldLow || Trigger == FleeTrigger.Forced || Trigger == FleeTrigger.Panic) ? 0 : Config.FleeWait;
             AutoModule.AutoModule.Instance.Decloak = false;
+            AutoModule.AutoModule.Instance.Config.NetworkedSensorArray = false;
             if (Trigger == FleeTrigger.CapacitorLow && Trigger == FleeTrigger.ShieldLow) AutoModule.AutoModule.Instance.Decloak = true;
             if (Trigger == FleeTrigger.ArmorLow && MyShip.Modules.Any(a => a.GroupID == Group.ArmorRepairUnit && a.IsOnline)) AutoModule.AutoModule.Instance.Decloak = true;
 
@@ -695,6 +698,8 @@ namespace EveComFramework.Security
             Move.Clear();
 
             Decloak = AutoModule.AutoModule.Instance.Decloak;
+            NetworkedSensorArray = AutoModule.AutoModule.Instance.Config.NetworkedSensorArray;
+            AutoModule.AutoModule.Instance.Config.NetworkedSensorArray = false;
 
             QueueState(WaitFlee);
             QueueState(SignalSuccessful);
@@ -782,6 +787,7 @@ namespace EveComFramework.Security
         {
             _isAlert = false;
             AutoModule.AutoModule.Instance.Decloak = Decloak;
+            AutoModule.AutoModule.Instance.Config.NetworkedSensorArray = NetworkedSensorArray;
             if (ClearAlert != null)
             {
                 Log.Log("|oSending ClearAlert command - resume operations");
