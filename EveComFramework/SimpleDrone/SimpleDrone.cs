@@ -235,6 +235,8 @@ namespace EveComFramework.SimpleDrone
                 return false;
             }
 
+            if (MyShip.ToEntity.Mode == EntityMode.Warping) return false;
+
             if (!Rats.TargetList.Any() && !Entity.All.Any(a => PriorityTargets.Contains(a.Name)) && !Config.StayDeployedWithNoTargets)
             {
                 // Recall drones
