@@ -153,7 +153,7 @@ namespace EveComFramework.AutoModule
 
         bool Control(object[] Params)
         {
-            if (!Session.InSpace || !Session.Safe)
+            if (!Session.InSpace || !Session.Safe || MyShip.ToEntity == null)
             {
                 return false;
             }
@@ -177,7 +177,7 @@ namespace EveComFramework.AutoModule
                 }
             }
 
-            if (MyShip.ToEntity.Cloaked)
+            if (MyShip.ToEntity != null && MyShip.ToEntity.Cloaked)
             {
                 return false;
             }
