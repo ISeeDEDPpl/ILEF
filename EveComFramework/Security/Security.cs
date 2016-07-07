@@ -525,32 +525,32 @@ namespace EveComFramework.Security
                     StopUntilManualClearance = true;
                     return;
                 case FleeTrigger.SuspectLocal:
-                    Log.Log("|rSuspect pilot in system");
-                    Comms.ChatQueue.Enqueue("Suspect pilot in system");
+                    Log.Log("|rSuspect pilot in local [ " + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()) + "]");
+                    Comms.ChatQueue.Enqueue("Suspect pilot in local [ " + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()) + "]");
                     return;
                 case FleeTrigger.SuspectGrid:
                     Log.Log("|rSuspect pilot on grid");
                     Comms.ChatQueue.Enqueue("Suspect pilot on grid");
                     return;
                 case FleeTrigger.CriminalLocal:
-                    Log.Log("|rCriminal pilot in system");
-                    Comms.ChatQueue.Enqueue("Criminal pilot in system");
+                    Log.Log("|rCriminal pilot in local [ " + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()) + "]");
+                    Comms.ChatQueue.Enqueue("Criminal pilot in local [ " + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()) + "]");
                     return;
                 case FleeTrigger.CriminalGrid:
                     Log.Log("|rCriminal pilot on grid");
                     Comms.ChatQueue.Enqueue("Criminal pilot on grid");
                     return;
                 case FleeTrigger.NegativeStanding:
-                    Log.Log("|r{0} is negative standing", Hostile.Name);
-                    Comms.ChatQueue.Enqueue("<Security> " + Hostile.Name + " is negative standing");
+                    Log.Log("|r{0} is negative standing in [ " + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()) + "]", Hostile.Name);
+                    Comms.ChatQueue.Enqueue("<Security> [ " + Hostile.Name + " ] in [ " + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()) + "] is negative standing");
                     return;
                 case FleeTrigger.NeutralStanding:
-                    Log.Log("|r{0} is neutral standing", Hostile.Name);
-                    Comms.ChatQueue.Enqueue("<Security> " + Hostile.Name + " is neutral standing");
+                    Log.Log("|r{0} is neutral standing in [ " + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()) + "]", Hostile.Name);
+                    Comms.ChatQueue.Enqueue("<Security> [ " + Hostile.Name + " ] in [ " + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()) + "]  is neutral standing");
                     return;
                 case FleeTrigger.Paranoid:
                     Log.Log("|r{0} is neutral to me", Hostile.Name);
-                    Comms.ChatQueue.Enqueue("<Security> " + Hostile.Name + " is neutral to me");
+                    Comms.ChatQueue.Enqueue("<Security> [ " + Hostile.Name + " ] in [ " + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()) + "]  is neutral to me");
                     return;
                 case FleeTrigger.Targeted:
                     Log.Log("|r{0} is targeting me", Hostile.Name);
