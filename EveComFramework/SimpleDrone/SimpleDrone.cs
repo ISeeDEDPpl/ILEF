@@ -214,7 +214,7 @@ namespace EveComFramework.SimpleDrone
             }
 
             // If we're warping and drones are in space, recall them and stop the module
-            if (MyShip.ToEntity.Mode == EntityMode.Warping && Drone.AllInSpace.Any())
+            if (MyShip.ToEntity.Mode == EntityMode.Warping && MyShip.ToEntity.Velocity.Magnitude < 2000 && Drone.AllInSpace.Any())
             {
                 Drone.AllInSpace.ReturnToDroneBay();
                 return true;
