@@ -450,11 +450,38 @@ namespace EveComFramework.SimpleDrone
                         Recall.ForEach(a => NextDroneCommand.AddOrUpdate(a, DateTime.Now.AddSeconds(5)));
                     }
 
-                    IEnumerable<Fighters.Fighter> RecallFighters = Fighters.Active.Where(a => a.State != Fighters.States.RECALLING);
-                    if (RecallFighters.Any() && !Config.StayDeployedWithNoTargets && MyShip.ToEntity.Mode != EntityMode.Warping)
+                    try
                     {
-                        Console.Log("|oRecalling fighters");
-                        Fighters.RecallAllFightersToTubes();
+                        IEnumerable<Fighters.Fighter> RecallFighters = Fighters.Active.Where(a => a.State != Fighters.States.RECALLING);
+                        if (RecallFighters.Any() && !Config.StayDeployedWithNoTargets && MyShip.ToEntity.Mode != EntityMode.Warping)
+                        {
+                            Console.Log("|oRecalling fighters");
+                            Fighters.RecallAllFightersToTubes();
+                            return false;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Log("Exception [" + ex + "]");
+                    }
+
+                    // Speed up Returning Fighters
+                    try
+                    {
+                        if (!Entity.All.Any(b => b.GroupID == Group.ForceField))
+                        {
+                            IEnumerable<Fighters.Fighter> ReturningFighter = Fighters.Active.Where(a => a.State == Fighters.States.RECALLING && a.HasPropmod() && a.Slot2 != null && a.Slot2.AllowsActivate).ToList();
+                            if (ReturningFighter != null && ReturningFighter.Any())
+                            {
+                                Console.Log("|oSpeed up Returning Fighters");
+                                ReturningFighter.ActivateAbilitySlotOnSelf(1);
+                                return false;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Log("Exception [" + ex + "]");
                     }
                 }
                 return false;
