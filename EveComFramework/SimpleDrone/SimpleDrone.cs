@@ -579,7 +579,6 @@ namespace EveComFramework.SimpleDrone
                 }
             }
 
-
             // Handle Attacking anything if in AgressiveMedium mode
             if (Config.Mode == Mode.AgressiveMedium)
             {
@@ -752,6 +751,7 @@ namespace EveComFramework.SimpleDrone
                     IEnumerable<Fighters.Tube> deployFighters = Fighters.Tubes.Where(a => !a.InSpace && a.Fighter.State == Fighters.States.READY);
                     if (deployFighters != null && deployFighters.Any())
                     {
+                        Console.Log("Launching Fighters");
                         Fighters.LaunchAllFighters();
                         return false;
                     }
@@ -890,7 +890,6 @@ namespace EveComFramework.SimpleDrone
             if (MyShip.ToEntity.Mode == EntityMode.Warping) return false;
 
             Fighters.RecallAllFightersToTubes();
-
             return true;
         }
 
