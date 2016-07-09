@@ -857,6 +857,15 @@ namespace EveComFramework.SimpleDrone
                                 Attack.ActivateSlotOnTarget(0, ActiveTarget);
                                 return false;
                             }
+
+                            // Return fighters that are not moving (not responding to commands?)
+                            IEnumerable<Fighters.Fighter> Return = availableFighters.Where(a => (a.ToEntity != null && a.ToEntity.Velocity.Magnitude < 10)).ToList();
+                            if (Return != null && Return.Any())
+                            {
+                                Console.Log("|Sending Recall to Tube command to [" + Return.Count() + "] fighters");
+                                Attack.RecallToTube();
+                                return false;
+                            }
                         }
                     }
                     catch (Exception ex)
