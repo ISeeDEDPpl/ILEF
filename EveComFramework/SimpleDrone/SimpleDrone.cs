@@ -126,7 +126,7 @@ namespace EveComFramework.SimpleDrone
 
         bool FighterMissileTarget(Entity target)
         {
-            return (Data.NPCClasses.All.Any(a => a.Key == target.GroupID && (a.Value == "Capital" || a.Value == "Destroyer" || a.Value == "BattleCruiser")));
+            return (Data.NPCClasses.All.Any(a => a.Key == target.GroupID && (a.Value == "Capital" || a.Value == "Destroyer" || a.Value == "BattleCruiser" || a.Value == "BattleShip")));
         }
 
         bool SmallTarget(Entity target)
