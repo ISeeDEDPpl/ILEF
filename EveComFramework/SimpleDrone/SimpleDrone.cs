@@ -378,7 +378,7 @@ namespace EveComFramework.SimpleDrone
             Rats.LockedAndLockingTargetList.ForEach(a => { TargetCooldown.AddOrUpdate(a, DateTime.Now.AddSeconds(2)); });
             if (WarpScrambling != null)
             {
-                if (!WarpScrambling.LockedTarget && !WarpScrambling.LockingTarget)
+                if (!WarpScrambling.LockedTarget && !WarpScrambling.LockingTarget && !WarpScrambling.Exploded && !WarpScrambling.Released)
                 {
                     if (Rats.LockedAndLockingTargetList.Count >= Me.TrueMaxTargetLocks)
                     {
@@ -394,7 +394,7 @@ namespace EveComFramework.SimpleDrone
             }
             else if (Neuting != null)
             {
-                if (!Neuting.LockedTarget && !Neuting.LockingTarget)
+                if (!Neuting.LockedTarget && !Neuting.LockingTarget && !Neuting.Exploded && !Neuting.Released)
                 {
                     if (Rats.LockedAndLockingTargetList.Count >= Me.TrueMaxTargetLocks)
                     {
@@ -410,8 +410,8 @@ namespace EveComFramework.SimpleDrone
             }
             else
             {
-                Entity NewTarget = Entity.All.FirstOrDefault(a => !a.LockedTarget && !a.LockingTarget && PriorityTargets.Contains(a.Name) && a.Distance < MyShip.MaxTargetRange && !TargetCooldown.ContainsKey(a) && !Triggers.Contains(a.Name));
-                if (NewTarget == null) NewTarget = Rats.UnlockedTargetList.FirstOrDefault(a => !TargetCooldown.ContainsKey(a) && a.Distance < MyShip.MaxTargetRange);
+                Entity NewTarget = Entity.All.FirstOrDefault(a => !a.Exploded && !a.Released && !a.LockedTarget && !a.LockingTarget && PriorityTargets.Contains(a.Name) && a.Distance < MyShip.MaxTargetRange && !TargetCooldown.ContainsKey(a) && !Triggers.Contains(a.Name));
+                if (NewTarget == null) NewTarget = Rats.UnlockedTargetList.FirstOrDefault(a => !a.Exploded && !a.Released && !TargetCooldown.ContainsKey(a) && a.Distance < MyShip.MaxTargetRange);
                 if (Rats.LockedAndLockingTargetList.Count < Config.TargetSlots &&
                     NewTarget != null &&
                     Entity.All.FirstOrDefault(a => a.IsJamming && a.IsTargetingMe) == null)
@@ -431,7 +431,7 @@ namespace EveComFramework.SimpleDrone
             // Make sure ActiveTarget is locked.  If so, make sure it's the active target, if not, return.
             if (ActiveTarget != null && ActiveTarget.Exists && ActiveTarget.LockedTarget)
             {
-                if (!Fighters.Tubes.Any() && !ActiveTarget.IsActiveTarget)
+                if (!Fighters.Tubes.Any() && !ActiveTarget.IsActiveTarget && !ActiveTarget.Exploded && !ActiveTarget.Released)
                 {
                     ActiveTarget.MakeActive();
                     return false;
