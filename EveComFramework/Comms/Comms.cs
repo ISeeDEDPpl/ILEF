@@ -182,6 +182,18 @@ namespace EveComFramework.Comms
                     });
                     ChatQueue.Enqueue("----------------End List----------------");
                 }
+                if (e.Text.ToLower().StartsWith("listentities"))
+                {
+                    ChatQueue.Enqueue("---------------Entity List---------------");
+                    EVEFrameUtil.Do(() =>
+                    {
+                        foreach (Entity entity in Entity.All.Where(i => i.Distance < 200000 && i.GroupID != Group.Wreck && i.CategoryID != Category.Drone && i.CategoryID != Category.Charge && i.CategoryID != Category.Asteroid))
+                        {
+                            ChatQueue.Enqueue("Name [" + entity.Name + "] Distance [" + Math.Round(entity.Distance/1000,0) + "k] GroupID [" + entity.GroupID + "] TypeID [" + entity.TypeID + "]");
+                        }
+                    });
+                    ChatQueue.Enqueue("----------------End List----------------");
+                }
             }
         }
 
