@@ -38,6 +38,21 @@ namespace EveComFramework.Move
 
     }
 
+    [Serializable]
+    public class JumpbridgeData
+    {
+        public int SolarSystemFrom;
+        public int SolarSystemTo;
+        public string BookmarkName;
+
+        public JumpbridgeData(int SolarSystemFrom, int SolarSystemTo, string BookmarkName)
+        {
+            this.SolarSystemFrom = SolarSystemFrom;
+            this.SolarSystemTo = SolarSystemTo;
+            this.BookmarkName = BookmarkName;
+        }
+    }
+
     /// <summary>
     /// Settings for the Move class
     /// </summary>
@@ -53,6 +68,7 @@ namespace EveComFramework.Move
         public decimal OrbitCollisionTrigger = 5;
         public decimal OrbitCollisionOrbit = 10;
         public bool InstaWarp = false;
+        public List<JumpbridgeData> Jumpbridges = new List<JumpbridgeData>();
     }
 
     /// <summary>

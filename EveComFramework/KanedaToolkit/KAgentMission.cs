@@ -8,33 +8,13 @@ namespace EveComFramework.KanedaToolkit
     public static class KAgentMission
     {
         /// <summary>
-        /// Is the mission accepted?
-        /// </summary>
-        /// <param name="mission">AgentMission</param>
-        /// <returns></returns>
-        public static bool IsAccepted(this AgentMission mission)
-        {
-            return (mission.State == AgentMission.MissionState.Accepted);
-        }
-
-        /// <summary>
-        /// Is the mission completed?
-        /// </summary>
-        /// <param name="mission">AgentMission</param>
-        /// <returns></returns>
-        public static bool IsCompleted(this AgentMission mission)
-        {
-            return (mission.IsAccepted() && mission.MissionObjectiveState() == MissionToolkit.MissionObjectiveState.AllObjectivesComplete);
-        }
-
-        /// <summary>
         /// Get Objective state for mission
         /// </summary>
         /// <param name="mission">AgentMission</param>
         /// <returns></returns>
         public static MissionToolkit.MissionObjectiveState MissionObjectiveState(this AgentMission mission)
         {
-            if (!mission.IsAccepted())
+            if (!mission.Accepted)
                 return MissionToolkit.MissionObjectiveState._NotAccepted;
 
             switch (mission.Objective.Action)
@@ -81,14 +61,6 @@ namespace EveComFramework.KanedaToolkit
             return MissionToolkit.MissionObjectiveState._Unknown;
         }
 
-        /// <summary>
-        /// Get a missions agent
-        /// </summary>
-        /// <returns></returns>
-        public static Agent GetAgent(this AgentMission agentMission)
-        {
-            return Agent.Get(agentMission.AgentID);
-        }
     }
 
 }

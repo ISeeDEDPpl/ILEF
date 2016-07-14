@@ -908,16 +908,6 @@
             extension methods for Module
             </summary>
         </member>
-        <member name="M:EveComFramework.KanedaToolkit.KModule.AllowsActivate(EveCom.Module)">
-            <summary>
-            Is this module in a state where it can be activated?
-            </summary>
-        </member>
-        <member name="M:EveComFramework.KanedaToolkit.KModule.AllowsDeactivate(EveCom.Module)">
-            <summary>
-            Is this module in a state where it can be deactivated?
-            </summary>
-        </member>
         <member name="M:EveComFramework.KanedaToolkit.KModule.CapacitorNeed(EveCom.Module)">
             <summary>
             Capacitor required to enable the module
@@ -974,31 +964,11 @@
             extension methods for AgentMission
             </summary>
         </member>
-        <member name="M:EveComFramework.KanedaToolkit.KAgentMission.IsAccepted(EveCom.AgentMission)">
-            <summary>
-            Is the mission accepted?
-            </summary>
-            <param name="mission">AgentMission</param>
-            <returns></returns>
-        </member>
-        <member name="M:EveComFramework.KanedaToolkit.KAgentMission.IsCompleted(EveCom.AgentMission)">
-            <summary>
-            Is the mission completed?
-            </summary>
-            <param name="mission">AgentMission</param>
-            <returns></returns>
-        </member>
         <member name="M:EveComFramework.KanedaToolkit.KAgentMission.MissionObjectiveState(EveCom.AgentMission)">
             <summary>
             Get Objective state for mission
             </summary>
             <param name="mission">AgentMission</param>
-            <returns></returns>
-        </member>
-        <member name="M:EveComFramework.KanedaToolkit.KAgentMission.GetAgent(EveCom.AgentMission)">
-            <summary>
-            Get a missions agent
-            </summary>
             <returns></returns>
         </member>
         <member name="T:EveComFramework.KanedaToolkit.MiningToolkit">

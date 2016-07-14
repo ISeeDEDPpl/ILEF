@@ -9,24 +9,6 @@ namespace EveComFramework.KanedaToolkit
     public static class KModule
     {
         /// <summary>
-        /// Is this module in a state where it can be activated?
-        /// </summary>
-        [Obsolete("Not required anymore.")]
-        public static bool AllowsActivate(this Module module)
-        {
-            return module.AllowsActivate;
-        }
-
-        /// <summary>
-        /// Is this module in a state where it can be deactivated?
-        /// </summary>
-        [Obsolete("Not required anymore.")]
-        public static bool AllowsDeactivate(this Module module)
-        {
-            return module.AllowsDeactivate;
-        }
-
-        /// <summary>
         /// Capacitor required to enable the module
         /// </summary>
         public static double CapacitorNeed(this Module module)
