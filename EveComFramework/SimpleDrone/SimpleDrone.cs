@@ -201,6 +201,7 @@ namespace EveComFramework.SimpleDrone
             return true;
         }
 
+        Vector3 LastTargetLocation = Vector3.origin;
         bool Control(object[] Params)
         {
             if (!Session.InSpace)
@@ -342,24 +343,29 @@ namespace EveComFramework.SimpleDrone
 
             if (ActiveTarget == null || !ActiveTarget.Exists || ActiveTarget.Exploded || ActiveTarget.Released)
             {
+                List<Entity> AvailableTargets = Entity.All.ToList();
+                if (LastTargetLocation != Vector3.origin) AvailableTargets = AvailableTargets.OrderBy(a => a.DistanceTo(LastTargetLocation)).ToList();
                 ActiveTarget = null;
-                ActiveTarget = Entity.All.FirstOrDefault(a => PriorityTargets.Contains(a.Name) && !a.Exploded && !a.Released && (a.LockedTarget || a.LockingTarget) && !Triggers.Contains(a.Name) && a.Distance < MaxRange);
-                if (Rats.LockedAndLockingTargetList.Any() && ActiveTarget == null)
+                ActiveTarget = AvailableTargets.FirstOrDefault(a => PriorityTargets.Contains(a.Name) && !a.Exploded && !a.Released && (a.LockedTarget || a.LockingTarget) && !Triggers.Contains(a.Name) && a.Distance < MaxRange);
+
+                AvailableTargets = Rats.LockedAndLockingTargetList.ToList();
+                if (LastTargetLocation != Vector3.origin) AvailableTargets = AvailableTargets.OrderBy(a => a.DistanceTo(LastTargetLocation)).ToList();
+                if (AvailableTargets.Any() && ActiveTarget == null)
                 {
                     if (Config.PrivateTargets)
                     {
                         if (Config.SharedTargets)
                         {
-                            ActiveTarget = Rats.LockedAndLockingTargetList.FirstOrDefault(a => IPC.ActiveTargets.ContainsValue(a.ID) && a.Distance < MaxRange);
+                            ActiveTarget = AvailableTargets.FirstOrDefault(a => IPC.ActiveTargets.ContainsValue(a.ID) && a.Distance < MaxRange);
                         }
                         else
                         {
-                            ActiveTarget = Rats.LockedAndLockingTargetList.FirstOrDefault(a => !IPC.ActiveTargets.ContainsValue(a.ID) && a.Distance < MaxRange);
+                            ActiveTarget = AvailableTargets.FirstOrDefault(a => !IPC.ActiveTargets.ContainsValue(a.ID) && a.Distance < MaxRange);
                         }
                     }
                     if (ActiveTarget == null && OutOfTargets)
                     {
-                        ActiveTarget = Rats.LockedAndLockingTargetList.FirstOrDefault(a => a.Distance < MaxRange);
+                        ActiveTarget = AvailableTargets.FirstOrDefault(a => a.Distance < MaxRange);
                     }
                     if (ActiveTarget != null)
                     {
@@ -367,6 +373,8 @@ namespace EveComFramework.SimpleDrone
                     }
                 }
             }
+
+            if (ActiveTarget != null && ActiveTarget.Exists) LastTargetLocation = ActiveTarget.Position;
 
             #endregion
 
