@@ -171,6 +171,8 @@ namespace EveComFramework.Targets
     {
         #region Instantiation
 
+        public Logger Console = new Logger("IPCTargets");
+
         static IPC _Instance;
         public static IPC Instance
         {
@@ -200,9 +202,17 @@ namespace EveComFramework.Targets
 
         bool Control(object[] Params)
         {
-            if (!Session.InSpace || !Session.Safe) return false;
-            LavishScript.ExecuteCommand(string.Format("relay \"all other\" Event[UpdateIPCPilots]:Execute[{0},{1},{2},{3},{4}]", Me.CharID, MyShip.ToEntity.HullPct, MyShip.ToEntity.ArmorPct, MyShip.ToEntity.ShieldPct, MyShip.Capacitor / MyShip.MaxCapacitor));
-            return false;
+            try
+            {
+                if (!Session.InSpace || !Session.Safe || MyShip.ToEntity == null || MyShip.Capacitor == 0) return false;
+                LavishScript.ExecuteCommand(string.Format("relay \"all other\" Event[UpdateIPCPilots]:Execute[{0},{1},{2},{3},{4}]", Me.CharID, MyShip.ToEntity.HullPct, MyShip.ToEntity.ArmorPct, MyShip.ToEntity.ShieldPct, MyShip.Capacitor / MyShip.MaxCapacitor));
+                return false;
+            }
+            catch (Exception)
+            {
+                Console.Log("|oOveriding current drone target");
+                return false;
+            }
         }
 
         void UpdateActiveTargets(object sender, LSEventArgs args)
