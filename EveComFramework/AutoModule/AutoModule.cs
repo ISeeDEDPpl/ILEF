@@ -6,6 +6,7 @@ using EveCom;
 using EveComFramework.Core;
 using EveComFramework.KanedaToolkit;
 using EveComFramework.Move;
+using EveComFramework.Targets;
 
 namespace EveComFramework.AutoModule
 {
@@ -64,7 +65,6 @@ namespace EveComFramework.AutoModule
     {
         #region Instantiation
 
-        static Targets.Targets targets = new Targets.Targets();
         static AutoModule _Instance;
         /// <summary>
         /// Singletoner
@@ -91,6 +91,7 @@ namespace EveComFramework.AutoModule
 
         #region Variables
 
+        public Targets.Targets Rats = new Targets.Targets();
         public Logger Console = new Logger("AutoModule");
 
         /// <summary>
@@ -108,6 +109,15 @@ namespace EveComFramework.AutoModule
         /// </summary>
         public bool KeepPropulsionModuleActive = false;
 
+        private bool _insidePosForceField = false;
+        bool InsidePosForceField
+        {
+            get
+            {
+                _insidePosForceField = Entity.All.Where(i => i.Distance < 60000).Any(b => b.GroupID == Group.ForceField && b.SurfaceDistance <= 0);
+                return _insidePosForceField;
+            }
+        }
         #endregion
 
         #region Actions
@@ -156,7 +166,6 @@ namespace EveComFramework.AutoModule
         #region States
 
         private readonly Dictionary<string, DateTime> nextArmorRepAttemptTime = new Dictionary<string, DateTime>();
-        
 
         bool Control(object[] Params)
         {
@@ -166,8 +175,6 @@ namespace EveComFramework.AutoModule
             }
 
             if (UndockWarp.Instance != null && !UndockWarp.Instance.Idle && UndockWarp.Instance.CurState.ToString() != "WaitStation") return false;
-
-            bool InsidePOSForceField = !Entity.All.Any(b => b.GroupID == Group.ForceField && b.SurfaceDistance < 0);
 
             #region Cloaks
 
@@ -186,7 +193,7 @@ namespace EveComFramework.AutoModule
                 }
             }
 
-            if (MyShip.ToEntity != null && MyShip.ToEntity.Cloaked)
+            if (MyShip.ToEntity == null || (MyShip.ToEntity != null && MyShip.ToEntity.Cloaked))
             {
                 return false;
             }
@@ -196,7 +203,7 @@ namespace EveComFramework.AutoModule
                 Module cloakingDevice = MyShip.Modules.FirstOrDefault(a => a.GroupID == Group.CloakingDevice && a.IsOnline);
                 if (cloakingDevice != null && (cloakingDevice.TypeID == 11578 || MyShip.ToEntity.Mode != EntityMode.Warping))
                 {
-                    if (!InsidePOSForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapCloaks && !Decloak && !Entity.All.Any(a => a.Distance < 2000 && a.ID != MyShip.ToEntity.ID))
+                    if (!InsidePosForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapCloaks && !Decloak && !Entity.All.Any(a => a.Distance < 2000 && a.ID != MyShip.ToEntity.ID))
                     {
                         if (!Entity.All.Any(a => a.IsTargetingMe && !a.Released && !a.Exploded))
                         {
@@ -243,7 +250,11 @@ namespace EveComFramework.AutoModule
                 {
                     if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapArmorRepairs || MyShip.ToEntity.ArmorPct > Config.MaxArmorRepairs)
                     {
-                        armorRepairers.Where(a => a.AllowsDeactivate).ForEach(m => m.Deactivate());
+                        foreach (var armorRepairer in armorRepairers.Where(a => a.AllowsDeactivate))
+                        {
+                            Console.Log("|o[|gArmorRepairer|o] deactivated. ArmorPct [|g" + Math.Round(MyShip.ToEntity.ArmorPct, 1) + "|o] MaxArmorRepairs [|g" + Config.MinArmorRepairs + "|o] C[|g" + Math.Round((MyShip.Capacitor / MyShip.MaxCapacitor * 100),0) + "|o] CapArmorRepairs [|g" + Config.CapArmorRepairs + "|o]");
+                            armorRepairer.Deactivate();
+                        }
                     }
                     else if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapArmorRepairs && MyShip.ToEntity.ArmorPct <= Config.MinArmorRepairs)
                     {
@@ -251,7 +262,7 @@ namespace EveComFramework.AutoModule
                         {
                             if (!nextArmorRepAttemptTime.ContainsKey(armorRepairer.ID) || (nextArmorRepAttemptTime.ContainsKey(armorRepairer.ID) && DateTime.UtcNow > nextArmorRepAttemptTime[armorRepairer.ID]))
                             {
-                                Console.Log("|warmorRepairer activated. ArmorPct [" + Math.Round(MyShip.ToEntity.ArmorPct, 1) + "] is less than MinArmorRepairs [" + Config.MinArmorRepairs + "]");
+                                Console.Log("|o[|gArmorRepairer|o] activated. ArmorPct [|g" + Math.Round(MyShip.ToEntity.ArmorPct, 1) + "|o] is less than MinArmorRepairs [|g" + Config.MinArmorRepairs + "|o]");
                                 armorRepairer.Activate();
                                 //
                                 // if a capital rep - add a timestamp for the next armo rep time to try to avoid cycling the armor rep twice during every repair
@@ -330,11 +341,11 @@ namespace EveComFramework.AutoModule
                 List<Module> sensorBoosters = MyShip.Modules.Where(a => a.GroupID == Group.SensorBooster && a.IsOnline).ToList();
                 if (sensorBoosters.Any())
                 {
-                    if (!InsidePOSForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapSensorBoosters)
+                    if (!InsidePosForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapSensorBoosters)
                     {
                         sensorBoosters.Where(a => a.AllowsActivate).ForEach(m => m.Activate());
                     }
-                    if (InsidePOSForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapSensorBoosters)
+                    if (InsidePosForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapSensorBoosters)
                     {
                         sensorBoosters.Where(a => a.AllowsDeactivate).ForEach(m => m.Deactivate());
                     }
@@ -350,11 +361,11 @@ namespace EveComFramework.AutoModule
                 List<Module> trackingComputers = MyShip.Modules.Where(a => (a.GroupID == Group.TrackingComputer || a.GroupID == Group.MissileGuidanceComputer) && a.IsOnline).ToList();
                 if (trackingComputers.Any())
                 {
-                    if (!InsidePOSForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapTrackingComputers)
+                    if (!InsidePosForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapTrackingComputers)
                     {
                         trackingComputers.Where(a => a.AllowsActivate).ForEach(m => m.Activate());
                     }
-                    if (InsidePOSForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapTrackingComputers)
+                    if (InsidePosForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapTrackingComputers)
                     {
                         trackingComputers.Where(a => a.AllowsDeactivate).ForEach(m => m.Deactivate());
                     }
@@ -370,13 +381,16 @@ namespace EveComFramework.AutoModule
                 List<Module> droneTrackingModules = MyShip.Modules.Where(a => a.GroupID == Group.DroneTrackingModules && a.IsOnline).ToList();
                 if (droneTrackingModules.Any())
                 {
-                    if (!InsidePOSForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapDroneTrackingModules)
+                    foreach (Module droneTrackingModule in droneTrackingModules)
                     {
-                        droneTrackingModules.Where(a => a.AllowsActivate).ForEach(m => m.Activate());
-                    }
-                    if (InsidePOSForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapDroneTrackingModules)
-                    {
-                        droneTrackingModules.Where(a => a.AllowsDeactivate).ForEach(m => m.Deactivate());
+                        if (!InsidePosForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapDroneTrackingModules && droneTrackingModule.AllowsActivate)
+                        {
+                            droneTrackingModule.Activate();
+                        }
+                        if (InsidePosForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapDroneTrackingModules && droneTrackingModule.AllowsDeactivate)
+                        {
+                            droneTrackingModule.Deactivate();
+                        }
                     }
                 }
             }
@@ -390,11 +404,11 @@ namespace EveComFramework.AutoModule
                 List<Module> ECCM = MyShip.Modules.Where(a => a.GroupID == Group.ECCM && a.IsOnline).ToList();
                 if (ECCM.Any())
                 {
-                    if (!InsidePOSForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapECCMs)
+                    if (!InsidePosForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapECCMs)
                     {
                         ECCM.Where(a => a.AllowsActivate).ForEach(m => m.Activate());
                     }
-                    if (InsidePOSForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapECCMs)
+                    if (InsidePosForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapECCMs)
                     {
                         ECCM.Where(a => a.AllowsDeactivate).ForEach(m => m.Deactivate());
                     }
@@ -410,11 +424,11 @@ namespace EveComFramework.AutoModule
                 List<Module> ECMBursts = MyShip.Modules.Where(a => a.GroupID == Group.BurstJammer && a.IsOnline).ToList();
                 if (ECMBursts.Any())
                 {
-                    if (!InsidePOSForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapECMBursts)
+                    if (!InsidePosForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapECMBursts)
                     {
                         ECMBursts.Where(a => a.AllowsActivate).ForEach(m => m.Activate());
                     }
-                    if (InsidePOSForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapECMBursts)
+                    if (InsidePosForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapECMBursts)
                     {
                         ECMBursts.Where(a => a.AllowsDeactivate).ForEach(m => m.Deactivate());
                     }
@@ -430,29 +444,32 @@ namespace EveComFramework.AutoModule
                 List<Module> networkedSensorArrays = MyShip.Modules.Where(a => (int) a.GroupID == 1706 && a.IsOnline).ToList();
                 if (networkedSensorArrays.Any())
                 {
-                    if (!InsidePOSForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapNetworkedSensorArray)
+                    if (!InsidePosForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapNetworkedSensorArray + 2)
                     {
-                        if (targets.LockedAndLockingTargetList.Count >= targets.LockedTargetList.Count ||
-                            (targets.LockedTargetList.Count < Entity.All.Where(i => i.Distance < 100000).Count(i => i.IsNPC && i.LockedTarget)))
-                        {
+                        //if (targets.LockedAndLockingTargetList.Count >= targets.LockedTargetList.Count ||
+                        //    (targets.LockedTargetList.Count < Entity.All.Where(i => i.Distance < 100000).Count(i => (i.IsNPC || i.IsPC))))
+                        //{
                             foreach (var networkedScannerArray in networkedSensorArrays)
                             {
                                 if (networkedScannerArray.AllowsActivate)
                                 {
-                                    Console.Log("|wNetworkedSensorArray activated");
+                                    Console.Log("|o[|gNetworkedSensorArray|o] activated");
                                     networkedScannerArray.Activate();
                                 }
                             }
-                        }
+                        //}
                     }
-                    if (InsidePOSForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapNetworkedSensorArray ||
-                            (targets.LockedTargetList.Count == Entity.All.Where(i => i.Distance < 100000).Count(i => i.IsNPC && i.LockedTarget)))
+
+                    //if (InsidePosForceField) Console.Log("|wAutoModule: InsidePosForceField == true");
+                    //if (Rats.LockedTargetList.Count == Entity.All.Where(i => i.Distance < 100000).Count(i => (i.IsNPC || i.IsPC || i.IsAttackingMe || i.IsActiveTarget || i.IsHostile || i.IsTargetingMe))) Console.Log("|wAutoModule: We have everthing locked");
+                    //Console.Log("|wAutoModule: targets.LockedTargetList.Count [" + Rats.LockedTargetList.Count + "] NPCs [" + Entity.All.Where(i => i.Distance < 100000).Count(i => (i.IsNPC || i.IsPC || i.IsAttackingMe || i.IsActiveTarget || i.IsHostile || i.IsTargetingMe)) + "]");
+                    if (InsidePosForceField || (MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapNetworkedSensorArray)
                     {
                         foreach (var networkedScannerArray in networkedSensorArrays)
                         {
                             if (networkedScannerArray.AllowsDeactivate)
                             {
-                                Console.Log("|wNetworkedSensorArray deactivated");
+                                Console.Log("|o[|gNetworkedSensorArray|o] deactivated  InsidePosForceField [|g" + InsidePosForceField + "|o] C[|g" + Math.Round(MyShip.Capacitor / MyShip.MaxCapacitor * 100, 0) + "|o] MinCap [|g" + Config.CapNetworkedSensorArray + "|o]");
                                 networkedScannerArray.Deactivate();
                             }
                         }
