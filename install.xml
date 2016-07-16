@@ -2,7 +2,7 @@
 <Install>
 	<Files>
 		<File>
-			<Get>EveComFramework/bin/Release/EveComFramework.dll</Get>
+			<Get>EveComFramework/bin/Debug/EveComFramework.dll</Get>
 			<Put>EveComFramework.dll</Put>
 			<Dependencies>
 				<Dependency>
