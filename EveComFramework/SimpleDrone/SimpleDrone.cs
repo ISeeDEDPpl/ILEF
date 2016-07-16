@@ -96,6 +96,7 @@ namespace EveComFramework.SimpleDrone
             {
                 if (Idle)
                 {
+                    LastTargetLocation = MyShip.ToEntity.Position;
                     TryReconnect = true;
                     QueueState(Control);
                 }
