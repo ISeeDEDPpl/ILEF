@@ -108,8 +108,9 @@
             this.checkLocal = new System.Windows.Forms.CheckBox();
             this.checkWallet = new System.Windows.Forms.CheckBox();
             this.checkReportChatInvite = new System.Windows.Forms.CheckBox();
-            this.checkGridTraffic = new System.Windows.Forms.CheckBox();
             this.checkLocalTraffic = new System.Windows.Forms.CheckBox();
+            this.checkGridTraffic = new System.Windows.Forms.CheckBox();
+            this.checkAllChat = new System.Windows.Forms.CheckBox();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanel7 = new System.Windows.Forms.TableLayoutPanel();
             this.label10 = new System.Windows.Forms.Label();
@@ -118,6 +119,7 @@
             this.comboDroneMode = new System.Windows.Forms.ComboBox();
             this.checkDronePrivateTargets = new System.Windows.Forms.CheckBox();
             this.checkDroneFocus = new System.Windows.Forms.CheckBox();
+            this.checkStickyDrones = new System.Windows.Forms.CheckBox();
             this.groupBox8 = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanel8 = new System.Windows.Forms.TableLayoutPanel();
             this.buttonUpload = new System.Windows.Forms.Button();
@@ -125,10 +127,8 @@
             this.buttonOpenLogFolder = new System.Windows.Forms.Button();
             this.buttonView = new System.Windows.Forms.Button();
             this.labelUploadResult = new System.Windows.Forms.Label();
-            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.checkAllChat = new System.Windows.Forms.CheckBox();
             this.checkStatsOptOut = new System.Windows.Forms.CheckBox();
-            this.checkStickyDrones = new System.Windows.Forms.CheckBox();
+            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.groupBox1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -255,6 +255,7 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(287, 370);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
@@ -405,7 +406,7 @@
             // numericECMBurstCap
             // 
             this.numericECMBurstCap.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.numericECMBurstCap.Location = new System.Drawing.Point(120, 190);
+            this.numericECMBurstCap.Location = new System.Drawing.Point(120, 344);
             this.numericECMBurstCap.Margin = new System.Windows.Forms.Padding(0);
             this.numericECMBurstCap.Name = "numericECMBurstCap";
             this.numericECMBurstCap.Size = new System.Drawing.Size(60, 21);
@@ -538,10 +539,10 @@
             this.checkECMBursts.AutoSize = true;
             this.tableLayoutPanel1.SetColumnSpan(this.checkECMBursts, 2);
             this.checkECMBursts.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.checkECMBursts.Location = new System.Drawing.Point(0, 190);
+            this.checkECMBursts.Location = new System.Drawing.Point(0, 344);
             this.checkECMBursts.Margin = new System.Windows.Forms.Padding(0);
             this.checkECMBursts.Name = "checkECMBursts";
-            this.checkECMBursts.Size = new System.Drawing.Size(120, 21);
+            this.checkECMBursts.Size = new System.Drawing.Size(120, 26);
             this.checkECMBursts.TabIndex = 99;
             this.checkECMBursts.Text = "ECMBursts";
             this.checkECMBursts.UseVisualStyleBackColor = true;
@@ -606,7 +607,7 @@
             this.checkAlwaysActive.Location = new System.Drawing.Point(20, 327);
             this.checkAlwaysActive.Margin = new System.Windows.Forms.Padding(0);
             this.checkAlwaysActive.Name = "checkAlwaysActive";
-            this.checkAlwaysActive.Size = new System.Drawing.Size(160, 43);
+            this.checkAlwaysActive.Size = new System.Drawing.Size(160, 17);
             this.checkAlwaysActive.TabIndex = 30;
             this.checkAlwaysActive.Text = "Always Active";
             this.checkAlwaysActive.UseVisualStyleBackColor = true;
@@ -1252,6 +1253,17 @@
             this.checkReportChatInvite.Text = "Report Chat Invites";
             this.checkReportChatInvite.UseVisualStyleBackColor = true;
             // 
+            // checkLocalTraffic
+            // 
+            this.checkLocalTraffic.AutoSize = true;
+            this.checkLocalTraffic.Location = new System.Drawing.Point(149, 140);
+            this.checkLocalTraffic.Margin = new System.Windows.Forms.Padding(0);
+            this.checkLocalTraffic.Name = "checkLocalTraffic";
+            this.checkLocalTraffic.Size = new System.Drawing.Size(115, 17);
+            this.checkLocalTraffic.TabIndex = 14;
+            this.checkLocalTraffic.Text = "Report Local Traffic";
+            this.checkLocalTraffic.UseVisualStyleBackColor = true;
+            // 
             // checkGridTraffic
             // 
             this.checkGridTraffic.AutoSize = true;
@@ -1263,16 +1275,16 @@
             this.checkGridTraffic.Text = "Report Grid Traffic";
             this.checkGridTraffic.UseVisualStyleBackColor = true;
             // 
-            // checkLocalTraffic
+            // checkAllChat
             // 
-            this.checkLocalTraffic.AutoSize = true;
-            this.checkLocalTraffic.Location = new System.Drawing.Point(149, 140);
-            this.checkLocalTraffic.Margin = new System.Windows.Forms.Padding(0);
-            this.checkLocalTraffic.Name = "checkLocalTraffic";
-            this.checkLocalTraffic.Size = new System.Drawing.Size(115, 17);
-            this.checkLocalTraffic.TabIndex = 14;
-            this.checkLocalTraffic.Text = "Report Local Traffic";
-            this.checkLocalTraffic.UseVisualStyleBackColor = true;
+            this.checkAllChat.AutoSize = true;
+            this.checkAllChat.Location = new System.Drawing.Point(149, 100);
+            this.checkAllChat.Margin = new System.Windows.Forms.Padding(0);
+            this.checkAllChat.Name = "checkAllChat";
+            this.checkAllChat.Size = new System.Drawing.Size(127, 17);
+            this.checkAllChat.TabIndex = 15;
+            this.checkAllChat.Text = "Include all other Chat";
+            this.checkAllChat.UseVisualStyleBackColor = true;
             // 
             // groupBox7
             // 
@@ -1315,7 +1327,7 @@
             this.label10.Location = new System.Drawing.Point(0, 0);
             this.label10.Margin = new System.Windows.Forms.Padding(0);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(61, 21);
+            this.label10.Size = new System.Drawing.Size(61, 23);
             this.label10.TabIndex = 0;
             this.label10.Text = "Target Slots";
             this.label10.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -1332,7 +1344,7 @@
             // 
             this.label12.AutoSize = true;
             this.label12.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label12.Location = new System.Drawing.Point(0, 21);
+            this.label12.Location = new System.Drawing.Point(0, 23);
             this.label12.Margin = new System.Windows.Forms.Padding(0);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(61, 21);
@@ -1352,8 +1364,9 @@
             "Agressive Scout",
             "Agressive Medium",
             "Agressive Heavy",
-            "Agressive Sentry"});
-            this.comboDroneMode.Location = new System.Drawing.Point(61, 21);
+            "Agressive Sentry",
+            "AFK Salvage"});
+            this.comboDroneMode.Location = new System.Drawing.Point(61, 23);
             this.comboDroneMode.Margin = new System.Windows.Forms.Padding(0);
             this.comboDroneMode.Name = "comboDroneMode";
             this.comboDroneMode.Size = new System.Drawing.Size(186, 21);
@@ -1362,9 +1375,9 @@
             // checkDronePrivateTargets
             // 
             this.checkDronePrivateTargets.AutoSize = true;
-            this.checkDronePrivateTargets.Location = new System.Drawing.Point(64, 45);
+            this.checkDronePrivateTargets.Location = new System.Drawing.Point(64, 47);
             this.checkDronePrivateTargets.Name = "checkDronePrivateTargets";
-            this.checkDronePrivateTargets.Size = new System.Drawing.Size(77, 15);
+            this.checkDronePrivateTargets.Size = new System.Drawing.Size(77, 14);
             this.checkDronePrivateTargets.TabIndex = 4;
             this.checkDronePrivateTargets.Text = "IPC Targets";
             this.checkDronePrivateTargets.UseVisualStyleBackColor = true;
@@ -1373,23 +1386,24 @@
             // 
             this.checkDroneFocus.AutoSize = true;
             this.checkDroneFocus.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.checkDroneFocus.Location = new System.Drawing.Point(144, 42);
+            this.checkDroneFocus.Location = new System.Drawing.Point(144, 44);
             this.checkDroneFocus.Margin = new System.Windows.Forms.Padding(0);
             this.checkDroneFocus.Name = "checkDroneFocus";
-            this.checkDroneFocus.Size = new System.Drawing.Size(152, 21);
+            this.checkDroneFocus.Size = new System.Drawing.Size(152, 20);
             this.checkDroneFocus.TabIndex = 5;
             this.checkDroneFocus.Text = "Focus";
             this.checkDroneFocus.UseVisualStyleBackColor = true;
             // 
-            // checkStatsOptOut
+            // checkStickyDrones
             // 
-            this.checkStatsOptOut.AutoSize = true;
-            this.checkStatsOptOut.Location = new System.Drawing.Point(76, 0);
-            this.checkStatsOptOut.Name = "checkStatsOptOut";
-            this.checkStatsOptOut.Size = new System.Drawing.Size(154, 17);
-            this.checkStatsOptOut.TabIndex = 9;
-            this.checkStatsOptOut.Text = "Disable statistics collection";
-            this.checkStatsOptOut.UseVisualStyleBackColor = true;
+            this.checkStickyDrones.AutoSize = true;
+            this.checkStickyDrones.Location = new System.Drawing.Point(147, 3);
+            this.checkStickyDrones.Name = "checkStickyDrones";
+            this.checkStickyDrones.Size = new System.Drawing.Size(52, 17);
+            this.checkStickyDrones.TabIndex = 6;
+            this.checkStickyDrones.Text = "Sticky";
+            this.toolTip1.SetToolTip(this.checkStickyDrones, "Leave drones out if no targets are locked instead of recalling them");
+            this.checkStickyDrones.UseVisualStyleBackColor = true;
             // 
             // groupBox8
             // 
@@ -1480,31 +1494,19 @@
             this.labelUploadResult.TabIndex = 1;
             this.labelUploadResult.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // checkStatsOptOut
+            // 
+            this.checkStatsOptOut.AutoSize = true;
+            this.checkStatsOptOut.Location = new System.Drawing.Point(76, 0);
+            this.checkStatsOptOut.Name = "checkStatsOptOut";
+            this.checkStatsOptOut.Size = new System.Drawing.Size(154, 17);
+            this.checkStatsOptOut.TabIndex = 9;
+            this.checkStatsOptOut.Text = "Disable statistics collection";
+            this.checkStatsOptOut.UseVisualStyleBackColor = true;
+            // 
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
-            // 
-            // checkAllChat
-            // 
-            this.checkAllChat.AutoSize = true;
-            this.checkAllChat.Location = new System.Drawing.Point(149, 100);
-            this.checkAllChat.Margin = new System.Windows.Forms.Padding(0);
-            this.checkAllChat.Name = "checkAllChat";
-            this.checkAllChat.Size = new System.Drawing.Size(127, 17);
-            this.checkAllChat.TabIndex = 15;
-            this.checkAllChat.Text = "Include all other Chat";
-            this.checkAllChat.UseVisualStyleBackColor = true;
-            // 
-            // checkStickyDrones
-            // 
-            this.checkStickyDrones.AutoSize = true;
-            this.checkStickyDrones.Location = new System.Drawing.Point(147, 3);
-            this.checkStickyDrones.Name = "checkStickyDrones";
-            this.checkStickyDrones.Size = new System.Drawing.Size(52, 17);
-            this.checkStickyDrones.TabIndex = 6;
-            this.checkStickyDrones.Text = "Sticky";
-            this.toolTip1.SetToolTip(this.checkStickyDrones, "Leave drones out if no targets are locked instead of recalling them");
-            this.checkStickyDrones.UseVisualStyleBackColor = true;
             // 
             // Configuration
             // 
@@ -1571,6 +1573,7 @@
             this.tableLayoutPanel7.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericDroneTargetSlots)).EndInit();
             this.groupBox8.ResumeLayout(false);
+            this.groupBox8.PerformLayout();
             this.tableLayoutPanel8.ResumeLayout(false);
             this.tableLayoutPanel8.PerformLayout();
             this.ResumeLayout(false);

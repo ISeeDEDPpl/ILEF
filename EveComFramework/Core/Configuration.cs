@@ -238,6 +238,9 @@ namespace EveComFramework.Core
                     case SimpleDrone.Mode.AgressiveSentry:
                         comboDroneMode.SelectedItem = "Agressive Sentry";
                         break;
+                    case SimpleDrone.Mode.AFKSalvage:
+                        comboDroneMode.SelectedItem = "AFK Salvage";
+                        break;
                 }
                 comboDroneMode.SelectedIndexChanged += (s, a) =>
                 {
@@ -266,6 +269,9 @@ namespace EveComFramework.Core
                             break;
                         case "Agressive Sentry":
                             DroneConfig.Mode = SimpleDrone.Mode.AgressiveSentry;
+                            break;
+                        case "AFK Salvage":
+                            DroneConfig.Mode = SimpleDrone.Mode.AFKSalvage;
                             break;
                     }
                     DroneConfig.Save();
@@ -313,8 +319,6 @@ namespace EveComFramework.Core
         {
             System.Diagnostics.Process.Start(Diagnostics.Instance.file);
         }
-
-
 
     }
 }

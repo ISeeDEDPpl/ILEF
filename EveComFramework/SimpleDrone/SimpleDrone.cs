@@ -20,7 +20,8 @@ namespace EveComFramework.SimpleDrone
         AgressiveMedium,
         AFKHeavy,
         AgressiveHeavy,
-        AgressiveSentry
+        AgressiveSentry,
+        AFKSalvage
     }
 
     #endregion
@@ -113,7 +114,7 @@ namespace EveComFramework.SimpleDrone
         #region States
 
         bool TryReconnect = true;
-        Entity ActiveTarget;
+        public Entity ActiveTarget;
         Dictionary<Entity, DateTime> TargetCooldown = new Dictionary<Entity, DateTime>();
         bool OutOfTargets = false;
         Dictionary<Drone, DateTime> NextDroneCommand = new Dictionary<Drone, DateTime>();
@@ -268,6 +269,29 @@ namespace EveComFramework.SimpleDrone
                     Console.Log("|oLaunching drones");
                     Deploy.Launch();
                     Deploy.ForEach(a => NextDroneCommand.AddOrUpdate(a, DateTime.Now.AddSeconds(5)));
+                }
+                return false;
+            }
+
+            if (Config.Mode == Mode.AFKSalvage)
+            {
+                int AvailableSlots = Me.MaxActiveDrones - Drone.AllInSpace.Count();
+                List<Drone> Deploy = Drone.AllInBay.Where(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Salvage Drone")).Take(AvailableSlots).ToList();
+                // Launch drones
+                if (Deploy.Any())
+                {
+                    Console.Log("|oLaunching drones");
+                    Deploy.Launch();
+                    Deploy.ForEach(a => NextDroneCommand.AddOrUpdate(a, DateTime.Now.AddSeconds(5)));
+                    return false;
+                }
+
+                List<Drone> Salvage = Drone.AllInSpace.Where(a => !DroneCooldown.Contains(a) && DroneReady(a) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Salvage Drone") && a.State != EntityState.Salvaging).ToList();
+                if (Salvage.Any())
+                {
+                    Console.Log("|oTelling drones to salvage");
+                    Salvage.Salvage();
+                    Salvage.ForEach(a => NextDroneCommand.AddOrUpdate(a, DateTime.Now.AddSeconds(5)));
                 }
                 return false;
             }
