@@ -88,6 +88,7 @@
   <Group ID="704" Class="Other" Group="Mission Mordu Other" />
   <Group ID="705" Class="Cruiser" Group="Mission Minmatar Republic Cruiser" />
   <Group ID="755" Class="BattleCruiser" Group="Asteroid Rogue Group BattleCruiser" />
+  <Group ID="756" Class="BattleShip" Group="Asteroid Rogue Group BattleShip" />
   <Group ID="757" Class="Cruiser" Group="Asteroid Rogue Group Cruiser" />
   <Group ID="758" Class="Destroyer" Group="Asteroid Rogue Group Destroyer" />
   <Group ID="759" Class="Frigate" Group="Asteroid Rogue Group Frigate" />
@@ -106,6 +107,7 @@
   <Group ID="799" Class="Destroyer" Group="Asteroid Guristas Commander Destroyer" />
   <Group ID="800" Class="Frigate" Group="Asteroid Guristas Commander Frigate" />
   <Group ID="801" Class="BattleCruiser" Group="Deadspace Rogue Group BattleCruiser" />
+  <Group ID="802" Class="BattleShip" Group="Deadspace Rogue Group BattleShip" />
   <Group ID="803" Class="Cruiser" Group="Deadspace Rogue Group Cruiser" />
   <Group ID="804" Class="Destroyer" Group="Deadspace Rogue Group Destroyer" />
   <Group ID="805" Class="Frigate" Group="Deadspace Rogue Group Frigate" />

@@ -182,6 +182,18 @@ namespace EveComFramework.Comms
                     });
                     ChatQueue.Enqueue("----------------End List----------------");
                 }
+                if (e.Text.ToLower().StartsWith("listentities"))
+                {
+                    ChatQueue.Enqueue("---------------Entity List---------------");
+                    EVEFrameUtil.Do(() =>
+                    {
+                        foreach (Entity entity in Entity.All.Where(i => i.Distance < 200000 && i.GroupID != Group.Wreck && i.CategoryID != Category.Drone && i.CategoryID != Category.Charge && i.CategoryID != Category.Asteroid))
+                        {
+                            ChatQueue.Enqueue("Name [" + entity.Name + "] Distance [" + Math.Round(entity.Distance/1000,0) + "k] GroupID [" + entity.GroupID + "] TypeID [" + entity.TypeID + "]");
+                        }
+                    });
+                    ChatQueue.Enqueue("----------------End List----------------");
+                }
             }
         }
 
@@ -218,7 +230,7 @@ namespace EveComFramework.Comms
         {
             if (!Session.Safe || (!Session.InSpace && !Session.InStation)) return false;
 
-            if (Config.UseIRC)
+            if (Config.UseIRC && !IRC.IsConnected)
             {
                 try
                 {
@@ -250,6 +262,7 @@ namespace EveComFramework.Comms
             {
                 DislodgeCurState(ConnectIRC);
                 InsertState(Blank, 5000);
+                QueueState(Control);
                 return false;
             }
             IRC.LocalUser.MessageReceived += PMReceived;
@@ -259,6 +272,13 @@ namespace EveComFramework.Comms
 
         bool Control(object[] Params)
         {
+            if (!IRC.IsConnected)
+            {
+                DislodgeCurState(ConnectIRC);
+                InsertState(Blank, 5000);
+                return false;
+            }
+
             if (!Session.Safe || (!Session.InSpace && !Session.InStation)) return false;
 
             if (Session.SolarSystemID != SolarSystem)
@@ -272,7 +292,7 @@ namespace EveComFramework.Comms
                 List<Pilot> newPilots = Local.Pilots.Where(a => !PilotCache.Contains(a)).ToList();
                 foreach (Pilot pilot in newPilots)
                 {
-                    ChatQueue.Enqueue("<Local> New Pilot: " + pilot.Name);
+                    ChatQueue.Enqueue("<Local> New Pilot: [ " + pilot.Name + " ]");
                 }
             }
 

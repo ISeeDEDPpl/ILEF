@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Speech.Synthesis;
 using EveCom;
+using EveComFramework.AutoModule;
 using EveComFramework.Core;
 using EveComFramework.KanedaToolkit;
 using LavishScriptAPI;
@@ -524,35 +525,35 @@ namespace EveComFramework.Security
                     StopUntilManualClearance = true;
                     return;
                 case FleeTrigger.SuspectLocal:
-                    Log.Log("|rSuspect pilot in system");
-                    Comms.ChatQueue.Enqueue("Suspect pilot in system");
+                    Log.Log("|rSuspect pilot in local [ " + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()).Name + "]");
+                    Comms.ChatQueue.Enqueue("Suspect pilot in local [ " + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()).Name + "]");
                     return;
                 case FleeTrigger.SuspectGrid:
                     Log.Log("|rSuspect pilot on grid");
                     Comms.ChatQueue.Enqueue("Suspect pilot on grid");
                     return;
                 case FleeTrigger.CriminalLocal:
-                    Log.Log("|rCriminal pilot in system");
-                    Comms.ChatQueue.Enqueue("Criminal pilot in system");
+                    Log.Log("|rCriminal pilot in local [ " + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()).Name + "]");
+                    Comms.ChatQueue.Enqueue("Criminal pilot in local [ " + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()).Name + "]");
                     return;
                 case FleeTrigger.CriminalGrid:
                     Log.Log("|rCriminal pilot on grid");
                     Comms.ChatQueue.Enqueue("Criminal pilot on grid");
                     return;
                 case FleeTrigger.NegativeStanding:
-                    Log.Log("|r{0} is negative standing", Hostile.Name);
-                    Comms.ChatQueue.Enqueue("<Security> " + Hostile.Name + " is negative standing");
+                    Log.Log("|r [" + Hostile.Name + "] negative standing in [ " + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()).Name + "]");
+                    Comms.ChatQueue.Enqueue("<Security> [ " + Hostile.Name + " ] in [ " + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()).Name + "] is negative standing");
                     return;
                 case FleeTrigger.NeutralStanding:
-                    Log.Log("|r{0} is neutral standing", Hostile.Name);
-                    Comms.ChatQueue.Enqueue("<Security> " + Hostile.Name + " is neutral standing");
+                    Log.Log("|r [" + Hostile.Name + "] neutral standing in [ " + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()).Name + "]", Hostile.Name);
+                    Comms.ChatQueue.Enqueue("<Security> [ " + Hostile.Name + " ] in [ " + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()).Name + "]  is neutral standing");
                     return;
                 case FleeTrigger.Paranoid:
-                    Log.Log("|r{0} is neutral to me", Hostile.Name);
-                    Comms.ChatQueue.Enqueue("<Security> " + Hostile.Name + " is neutral to me");
+                    Log.Log("|r [" + Hostile.Name + "] neutral to me");
+                    Comms.ChatQueue.Enqueue("<Security> [ " + Hostile.Name + " ] in [ " + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()).Name + "]  is neutral to me");
                     return;
                 case FleeTrigger.Targeted:
-                    Log.Log("|r{0} is targeting me", Hostile.Name);
+                    Log.Log("|r [" + Hostile.Name + "] targeting me");
                     Comms.ChatQueue.Enqueue("<Security> " + Hostile.Name + " is targeting me");
                     return;
                 case FleeTrigger.CapacitorLow:
@@ -638,6 +639,7 @@ namespace EveComFramework.Security
         }
 
         bool Decloak;
+        bool NetworkedSensorArray;
 
         bool CheckClear(object[] Params)
         {
@@ -645,6 +647,19 @@ namespace EveComFramework.Security
             FleeTrigger Trigger = (FleeTrigger)Params[0];
             int FleeWait = (Trigger == FleeTrigger.ArmorLow || Trigger == FleeTrigger.CapacitorLow || Trigger == FleeTrigger.ShieldLow || Trigger == FleeTrigger.Forced || Trigger == FleeTrigger.Panic) ? 0 : Config.FleeWait;
             AutoModule.AutoModule.Instance.Decloak = false;
+            AutoModule.AutoModule.Instance.Config.NetworkedSensorArray = false;
+            //If we are not in a POS Shield
+            //if (!Entity.All.Any(a => a.GroupID == Group.ForceField && a.SurfaceDistance < 100000))
+            //{
+                  //We are not yet cloaked
+            //    if (!EveCom.MyShip.ToEntity.Cloaked && //drones are on grid but very far away
+            //    {
+                    //abandon drones here so that we can cloak
+                    //we need to auto-reconnect to the abandoned drones when we think it is safe again
+                    //
+                    // FYI, I think reconnecting to drones (fighters) is currently broken!
+            //    }
+            //}
             if (Trigger == FleeTrigger.CapacitorLow && Trigger == FleeTrigger.ShieldLow) AutoModule.AutoModule.Instance.Decloak = true;
             if (Trigger == FleeTrigger.ArmorLow && MyShip.Modules.Any(a => a.GroupID == Group.ArmorRepairUnit && a.IsOnline)) AutoModule.AutoModule.Instance.Decloak = true;
 
@@ -695,6 +710,8 @@ namespace EveComFramework.Security
             Move.Clear();
 
             Decloak = AutoModule.AutoModule.Instance.Decloak;
+            NetworkedSensorArray = AutoModule.AutoModule.Instance.Config.NetworkedSensorArray;
+            AutoModule.AutoModule.Instance.Config.NetworkedSensorArray = false;
 
             QueueState(WaitFlee);
             QueueState(SignalSuccessful);
@@ -734,11 +751,11 @@ namespace EveComFramework.Security
                         Log.Log("Warning: Bookmark not found!");
                         break;
                     case FleeType.SafeBookmarks:
-                        if (!SafeSpots.Any())
+                        if (SafeSpots != null && !SafeSpots.Any())
                         {
                             SafeSpots = Bookmark.All.Where(a => a.Title.Contains(Config.SafeSubstring) && a.LocationID == Session.SolarSystemID).ToList();
                         }
-                        if (SafeSpots.Any())
+                        if (SafeSpots != null && SafeSpots.Any())
                         {
                             Move.Bookmark(SafeSpots.FirstOrDefault());
                             SafeSpots.Remove(SafeSpots.FirstOrDefault());
@@ -782,6 +799,7 @@ namespace EveComFramework.Security
         {
             _isAlert = false;
             AutoModule.AutoModule.Instance.Decloak = Decloak;
+            AutoModule.AutoModule.Instance.Config.NetworkedSensorArray = NetworkedSensorArray;
             if (ClearAlert != null)
             {
                 Log.Log("|oSending ClearAlert command - resume operations");
@@ -930,13 +948,20 @@ namespace EveComFramework.Security
                 }
             }
 
-            if (Config.Local && LocalCache != LocalChat.Messages.Count)
+            try
             {
-                if (LocalChat.Messages.Last().SenderID > 1)
+                if (Config.Local && LocalChat.Messages != null && LocalCache != LocalChat.Messages.Count)
                 {
-                    SpeechQueue.Enqueue("Local chat");
+                    if (LocalChat.Messages.Last().SenderID > 1)
+                    {
+                        SpeechQueue.Enqueue("Local chat");
+                    }
+                    LocalCache = LocalChat.Messages.Count;
                 }
-                LocalCache = LocalChat.Messages.Count;
+            }
+            catch (Exception)
+            {
+                //Log.Log("Exception [" + ex + "]");
             }
 
             if (Session.InSpace)
