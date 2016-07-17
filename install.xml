@@ -4,6 +4,8 @@
 		<File>
 			<Get>EveComFramework/bin/Debug/EveComFramework.dll</Get>
 			<Put>EveComFramework.dll</Put>
+			<Get>EveComFramework/bin/Debug/EveComFramework.pdb</Get>
+			<Put>EveComFramework.pdb</Put>
 			<Dependencies>
 				<Dependency>
 					<Repo>evecom/EveCom.git</Repo>
