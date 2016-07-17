@@ -176,7 +176,14 @@ namespace EveComFramework.AutoModule
 
         bool Control(object[] Params)
         {
-            if (!Session.InSpace || !Session.Safe || MyShip.ToEntity == null)
+            try
+            {
+                if (!Session.InSpace || !Session.Safe || (Session.InSpace && Session.Safe && MyShip.ToEntity == null))
+                {
+                    return false;
+                }
+            }
+            catch (Exception)
             {
                 return false;
             }
@@ -232,17 +239,44 @@ namespace EveComFramework.AutoModule
 
             if (Config.ShieldBoosters)
             {
-                List<Module> shieldBoosters = MyShip.Modules.Where(a => a.GroupID == Group.ShieldBooster && a.IsOnline).ToList();
-                if (shieldBoosters.Any())
+                try
                 {
-                    if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapShieldBoosters && MyShip.ToEntity.ShieldPct <= Config.MinShieldBoosters)
+                    List<Module> shieldBoosters = MyShip.Modules.Where(a => a.GroupID == Group.ShieldBooster && a.IsOnline).ToList();
+                    if (shieldBoosters.Any())
                     {
-                        shieldBoosters.Where(a => a.AllowsActivate).ForEach(m => m.Activate());
+                        if (shieldBoosters.Any(i => i.AllowsActivate))
+                        {
+                            if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapShieldBoosters && MyShip.ToEntity.ShieldPct <= Config.MinShieldBoosters)
+                            {
+                                IEnumerable<Module> activatableShieldBoosters = shieldBoosters.Where(i => i.AllowsActivate);
+                                foreach (Module activatableShieldBooster in activatableShieldBoosters)
+                                {
+                                    //only run one booster per iteration,
+                                    //this will potentially save on cap in situations where we have multiple boosters but only need one cycle of one booster at the time
+                                    activatableShieldBooster.Activate();
+                                    return false;
+                                }
+                            }
+                        }
+
+                        if (shieldBoosters.Any(i => i.AllowsDeactivate))
+                        {
+                            if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapShieldBoosters && MyShip.ToEntity.ShieldPct <= Config.MinShieldBoosters)
+                            {
+                                IEnumerable<Module> deactivatableShieldBoosters = shieldBoosters.Where(i => i.AllowsDeactivate);
+                                foreach (Module deactivatableShieldBooster in deactivatableShieldBoosters)
+                                {
+                                    //only turn off one booster per iteration, if we had 2 on its because incomming damage was high...
+                                    deactivatableShieldBooster.Deactivate();
+                                    return false;
+                                }
+                            }
+                        }
                     }
-                    if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapShieldBoosters || MyShip.ToEntity.ShieldPct > Config.MaxShieldBoosters)
-                    {
-                        shieldBoosters.Where(a => a.AllowsDeactivate).ForEach(m => m.Deactivate());
-                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.Log("Exception [" + ex + "]");
                 }
             }
 
@@ -252,36 +286,43 @@ namespace EveComFramework.AutoModule
 
             if (Config.ArmorRepairs)
             {
-                List<Module> armorRepairers = MyShip.Modules.Where(a => a.GroupID == Group.ArmorRepairUnit && a.IsOnline).ToList();
-                if (armorRepairers.Any())
+                try
                 {
-                    if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapArmorRepairs || MyShip.ToEntity.ArmorPct > Config.MaxArmorRepairs)
+                    List<Module> armorRepairers = MyShip.Modules.Where(a => a.GroupID == Group.ArmorRepairUnit && a.IsOnline).ToList();
+                    if (armorRepairers.Any())
                     {
-                        foreach (var armorRepairer in armorRepairers.Where(a => a.AllowsDeactivate))
+                        if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapArmorRepairs || MyShip.ToEntity.ArmorPct > Config.MaxArmorRepairs)
                         {
-                            Console.Log("|o[|gArmorRepairer|o] deactivated. ArmorPct [|g" + Math.Round(MyShip.ToEntity.ArmorPct, 1) + "|o] MaxArmorRepairs [|g" + Config.MinArmorRepairs + "|o] C[|g" + Math.Round((MyShip.Capacitor / MyShip.MaxCapacitor * 100),0) + "|o] CapArmorRepairs [|g" + Config.CapArmorRepairs + "|o]");
-                            armorRepairer.Deactivate();
-                        }
-                    }
-                    else if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapArmorRepairs && MyShip.ToEntity.ArmorPct <= Config.MinArmorRepairs)
-                    {
-                        foreach (var armorRepairer in armorRepairers.Where(a => a.AllowsActivate))
-                        {
-                            if (!nextArmorRepAttemptTime.ContainsKey(armorRepairer.ID) || (nextArmorRepAttemptTime.ContainsKey(armorRepairer.ID) && DateTime.UtcNow > nextArmorRepAttemptTime[armorRepairer.ID]))
+                            foreach (var armorRepairer in armorRepairers.Where(a => a.AllowsDeactivate))
                             {
-                                Console.Log("|o[|gArmorRepairer|o] activated. ArmorPct [|g" + Math.Round(MyShip.ToEntity.ArmorPct, 1) + "|o] is less than MinArmorRepairs [|g" + Config.MinArmorRepairs + "|o]");
-                                armorRepairer.Activate();
-                                //
-                                // if a capital rep - add a timestamp for the next armo rep time to try to avoid cycling the armor rep twice during every repair
-                                // it cycles twice because after the 1st cycle completes there is a slight delay in repairing the armor (milliseconds?)
-                                // remember: armor reps repair at the end of the cyctel, where as shields repair at the beginning of the cycle.
-                                //
-                                if (armorRepairer.Volume > 1000) nextArmorRepAttemptTime.AddOrUpdate(armorRepairer.ID, DateTime.UtcNow.AddSeconds(31));
+                                Console.Log("|o[|gArmorRepairer|o] deactivated. ArmorPct [|g" + Math.Round(MyShip.ToEntity.ArmorPct, 1) + "|o] MaxArmorRepairs [|g" + Config.MinArmorRepairs + "|o] C[|g" + Math.Round((MyShip.Capacitor / MyShip.MaxCapacitor * 100), 0) + "|o] CapArmorRepairs [|g" + Config.CapArmorRepairs + "|o]");
+                                armorRepairer.Deactivate();
                             }
+                        }
+                        else if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapArmorRepairs && MyShip.ToEntity.ArmorPct <= Config.MinArmorRepairs)
+                        {
+                            foreach (var armorRepairer in armorRepairers.Where(a => a.AllowsActivate))
+                            {
+                                if (!nextArmorRepAttemptTime.ContainsKey(armorRepairer.ID) || (nextArmorRepAttemptTime.ContainsKey(armorRepairer.ID) && DateTime.UtcNow > nextArmorRepAttemptTime[armorRepairer.ID]))
+                                {
+                                    Console.Log("|o[|gArmorRepairer|o] activated. ArmorPct [|g" + Math.Round(MyShip.ToEntity.ArmorPct, 1) + "|o] is less than MinArmorRepairs [|g" + Config.MinArmorRepairs + "|o]");
+                                    armorRepairer.Activate();
+                                    //
+                                    // if a capital rep - add a timestamp for the next armo rep time to try to avoid cycling the armor rep twice during every repair
+                                    // it cycles twice because after the 1st cycle completes there is a slight delay in repairing the armor (milliseconds?)
+                                    // remember: armor reps repair at the end of the cyctel, where as shields repair at the beginning of the cycle.
+                                    //
+                                    if (armorRepairer.Volume > 1000) nextArmorRepAttemptTime.AddOrUpdate(armorRepairer.ID, DateTime.UtcNow.AddSeconds(31));
+                                }
 
-                            continue;
+                                continue;
+                            }
                         }
                     }
+                }
+                catch (Exception ex)
+                {
+                    Console.Log("Exception [" + ex + "]");
                 }
             }
 

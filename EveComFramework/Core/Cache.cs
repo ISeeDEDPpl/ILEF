@@ -217,9 +217,13 @@ namespace EveComFramework.Core
 
             if (Session.InSpace)
             {
-                ArmorPercent = MyShip.Armor / MyShip.MaxArmor;
-                HullPercent = MyShip.Hull / MyShip.MaxHull;
-                if (Drone.AllInSpace.Any(a => a.ToEntity.ArmorPct < 100 || a.ToEntity.HullPct < 100)) DamagedDrones = true;
+                try
+                {
+                    ArmorPercent = MyShip.Armor / MyShip.MaxArmor;
+                    HullPercent = MyShip.Hull / MyShip.MaxHull;
+                    if (Drone.AllInSpace.Any(a => a.ToEntity.ArmorPct < 100 || a.ToEntity.HullPct < 100)) DamagedDrones = true;
+                }
+                catch (Exception){}
             }
             return false;
         }

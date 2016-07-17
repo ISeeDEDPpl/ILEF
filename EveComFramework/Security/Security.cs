@@ -593,7 +593,15 @@ namespace EveComFramework.Security
 
         bool CheckSafe(object[] Params)
         {
-            if ((!Session.InSpace && !Session.InStation) || !Session.Safe || MyShip.ToEntity == null) return false;
+            try
+            {
+                if ((!Session.InSpace && !Session.InStation) || !Session.Safe || (Session.InSpace && Session.Safe && MyShip.ToEntity == null)) return false;
+            }
+            catch (Exception ex)
+            {
+                Log.Log("Exception [" + ex + "]");
+                return false;
+            }
 
             Entity WarpScrambling = Entity.All.FirstOrDefault(a => a.IsWarpScrambling);
             if (WarpScrambling != null && WarpScrambling.GroupID != Group.EncounterSurveillanceSystem)
@@ -877,6 +885,7 @@ namespace EveComFramework.Security
 
         #region Variables
 
+        public Logger Console = new Logger("SecurityAudio");
         private ChatChannel LocalChat;
         SpeechSynthesizer Speech = new SpeechSynthesizer();
         Queue<string> SpeechQueue = new Queue<string>();
@@ -931,7 +940,16 @@ namespace EveComFramework.Security
                 Core = Security.Instance;
                 Core.Alert += Alert;
             }
-            if ((!Session.InSpace && !Session.InStation) || !Session.Safe) return false;
+
+            try
+            {
+                if ((!Session.InSpace && !Session.InStation) || !Session.Safe) return false;
+            }
+            catch (Exception ex)
+            {
+                Console.Log("Exception [" + ex + "]");
+            }
+
             if (Session.SolarSystemID != SolarSystem)
             {
                 PilotCache = Local.Pilots;
@@ -976,7 +994,7 @@ namespace EveComFramework.Security
                 //Log.Log("Exception [" + ex + "]");
             }
 
-            if (Session.InSpace)
+            if (Session.Safe && Session.InSpace)
             {
                 if (Config.Grid)
                 {
