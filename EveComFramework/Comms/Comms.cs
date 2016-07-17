@@ -70,6 +70,7 @@ namespace EveComFramework.Comms
         /// Config for this module
         /// </summary>
         public CommsSettings Config = new CommsSettings();
+        public Logger Console = new Logger("Comms");
         string LastLocal = "";
         Dictionary<string, string> chatMessages = new Dictionary<string, string>();
         double LastWallet;
@@ -172,13 +173,87 @@ namespace EveComFramework.Comms
                 }
                 if (e.Text.ToLower().StartsWith("listlocal") || e.Text.ToLower().StartsWith("locallist"))
                 {
-                    ChatQueue.Enqueue("---------------Local List---------------");
+                    List<Pilot> tempLocalPilots = new List<Pilot>();
                     EVEFrameUtil.Do(() =>
                     {
-                        foreach (Pilot p in Local.Pilots)
+                        try
                         {
-                            ChatQueue.Enqueue(p.Name + " - http://evewho.com/pilot/" + p.Name.Replace(" ", "%20"));
+                            if (Local.Pilots.Count < 20)
+                            {
+                                ChatQueue.Enqueue("Local has [" + Local.Pilots.Count + "] pilots currently");
+                                tempLocalPilots = Local.Pilots;
+                            }
+                            else
+                            {
+                                ChatQueue.Enqueue("Local has [" + Local.Pilots.Count + "] pilots currently - too many to list details individually");
+                            }
                         }
+                        catch (Exception) { }
+                    });
+
+                    EVEFrameUtil.Do(() =>
+                    {
+                        if (tempLocalPilots != null && tempLocalPilots.Any() && tempLocalPilots.Count < 20)
+                        {
+                            foreach (Pilot tempLocalPilot in tempLocalPilots)
+                            {
+                                //ChatQueue.Enqueue("Name: [" + tempLocalPilot.Name + "]");
+                                if (string.IsNullOrWhiteSpace(tempLocalPilot.CorpName))
+                                {
+                                    ChatQueue.Enqueue("Name: [" + tempLocalPilot.Name + "] CorpName not yet cached");
+                                    try
+                                    {
+                                        Pilot tempPilot = Local.Pilots.FirstOrDefault(i => i.Name == tempLocalPilot.Name);
+                                        if (tempPilot != null)
+                                        {
+                                            ChatQueue.Enqueue("Show info for [" + tempPilot.Name + "]'s corp");
+                                            tempPilot.ShowCorpInfo();
+                                        }
+                                    }
+                                    catch (Exception)
+                                    {
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    int intLocalPilot = 0;
+                    EVEFrameUtil.Do(() =>
+                    {
+                        try
+                        {
+                            if (Local.Pilots.Count < 20)
+                            {
+                                ChatQueue.Enqueue("---Local List (corp members not listed) [" + Local.Pilots.Count + "] total [" + Local.Pilots.Count(i => i.CorpID != Me.CorpID) + "] w/o corp ---");
+                                foreach (Pilot p in Local.Pilots.Where(i => i.CorpID != Me.CorpID))
+                                {
+                                    try
+                                    {
+                                        intLocalPilot++;
+                                        ChatQueue.Enqueue("[" + intLocalPilot + "][" + p.Name + "] Hostile[ " + p.Hostile() + " ] Corp[ " + p.CorpName + " ][" + p.AllianceName + "]" + " - [ http://evewho.com/pilot/" + p.Name.Replace(" ", "%20") + " ]");
+                                    }
+                                    catch (Exception){}
+                                }
+                            }
+                            else
+                            {
+                                ChatQueue.Enqueue("Local has [" + Local.Pilots.Count + "] pilots currently - too many to list details individually");
+                            }
+                        }
+                        catch (Exception){}
+                    });
+
+                    EVEFrameUtil.Do(() =>
+                    {
+                        try
+                        {
+                            foreach (Window w in Window.All.Where(i => i.Name == "infowindow" && i.Ready && (i.Caption.Equals("Corporation: Information") || i.Caption.Equals("Alliance: Information"))))
+                            {
+                                w.Close();
+                            }
+                        }
+                        catch (Exception) { }
                     });
                     ChatQueue.Enqueue("----------------End List----------------");
                 }
@@ -191,6 +266,22 @@ namespace EveComFramework.Comms
                         {
                             ChatQueue.Enqueue("Name [" + entity.Name + "] Distance [" + Math.Round(entity.Distance/1000,0) + "k] GroupID [" + entity.GroupID + "] TypeID [" + entity.TypeID + "]");
                         }
+                    });
+                    ChatQueue.Enqueue("----------------End List----------------");
+                }
+                if (e.Text.ToLower().StartsWith("listwindows") || e.Text.ToLower().StartsWith("windowlist"))
+                {
+                    ChatQueue.Enqueue("---------------Window List---------------");
+                    EVEFrameUtil.Do(() =>
+                    {
+                        try
+                        {
+                            foreach (Window w in EveCom.Window.All)
+                            {
+                                ChatQueue.Enqueue("Name: [" + w.Name + "] Type [" + w.Type + "] Caption [" + w.Caption + "] WindowCaption[" + w.WindowCaption + "]");
+                            }
+                        }
+                        catch (Exception) { }
                     });
                     ChatQueue.Enqueue("----------------End List----------------");
                 }
@@ -241,8 +332,9 @@ namespace EveComFramework.Comms
                     IRC.FloodPreventer = new IrcStandardFloodPreventer(4, 2000);
                     IRC.Connect(new Uri("irc://" + Config.Server), reginfo);
                 }
-                catch
+                catch(Exception ex)
                 {
+                    Console.Log("Exception [" + ex + "]");
                     return false;
                 }
             }
@@ -287,12 +379,37 @@ namespace EveComFramework.Comms
                 SolarSystem = Session.SolarSystemID;
             }
 
-            if (Config.LocalTraffic)
+            List<Pilot> newPilots = Local.Pilots.Where(a => !PilotCache.Contains(a)).ToList();
+            if (newPilots.Any())
             {
-                List<Pilot> newPilots = Local.Pilots.Where(a => !PilotCache.Contains(a)).ToList();
-                foreach (Pilot pilot in newPilots)
+                try
                 {
-                    ChatQueue.Enqueue("<Local> New Pilot: [ " + pilot.Name + " ]");
+                    foreach (Window w in Window.All.Where(i => i.Name.Contains("infowindow") && i.Ready && (i.Caption.Equals("Corporation: Information") || i.Caption.Equals("Alliance: Information"))))
+                    {
+                        w.Close();
+                        return false;
+                    }
+                }
+                catch (Exception) { }
+
+                if (Config.LocalTraffic)
+                {
+                    foreach (Pilot pilot in newPilots)
+                    {
+                        if (pilot.CorpID != 0 && string.IsNullOrWhiteSpace(pilot.CorpName))
+                        {
+                            pilot.ShowCorpInfo();
+                            return false;
+                        }
+
+                        if (pilot.AllianceID != 0 && string.IsNullOrWhiteSpace(pilot.AllianceName))
+                        {
+                            pilot.ShowAllianceInfo();
+                            return false;
+                        }
+
+                        ChatQueue.Enqueue("<Local> New Pilot: [" + pilot.StandingsStatus() + "][ " + pilot.Name + " ][" + pilot.CorpName + "][" + pilot.AllianceName + "][" + pilot.StandingsStatus() + "] - [ http://evewho.com/pilot/" + pilot.Name.Replace(" ", "%20") + " ]");
+                    }
                 }
             }
 
