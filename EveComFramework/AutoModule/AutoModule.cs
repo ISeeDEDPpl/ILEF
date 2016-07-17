@@ -109,13 +109,20 @@ namespace EveComFramework.AutoModule
         /// </summary>
         public bool KeepPropulsionModuleActive = false;
 
-        private bool _insidePosForceField = false;
+        private bool? _insidePosForceField = false;
         bool InsidePosForceField
         {
             get
             {
-                _insidePosForceField = Entity.All.Where(i => i.Distance < 60000).Any(b => b.GroupID == Group.ForceField && b.SurfaceDistance <= 0);
-                return _insidePosForceField;
+                try
+                {
+                    _insidePosForceField = Entity.All.Where(i => i.Distance < 60000).Any(b => b.GroupID == Group.ForceField && b.SurfaceDistance <= 0);
+                    return _insidePosForceField ?? false;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
             }
         }
         #endregion
