@@ -369,7 +369,7 @@ namespace EveComFramework.SimpleDrone
             if (ActiveTarget == null || !ActiveTarget.Exists || ActiveTarget.Exploded || ActiveTarget.Released)
             {
                 List<Entity> AvailableTargets = Entity.All.ToList();
-                if (LastTargetLocation != Vector3.origin) AvailableTargets = AvailableTargets.OrderBy(a => a.DistanceTo(LastTargetLocation)).ToList();
+                if (LastTargetLocation != Vector3.origin && (Config.Mode == Mode.AgressiveHeavy || Config.Mode == Mode.AgressiveMedium || Config.Mode == Mode.AgressiveScout)) AvailableTargets = AvailableTargets.OrderBy(a => a.DistanceTo(LastTargetLocation)).ToList();
                 ActiveTarget = null;
                 ActiveTarget = AvailableTargets.FirstOrDefault(a => PriorityTargets.Contains(a.Name) && !a.Exploded && !a.Released && (a.LockedTarget || a.LockingTarget) && !Triggers.Contains(a.Name) && a.Distance < MaxRange);
 
