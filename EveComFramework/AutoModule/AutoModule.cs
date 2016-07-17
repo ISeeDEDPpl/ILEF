@@ -110,7 +110,7 @@ namespace EveComFramework.AutoModule
         public bool KeepPropulsionModuleActive = false;
 
         private bool? _insidePosForceField = false;
-        bool InsidePosForceField
+        public bool InsidePosForceField
         {
             get
             {
