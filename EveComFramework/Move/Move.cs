@@ -239,6 +239,17 @@ namespace EveComFramework.Move
             {
                 return false;
             }
+            if (Destination.LocationID != Session.SolarSystemID)
+            {
+                if (Route.Path.Last() != Destination.LocationID)
+                {
+                    Log.Log("|oSetting course");
+                    Log.Log(" |-g{0}", Destination.Title);
+                    Destination.SetDestination();
+                }
+                DislodgeCurState(AutoPilot, 2000);
+                return false;
+            }
             if (Destination.Distance < 150000 && Destination.Distance > 0)
             {
                 return true;
@@ -820,8 +831,20 @@ namespace EveComFramework.Move
                         }
                     }
                     if (!Entity.All.Any(a => a.Dockable() && a.Distance < 150000)) DoInstaWarp();
-                    Log.Log("|oJumping through to |-g{0}", Route.NextWaypoint.Name);
-                    Route.NextWaypoint.Jump();
+                    if (Route.NextWaypoint.Distance < 2000 || Route.NextWaypoint.Distance > 150000)
+                    {
+                        Log.Log("|oJumping through to |-g{0}", Route.NextWaypoint.Name);
+                        Route.NextWaypoint.Jump();        
+                    }
+                    else
+                    {
+                        if (MyShip.ToEntity.Mode != EntityMode.Approaching)
+                        {
+                            Log.Log("|oApproaching |-g{0}", Route.NextWaypoint.Name);
+                            Route.NextWaypoint.Approach();
+                        }
+                        return false;
+                    }
                     if (Route.Path != null && Route.Waypoints != null)
                     {
                         if (Route.Path.FirstOrDefault() == Route.Waypoints.FirstOrDefault()) QueueAutoPilotDeactivation = true;
