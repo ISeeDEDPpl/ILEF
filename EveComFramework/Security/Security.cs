@@ -581,7 +581,7 @@ namespace EveComFramework.Security
 
         bool CheckSafe(object[] Params)
         {
-            if ((!Session.InSpace && !Session.InStation) || !Session.Safe) return false;
+            if ((!Session.InSpace && !Session.InStation) || !Session.Safe || MyShip.ToEntity == null) return false;
 
             Entity WarpScrambling = Entity.All.FirstOrDefault(a => a.IsWarpScrambling);
             if (WarpScrambling != null && WarpScrambling.GroupID != Group.EncounterSurveillanceSystem)

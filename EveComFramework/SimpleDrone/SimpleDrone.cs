@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using EveCom;
@@ -292,7 +292,7 @@ namespace EveComFramework.SimpleDrone
         #region States
 
         bool TryReconnect = true;
-        public Entity ActiveTarget;
+        public Entity ActiveTarget { get; set; }
         Dictionary<Entity, DateTime> TargetCooldown = new Dictionary<Entity, DateTime>();
         bool OutOfTargets = false;
         Dictionary<Drone, DateTime> NextDroneCommand = new Dictionary<Drone, DateTime>();
@@ -472,7 +472,6 @@ namespace EveComFramework.SimpleDrone
                 }
             }
             else if (Neuting != null)
-
             {
                 //Console.Log("|Found Neuting entity");
                 if (!Neuting.LockedTarget && !Neuting.LockingTarget && !Neuting.Released && !Neuting.Exploded)
@@ -490,10 +489,10 @@ namespace EveComFramework.SimpleDrone
                     return false;
                 }
             }
-            else if (ActiveTarget != null) //&& Config.PriorityTargets.Contains(ActiveTarget.Name)
+            else if (ActiveTarget != null && ActiveTarget.Exists && !ActiveTarget.Exploded && !ActiveTarget.Released) //&& Config.PriorityTargets.Contains(ActiveTarget.Name)
             {
                 //Console.Log("|oActiveTarget is not null");
-                if (!ActiveTarget.LockedTarget && !ActiveTarget.LockingTarget && !ActiveTarget.Released && !ActiveTarget.Exploded)
+                if (!ActiveTarget.LockedTarget && !ActiveTarget.LockingTarget)
                 {
                     if (Entity.Targeting.Count + Entity.Targets.Count >= Me.TrueMaxTargetLocks)
                     {
@@ -505,11 +504,15 @@ namespace EveComFramework.SimpleDrone
                     }
 
                     if (MyShip.ToEntity.Mode == EntityMode.Warping) return false;
-
-                    Console.Log("|oLocking [|-g" + ActiveTarget.Name +  "|o]");
+                    Console.Log("|oLocking [|-g" + ActiveTarget.Name +  "|o][|g" + Math.Round(ActiveTarget.Distance/1000, 0) + "|ok].");
                     ActiveTarget.LockTarget();
                     return false;
                 }
+            }
+
+            if (ActiveTarget != null && (ActiveTarget.Exploded || ActiveTarget.Released || !ActiveTarget.Exists))
+            {
+                ActiveTarget = null;
             }
 
             if (Rats.LockedAndLockingTargetList.Count < Config.TargetSlots)
