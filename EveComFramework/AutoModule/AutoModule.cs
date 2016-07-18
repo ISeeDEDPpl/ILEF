@@ -182,13 +182,19 @@ namespace EveComFramework.AutoModule
                 {
                     return false;
                 }
+
+                if (!MyShip.ModulesReady)
+                {
+                    MyShip.PrimeModules();
+                    return false;
+                }
+
+                if (UndockWarp.Instance != null && !UndockWarp.Instance.Idle && UndockWarp.Instance.CurState.ToString() != "WaitStation") return false;
             }
             catch (Exception)
             {
                 return false;
             }
-
-            if (UndockWarp.Instance != null && !UndockWarp.Instance.Idle && UndockWarp.Instance.CurState.ToString() != "WaitStation") return false;
 
             #region Cloaks
 
@@ -426,20 +432,27 @@ namespace EveComFramework.AutoModule
 
             if (Config.DroneTrackingModules)
             {
-                List<Module> droneTrackingModules = MyShip.Modules.Where(a => a.GroupID == Group.DroneTrackingModules && a.IsOnline).ToList();
-                if (droneTrackingModules.Any())
+                try
                 {
-                    foreach (Module droneTrackingModule in droneTrackingModules)
+                    List<Module> droneTrackingModules = MyShip.Modules.Where(a => a.GroupID == Group.DroneTrackingModules && a.IsOnline).ToList();
+                    if (droneTrackingModules.Any())
                     {
-                        if (!InsidePosForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapDroneTrackingModules && droneTrackingModule.AllowsActivate)
+                        foreach (Module droneTrackingModule in droneTrackingModules)
                         {
-                            droneTrackingModule.Activate();
-                        }
-                        if (InsidePosForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapDroneTrackingModules && droneTrackingModule.AllowsDeactivate)
-                        {
-                            droneTrackingModule.Deactivate();
+                            if (!InsidePosForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapDroneTrackingModules)
+                            {
+                                if (droneTrackingModule.AllowsActivate) droneTrackingModule.Activate();
+                            }
+                            if (InsidePosForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapDroneTrackingModules)
+                            {
+                                if (droneTrackingModule.AllowsDeactivate) droneTrackingModule.Deactivate();
+                            }
                         }
                     }
+                }
+                catch (Exception ex)
+                {
+                    Console.Log("Exception [" + ex + "]");
                 }
             }
 
