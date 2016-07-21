@@ -151,7 +151,7 @@ namespace EveComFramework.Stats
                     })).Start();
                 }
 
-                List<Entity> ReportStructures = Entity.All.Where(a => (a.CategoryID == Category.Starbase|| a.CategoryID == Category.Structure) && !ReportedStructures.Contains(a.ID) && !CustomsOffices.Contains(a.ID) && !ReportedPOS.Contains(a.ID)).ToList();
+                List<Entity> ReportStructures = Entity.All.Where(a => (a.CategoryID == Category.Starbase|| a.CategoryID == Category.Structure) && !ReportedStructures.Contains(a.ID) && !CustomsOffices.Contains(a.ID)).ToList();
                 if (ReportStructures.Any())
                 {
                     String data = String.Format(@"GUID={0}&solarSystemID={1}", Config.guid, Session.SolarSystemID);
