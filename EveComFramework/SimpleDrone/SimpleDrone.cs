@@ -34,7 +34,9 @@ namespace EveComFramework.SimpleDrone
         public bool PrivateTargets = true;
         public bool SharedTargets = false;
         public bool StayDeployedWithNoTargets = false;
+        public bool TargetCooldownRandomize = false;
         public int TargetSlots = 2;
+        public int TargetCooldown = 2;
 
         public double FighterCriticalHealthLevel = 30;
         public double FighterMaxRange = 800000;
@@ -99,6 +101,12 @@ namespace EveComFramework.SimpleDrone
                     LastTargetLocation = MyShip.ToEntity.Position;
                     TryReconnect = true;
                     QueueState(Control);
+                    if (Config.TargetCooldownRandomize)
+                    {
+                        Random rng = new Random();
+                        WaitFor(rng.Next(2, 10));
+                        Config.TargetCooldown = rng.Next(2, 10);
+                    }
                 }
             }
             else
@@ -406,7 +414,7 @@ namespace EveComFramework.SimpleDrone
             #region LockManagement
 
             TargetCooldown = TargetCooldown.Where(a => a.Value >= DateTime.Now).ToDictionary(a => a.Key, a => a.Value);
-            Rats.LockedAndLockingTargetList.ForEach(a => { TargetCooldown.AddOrUpdate(a, DateTime.Now.AddSeconds(2)); });
+            Rats.LockedAndLockingTargetList.ForEach(a => TargetCooldown.AddOrUpdate(a, DateTime.Now.AddSeconds(Config.TargetCooldown)));
             if (WarpScrambling != null)
             {
                 if (!WarpScrambling.LockedTarget && !WarpScrambling.LockingTarget)
@@ -449,7 +457,7 @@ namespace EveComFramework.SimpleDrone
                 {
                     Console.Log("|oLocking");
                     Console.Log(" |-g{0}", NewTarget.Name);
-                    TargetCooldown.AddOrUpdate(NewTarget, DateTime.Now.AddSeconds(2));
+                    TargetCooldown.AddOrUpdate(NewTarget, DateTime.Now.AddSeconds(Config.TargetCooldown));
                     NewTarget.LockTarget();
                     OutOfTargets = false;
                     return false;

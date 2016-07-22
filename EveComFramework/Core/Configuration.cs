@@ -206,10 +206,14 @@ namespace EveComFramework.Core
 
                 numericDroneTargetSlots.Value = DroneConfig.TargetSlots;
                 numericDroneTargetSlots.ValueChanged += (s, a) => { DroneConfig.TargetSlots = (int)Math.Floor(numericDroneTargetSlots.Value); DroneConfig.Save(); };
+                numericDroneTargetCooldown.Value = DroneConfig.TargetCooldown;
+                numericDroneTargetCooldown.ValueChanged += (s, a) => { DroneConfig.TargetCooldown = (int)Math.Floor(numericDroneTargetCooldown.Value); DroneConfig.Save(); };
                 checkDronePrivateTargets.Checked = DroneConfig.PrivateTargets;
                 checkDronePrivateTargets.CheckedChanged += (s, a) => { DroneConfig.PrivateTargets = checkDronePrivateTargets.Checked; DroneConfig.Save(); };
                 checkDroneFocus.Checked = DroneConfig.SharedTargets;
                 checkDroneFocus.CheckedChanged += (s, a) => { DroneConfig.SharedTargets = checkDroneFocus.Checked; DroneConfig.Save(); };
+                checkDroneTargetCooldownRandomize.Checked = DroneConfig.TargetCooldownRandomize;
+                checkDroneTargetCooldownRandomize.CheckedChanged += (s, a) => { DroneConfig.TargetCooldownRandomize = checkDroneTargetCooldownRandomize.Checked; DroneConfig.Save(); };
                 checkStickyDrones.Checked = DroneConfig.StayDeployedWithNoTargets;
                 checkStickyDrones.CheckedChanged += (s, a) => { DroneConfig.StayDeployedWithNoTargets = checkStickyDrones.Checked; DroneConfig.Save(); };
                 switch (DroneConfig.Mode)
