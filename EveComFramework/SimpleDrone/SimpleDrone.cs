@@ -967,7 +967,7 @@ namespace EveComFramework.SimpleDrone
                     List<Drone> Deploy = Drone.AllInBay.Where(a => !DroneCooldown.Contains(a) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Light Scout Drones")).Take(AvailableSlots).ToList();
                     List<Drone> DeployIgnoreCooldown = Drone.AllInBay.Where(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Light Scout Drones")).Take(AvailableSlots).ToList();
                     // Launch drones
-                    if (Deploy.Any())
+                    if (Deploy.Any() && Rats.LockedAndLockingTargetList.Any())
                     {
                         Console.Log("|oLaunching scout drones");
                         Deploy.Launch();
@@ -1018,7 +1018,7 @@ namespace EveComFramework.SimpleDrone
                 List<Drone> Deploy = Drone.AllInBay.Where(a => !DroneCooldown.Contains(a) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Light Scout Drones")).Take(AvailableSlots).ToList();
                 List<Drone> DeployIgnoreCooldown = Drone.AllInBay.Where(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Light Scout Drones")).Take(AvailableSlots).ToList();
                 // Launch drones
-                if (Deploy.Any())
+                if (Deploy.Any() && Rats.LockedAndLockingTargetList.Any())
                 {
                     Console.Log("|oLaunching scout drones");
                     Deploy.Launch();
@@ -1056,7 +1056,7 @@ namespace EveComFramework.SimpleDrone
                 List<Drone> Deploy = Drone.AllInBay.Where(a => !DroneCooldown.Contains(a) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Medium Scout Drones")).Take(AvailableSlots).ToList();
                 List<Drone> DeployIgnoreCooldown = Drone.AllInBay.Where(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Medium Scout Drones")).Take(AvailableSlots).ToList();
                 // Launch drones
-                if (Deploy.Any())
+                if (Deploy.Any() && Rats.LockedAndLockingTargetList.Any())
                 {
                     Console.Log("|oLaunching medium drones");
                     Deploy.Launch();
@@ -1094,7 +1094,7 @@ namespace EveComFramework.SimpleDrone
                 List<Drone> Deploy = Drone.AllInBay.Where(a => !DroneCooldown.Contains(a) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Heavy Attack Drones")).Take(AvailableSlots).ToList();
                 List<Drone> DeployIgnoreCooldown = Drone.AllInBay.Where(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Heavy Attack Drones")).Take(AvailableSlots).ToList();
                 // Launch drones
-                if (Deploy.Any())
+                if (Deploy.Any() && Rats.LockedAndLockingTargetList.Any())
                 {
                     Console.Log("|oLaunching heavy drones");
                     Deploy.Launch();
@@ -1132,7 +1132,7 @@ namespace EveComFramework.SimpleDrone
                 List<Drone> Deploy = Drone.AllInBay.Where(a => !DroneCooldown.Contains(a) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Sentry Drones")).Take(AvailableSlots).ToList();
                 List<Drone> DeployIgnoreCooldown = Drone.AllInBay.Where(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Sentry Drones")).Take(AvailableSlots).ToList();
                 // Launch drones
-                if (Deploy.Any())
+                if (Deploy.Any() && Rats.LockedAndLockingTargetList.Any())
                 {
                     Console.Log("|oLaunching sentry drones");
                     Deploy.Launch();
@@ -1173,7 +1173,7 @@ namespace EveComFramework.SimpleDrone
                     List<Drone> Deploy = Drone.AllInBay.Where(a => !DroneCooldown.Contains(a) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Sentry Drones")).Take(AvailableSlots).ToList();
                     List<Drone> DeployIgnoreCooldown = Drone.AllInBay.Where(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Sentry Drones")).Take(AvailableSlots).ToList();
                     // Launch drones
-                    if (Deploy.Any())
+                    if (Deploy.Any() && Rats.LockedAndLockingTargetList.Any())
                     {
                         Console.Log("|oLaunching sentry drones");
                         Deploy.Launch();
@@ -1227,7 +1227,7 @@ namespace EveComFramework.SimpleDrone
                 try
                 {
                     IEnumerable<Fighters.Tube> deployFighters = Fighters.Tubes.Where(a => !a.InSpace && a.Fighter.State == Fighters.States.READY).ToList();
-                    if (deployFighters.Any())
+                    if (deployFighters.Any() && Rats.TargetList.Any())
                     {
                         foreach (Fighters.Tube deployfighter in deployFighters)
                         {
