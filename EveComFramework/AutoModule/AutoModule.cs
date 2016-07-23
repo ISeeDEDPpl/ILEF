@@ -130,6 +130,7 @@ namespace EveComFramework.AutoModule
                 }
             }
         }
+
         #endregion
 
         #region Actions
@@ -476,26 +477,31 @@ namespace EveComFramework.AutoModule
             {
                 try
                 {
-                    List<Module> droneTrackingModules = MyShip.Modules.Where(a => a.GroupID == Group.DroneTrackingModules && a.IsOnline).ToList();
+                    List<Module> droneTrackingModules = MyShip.Modules.Where(a => a.GroupID == Group.DroneTrackingModules && a.IsOnline && !a.IsActivating && !a.IsDeactivating).ToList();
                     if (droneTrackingModules.Any())
                     {
                         foreach (Module droneTrackingModule in droneTrackingModules)
                         {
                             if (!InsidePosForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapDroneTrackingModules)
                             {
-                                if (droneTrackingModule.AllowsActivate) droneTrackingModule.Activate();
+                                if (droneTrackingModule.AllowsActivate)
+                                {
+                                    droneTrackingModule.Activate();
+                                    return false;
+                                }
                             }
                             if (InsidePosForceField && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapDroneTrackingModules)
                             {
-                                if (droneTrackingModule.AllowsDeactivate) droneTrackingModule.Deactivate();
+                                if (droneTrackingModule.AllowsDeactivate)
+                                {
+                                    droneTrackingModule.Deactivate();
+                                    return false;
+                                }
                             }
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    Console.Log("Exception [" + ex + "]");
-                }
+                catch (Exception ){} //swallow the exception here: this seems to generate an exception once on every startup
             }
 
             #endregion
