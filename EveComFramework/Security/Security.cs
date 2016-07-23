@@ -553,12 +553,12 @@ namespace EveComFramework.Security
                     Comms.ChatQueue.Enqueue("Criminal pilot on grid");
                     return;
                 case FleeTrigger.NegativeStanding:
-                    Log.Log("|r [" + Hostile.StandingsStatus() + "][ " + Hostile.Name + " ][" + Hostile.CorpName + "][" + Hostile.AllianceName + "][" + Hostile.StandingsStatus() + "] in [ " + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()).Name + "]");
-                    Comms.ChatQueue.Enqueue("<Security> [" + Hostile.StandingsStatus() + "][ " + Hostile.Name + " ][" + Hostile.CorpName + "][" + Hostile.AllianceName + "][" + Hostile.StandingsStatus() + "] in [ " + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()).Name + "]");
+                    Log.Log("|r [|r" + Hostile.StandingsStatus() + "|r][|w" + Hostile.Name + "|r][|w" + Hostile.CorpName + "|r][|w" + Hostile.AllianceName + "|r][|r" + Hostile.StandingsStatus() + "|r] in [|g" + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()).Name + "|r]");
+                    Comms.ChatQueue.Enqueue("<Security> [" + Hostile.StandingsStatus() + "][" + Hostile.Name + "][" + Hostile.CorpName + "][" + Hostile.AllianceName + "][" + Hostile.StandingsStatus() + "] in [" + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()).Name + "]");
                     return;
                 case FleeTrigger.NeutralStanding:
-                    Log.Log("|r [" + Hostile.StandingsStatus() + "][ " + Hostile.Name + " ][" + Hostile.CorpName + "][" + Hostile.AllianceName + "][" + Hostile.StandingsStatus() + "] in [ " + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()).Name + "]");
-                    Comms.ChatQueue.Enqueue("<Security> [" + Hostile.StandingsStatus() + "][ " + Hostile.Name + " ][" + Hostile.CorpName + "][" + Hostile.AllianceName + "][" + Hostile.StandingsStatus() + "] in [ " + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()).Name + "]");
+                    Log.Log("|r [|r" + Hostile.StandingsStatus() + "|r][|w" + Hostile.Name + "|r][|w" + Hostile.CorpName + "|r][|w" + Hostile.AllianceName + "|r][|r" + Hostile.StandingsStatus() + "|r] in [|g" + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()).Name + "|r]");
+                    Comms.ChatQueue.Enqueue("<Security> [" + Hostile.StandingsStatus() + "][" + Hostile.Name + " ][" + Hostile.CorpName + "][" + Hostile.AllianceName + "][" + Hostile.StandingsStatus() + "] in [" + EveComFramework.Data.SolarSystem.All.FirstOrDefault(i => i.ID.ToString() == EveCom.Session.SolarSystemID.ToString()).Name + "]");
                     return;
                 case FleeTrigger.Paranoid:
                     Log.Log("|r [" + Hostile.Name + "] neutral to me");

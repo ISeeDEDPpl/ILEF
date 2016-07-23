@@ -380,7 +380,7 @@ namespace EveComFramework.SimpleDrone
                 {
                     foreach (Fighters.Fighter returningFighterWithAPropMod in returningFightersWithAPropMod)
                     {
-                        Console.Log("|oFighter [" + MaskedId(returningFighterWithAPropMod.ID) + "] is returning: turning on speed mod");
+                        Console.Log("|oFighter [|g" + MaskedId(returningFighterWithAPropMod.ID) + "|o] is returning: turning on speed mod");
                         returningFighterWithAPropMod.Slot2.ActivateOnSelf();
                         NextFighterCommand.AddOrUpdate(returningFighterWithAPropMod, DateTime.Now.AddSeconds(3));
                     }
@@ -408,12 +408,12 @@ namespace EveComFramework.SimpleDrone
                     {
                         if (Entity.Targeting.Any())
                         {
-                            Console.Log("|oUnLocking [" + Rats.LockedTargetList.First().Name + "][" + Math.Round(Rats.LockedTargetList.First().Distance / 1000, 0) + "k] to free up a targeting slot");
+                            Console.Log("|oUnLocking [" + Rats.LockedTargetList.First().Name + "][" + Math.Round(Rats.LockedTargetList.First().Distance / 1000, 0) + "k|o] to free up a targeting slot");
                             Rats.LockedTargetList.First().UnlockTarget();
                         }
                         return false;
                     }
-                    Console.Log("|oLocking HostilePilot [|-g" + HostilePilot.Name + "|o][|g" + Math.Round(HostilePilot.Distance / 1000, 0) + "|o][|g" + MaskedId(HostilePilot.ID) + "|o]");
+                    Console.Log("|oLocking HostilePilot [|-g" + HostilePilot.Name + "|o][|g" + MaskedId(HostilePilot.ID) + "|o][|g" + Math.Round(HostilePilot.Distance / 1000, 0) + "k|o]");
                     HostilePilot.LockTarget();
                     return false;
                 }
@@ -427,12 +427,12 @@ namespace EveComFramework.SimpleDrone
                     {
                         if (Entity.Targeting.Any())
                         {
-                            Console.Log("|oUnLocking [" + Rats.LockedTargetList.First().Name + "][" + Math.Round(Rats.LockedTargetList.First().Distance / 1000, 0) + "k] to free up a targeting slot");
+                            Console.Log("|oUnLocking [" + Rats.LockedTargetList.First().Name + "][" + Math.Round(Rats.LockedTargetList.First().Distance / 1000, 0) + "k|o] to free up a targeting slot");
                             Rats.LockedTargetList.First().UnlockTarget();
                         }
                         return false;
                     }
-                    Console.Log("|oLocking AnchoredBubble [|-g" + AnchoredBubble.Name + "|o][|g" + Math.Round(AnchoredBubble.Distance / 1000, 0) + "|o][|g" + MaskedId(AnchoredBubble.ID) + "|o]");
+                    Console.Log("|oLocking AnchoredBubble [|-g" + AnchoredBubble.Name + "|o][|g" + MaskedId(AnchoredBubble.ID) + "|o][|g" + Math.Round(AnchoredBubble.Distance / 1000, 0) + "k|o]");
                     AnchoredBubble.LockTarget();
                     return false;
                 }
@@ -446,12 +446,12 @@ namespace EveComFramework.SimpleDrone
                     {
                         if (Rats.LockedTargetList.Any())
                         {
-                            Console.Log("|oUnLocking [" + Rats.LockedTargetList.First().Name + "][" + Math.Round(Rats.LockedTargetList.First().Distance / 1000,0) + "k] to free up a targeting slot");
+                            Console.Log("|oUnLocking [" + Rats.LockedTargetList.First().Name + "][" + Math.Round(Rats.LockedTargetList.First().Distance / 1000,0) + "k|o] to free up a targeting slot");
                             Rats.LockedTargetList.First().UnlockTarget();
                         }
                         return false;
                     }
-                    Console.Log("|oLocking WarpScrambling [|-g" + WarpScrambling.Name + "|o][|g" + Math.Round(WarpScrambling.Distance / 1000, 0) + "|o][|g" + MaskedId(WarpScrambling.ID) + "|o]");
+                    Console.Log("|oLocking WarpScrambling [|-g" + WarpScrambling.Name + "|o][|g" + MaskedId(WarpScrambling.ID) + "|o][|g" + Math.Round(WarpScrambling.Distance / 1000, 0) + "k|o]");
                     WarpScrambling.LockTarget();
                     return false;
                 }
@@ -465,12 +465,12 @@ namespace EveComFramework.SimpleDrone
                     {
                         if (Rats.LockedTargetList.Any())
                         {
-                            Console.Log("|oUnLocking [" + Rats.LockedTargetList.First().Name + "][" + Math.Round(Rats.LockedTargetList.First().Distance / 1000, 0) + "k] to free up a targeting slot");
+                            Console.Log("|oUnLocking [" + Rats.LockedTargetList.First().Name + "][" + Math.Round(Rats.LockedTargetList.First().Distance / 1000, 0) + "k|o] to free up a targeting slot");
                             Rats.LockedTargetList.First().UnlockTarget();
                         }
                         return false;
                     }
-                    Console.Log("|oLocking lcoToBlowUp [|-g" + lcoToBlowUp.Name + "|o][|g" + Math.Round(lcoToBlowUp.Distance / 1000, 0) + "|o][|g" + MaskedId(lcoToBlowUp.ID) + "|o]");
+                    Console.Log("|oLocking lcoToBlowUp [|-g" + lcoToBlowUp.Name + "|o][|g" + MaskedId(lcoToBlowUp.ID) + "|o][|g" + Math.Round(lcoToBlowUp.Distance / 1000, 0) + "k|o]");
                     lcoToBlowUp.LockTarget();
                     return false;
                 }
@@ -484,12 +484,12 @@ namespace EveComFramework.SimpleDrone
                     {
                         if (Rats.LockedTargetList.Any())
                         {
-                            Console.Log("|oUnLocking [" + Rats.LockedTargetList.First().Name + "][" + Math.Round(Rats.LockedTargetList.First().Distance / 1000, 0) + "k] to free up a targeting slot");
+                            Console.Log("|oUnLocking [" + Rats.LockedTargetList.First().Name + "][" + Math.Round(Rats.LockedTargetList.First().Distance / 1000, 0) + "k|o] to free up a targeting slot");
                             Rats.LockedTargetList.First().UnlockTarget();
                         }
                         return false;
                     }
-                    Console.Log("|oLocking Neuts [|-g" + Neuting.Name + "|o][|g" + Math.Round(Neuting.Distance / 1000, 0) + "|o][|g" + MaskedId(Neuting.ID) + "|o]");
+                    Console.Log("|oLocking Neuts [|-g" + Neuting.Name + "|o][|g" + MaskedId(Neuting.ID) + "|o][|g" + Math.Round(Neuting.Distance / 1000, 0) + "k|o]");
                     Neuting.LockTarget();
                     return false;
                 }
@@ -503,14 +503,14 @@ namespace EveComFramework.SimpleDrone
                     {
                         if (Entity.Targeting.Any())
                         {
-                            Console.Log("|oUnLocking [" + Rats.LockedTargetList.First().Name + "][" + Math.Round(Rats.LockedTargetList.First().Distance / 1000, 0) + "k] to free up a targeting slot");
+                            Console.Log("|oUnLocking [" + Rats.LockedTargetList.First().Name + "][" + Math.Round(Rats.LockedTargetList.First().Distance / 1000, 0) + "k|o] to free up a targeting slot");
                             Rats.LockedTargetList.First().UnlockTarget();
                         }
                         return false;
                     }
 
                     if (MyShip.ToEntity.Mode == EntityMode.Warping) return false;
-                    Console.Log("|oLocking ActiveTarget [|-g" + ActiveTarget.Name + "|o][|g" + Math.Round(ActiveTarget.Distance / 1000, 0) + "|o][|g" + MaskedId(ActiveTarget.ID) + "|o]");
+                    Console.Log("|oLocking ActiveTarget [|-g" + ActiveTarget.Name + "|o][|g" + MaskedId(ActiveTarget.ID) + "|o][|g" + Math.Round(ActiveTarget.Distance / 1000, 0) + "k|o]");
                     ActiveTarget.LockTarget();
                     return false;
                 }
@@ -528,7 +528,7 @@ namespace EveComFramework.SimpleDrone
                 if (NewTarget == null) NewTarget = Rats.UnlockedTargetList.FirstOrDefault(a => !a.Exploded && !a.Released && !TargetCooldown.ContainsKey(a) && a.Distance < MyShip.MaxTargetRange);
                 if (NewTarget != null && Entity.All.FirstOrDefault(a => a.IsJamming && a.IsTargetingMe) == null)
                 {
-                    Console.Log("|oLocking [|-g" + NewTarget.Name + "|o][|g" + Math.Round(NewTarget.Distance / 1000,0) + "|o][|g" + MaskedId(NewTarget.ID) + "|o]");
+                    Console.Log("|oLocking [|-g" + NewTarget.Name + "|o][|g" + MaskedId(NewTarget.ID) + "|o][|g" + Math.Round(NewTarget.Distance / 1000,0) + "k|o]");
                     TargetCooldown.AddOrUpdate(NewTarget, DateTime.Now.AddSeconds(2));
                     NewTarget.LockTarget();
                     OutOfTargets = false;
@@ -726,7 +726,7 @@ namespace EveComFramework.SimpleDrone
                     {
                         foreach (Fighters.Fighter returningFighterWithAPropMod in returningFightersWithAPropMod)
                         {
-                            Console.Log("|oFighter [" + MaskedId(returningFighterWithAPropMod.ID) + "] is returning: turning on speed mod!");
+                            Console.Log("|oFighter [|g" + MaskedId(returningFighterWithAPropMod.ID) + "|o][|g" + Math.Round(returningFighterWithAPropMod.ToEntity.Distance / 1000,0) + "k|o] is returning: turning on speed mod!");
                             returningFighterWithAPropMod.Slot2.ActivateOnSelf();
                             NextFighterCommand.AddOrUpdate(returningFighterWithAPropMod, DateTime.Now.AddSeconds(3));
                         }
@@ -803,7 +803,7 @@ namespace EveComFramework.SimpleDrone
                 {
                     foreach (Fighters.Fighter damagedFighter in damagedFighters)
                     {
-                        Console.Log("|o Fighter [" + MaskedId(damagedFighter.ID) + "] is Damaged: Recalling");
+                        Console.Log("|o Fighter [|g" + MaskedId(damagedFighter.ID) + "|o][|g" + Math.Round(damagedFighter.ToEntity.Distance / 1000, 0) + "k|o] is Damaged: Recalling");
                         damagedFighter.RecallToTube();
                         NextFighterCommand.AddOrUpdate(damagedFighter, DateTime.Now.AddSeconds(5));
                         return false;
@@ -883,7 +883,7 @@ namespace EveComFramework.SimpleDrone
                             {
                                 foreach (Fighters.Fighter returningFighterWithAPropMod in returningFightersWithAPropMod)
                                 {
-                                    Console.Log("|oFighter [" + MaskedId(returningFighterWithAPropMod.ID) + "] is returning: propmod on");
+                                    Console.Log("|oFighter [|g" + MaskedId(returningFighterWithAPropMod.ID) + "|o] is returning: propmod on");
                                     returningFighterWithAPropMod.Slot2.ActivateOnSelf();
                                     NextFighterCommand.AddOrUpdate(returningFighterWithAPropMod, DateTime.Now.AddSeconds(5));
                                 }
@@ -1163,7 +1163,7 @@ namespace EveComFramework.SimpleDrone
                     if (Config.ReArmFighters)
                     {
                         // Rearm missing fighters
-                        IEnumerable<Fighters.Tube> rearmFightersInTube = Fighters.Tubes.Where(a => a.Fighter != null && !a.InSpace && a.Fighter.State == Fighters.States.READY && a.Fighter.SquadronSize < (int)a.Fighter["fighterSquadronMaxSize"]);
+                        IEnumerable<Fighters.Tube> rearmFightersInTube = Fighters.Tubes.Where(a => a.Fighter != null && !a.InSpace && a.Fighter.State == Fighters.States.READY && a.Fighter.SquadronSize < (int)a.Fighter["fighterSquadronMaxSize"]).ToList();
                         if (rearmFightersInTube.Any())
                         {
                             foreach (Fighters.Tube rearmFighter in rearmFightersInTube)
@@ -1171,7 +1171,7 @@ namespace EveComFramework.SimpleDrone
                                 Item fighterItemToReload = Fighters.Bay.Items.FirstOrDefault(a => a.TypeID == rearmFighter.Fighter.TypeID);
                                 if (fighterItemToReload != null)
                                 {
-                                    Console.Log("Missing Fighters in a squadron: Loading a [|g" + fighterItemToReload.Name + "|o] into the Tube");
+                                    Console.Log("|oMissing Fighters in a squadron: Loading a [|g" + fighterItemToReload.Name + "|o] into the Tube");
                                     rearmFighter.LoadFightersToTube(fighterItemToReload);
                                     return false;
                                 }
@@ -1217,7 +1217,7 @@ namespace EveComFramework.SimpleDrone
                         {
                             foreach (Fighters.Fighter returningFighterWithAPropMod in returningFightersWithAPropMod)
                             {
-                                Console.Log("|oFighter [|g" + MaskedId(returningFighterWithAPropMod.ID) + "|o] is Returning: burning back");
+                                Console.Log("|oFighter [|g" + MaskedId(returningFighterWithAPropMod.ID) + "|o][|g" + Math.Round(returningFighterWithAPropMod.ToEntity.Distance / 1000,0) + "k|o] is Returning: burning back");
                                 returningFighterWithAPropMod.Slot2.ActivateOnSelf();
                                 NextFighterCommand.AddOrUpdate(returningFighterWithAPropMod, DateTime.Now.AddSeconds(5));
                                 return false;
@@ -1240,7 +1240,7 @@ namespace EveComFramework.SimpleDrone
                         {
                             foreach (Fighters.Fighter fighterThatNeedsToActivatPropMod in fightersThatNeedToActivatePropmod)
                             {
-                                Console.Log("|oFighter [|g" + MaskedId(fighterThatNeedsToActivatPropMod.ID) + "|o] burning to [|g" + ActiveTarget.Name + "|o][|g" + Math.Round(fighterThatNeedsToActivatPropMod.ToEntity.DistanceTo(ActiveTarget)/1000,0) + "k|o] DistanceToTravel");
+                                Console.Log("|oFighter [|g" + MaskedId(fighterThatNeedsToActivatPropMod.ID) + "|o] [2]MWD toward[|g" + ActiveTarget.Name + "|o][|g" + MaskedId(ActiveTarget.ID) + "|o][|g" + Math.Round(fighterThatNeedsToActivatPropMod.ToEntity.DistanceTo(ActiveTarget)/1000,0) + "k|o] FighterToTarget");
                                 fighterThatNeedsToActivatPropMod.Slot2.ActivateOnSelf();
                                 NextFighterCommand.AddOrUpdate(fighterThatNeedsToActivatPropMod, DateTime.Now.AddSeconds(3));
                                 return false;
@@ -1259,7 +1259,7 @@ namespace EveComFramework.SimpleDrone
                         {
                             if (_fighterRocketSalvosLeft.ContainsKey(availableFighter.ToEntity.ID) && (_fighterRocketSalvosLeft[availableFighter.ToEntity.ID] <= 0))
                             {
-                                Console.Log("|oFighter [" + MaskedId(availableFighter.ID) + "] Reloading Rockets");
+                                Console.Log("|oFighter [" + MaskedId(availableFighter.ID) + "|o] Reloading Rockets");
                                 availableFighter.RecallToTube();
                                 NextFighterCommand.AddOrUpdate(availableFighter, DateTime.Now.AddSeconds(7));
                                 return false;
@@ -1282,7 +1282,7 @@ namespace EveComFramework.SimpleDrone
                                 Entity rocketTargetEntity = Entity.All.Where(a => a.LockedTarget && !a.Exploded && !a.Released && (FighterMissileTarget(a) || a.GroupID == Group.LargeCollidableStructure || a.GroupID == Group.LargeCollidableObject || a.GroupID == Group.DestructibleSentryGun) && fighterReadyToMissileAttack.ToEntity.DistanceTo(a) < (double)fighterReadyToMissileAttack["fighterAbilityMissilesRange"] - 3000 && (!missileFired.ContainsKey(a.ID) || missileFired[a.ID].AddSeconds((double)fighterReadyToMissileAttack["fighterAbilityAttackMissileDuration"] / 1000 + 1) < DateTime.Now)).OrderBy(a => a == ActiveTarget).ThenByDescending(a => a.DistanceTo(fighterReadyToMissileAttack.ToEntity)).ThenByDescending(a => a.Velocity).ThenBy(a => a.ShieldPct).FirstOrDefault();
                                 if (rocketTargetEntity != null)
                                 {
-                                    Console.Log("|oFighter [|g" + MaskedId(fighterReadyToMissileAttack.ID) + "|o] Rocket [|g " + rocketTargetEntity.Name + " |o]ID[|g" + MaskedId(rocketTargetEntity.ID) + "|o][|g" + Math.Round(rocketTargetEntity.DistanceTo(fighterReadyToMissileAttack.ToEntity) / 1000, 0) + "k]|o DistanceToTravel");
+                                    Console.Log("|oFighter [|g" + MaskedId(fighterReadyToMissileAttack.ID) + "|o] [3]Rocket    [|g" + rocketTargetEntity.Name + "|o][|g" + MaskedId(rocketTargetEntity.ID) + "|o][|g" + Math.Round(rocketTargetEntity.DistanceTo(fighterReadyToMissileAttack.ToEntity) / 1000, 0) + "k|o] FighterToTarget");
                                     fighterReadyToMissileAttack.Slot3.ActivateOnTarget(rocketTargetEntity);
                                     _fighterRocketSalvosLeft.AddOrUpdate(fighterReadyToMissileAttack.ID, _fighterRocketSalvosLeft[fighterReadyToMissileAttack.ID] - 1);
                                     fightersReadyToMissileAttack.ForEach(a => NextFighterCommand.AddOrUpdate(a, DateTime.Now.AddMilliseconds(800)));
@@ -1305,7 +1305,7 @@ namespace EveComFramework.SimpleDrone
                         {
                             foreach (Fighters.Fighter fighterThatNeedsAnAttackTarget in fightersThatNeedAnAttackTarget)
                             {
-                                Console.Log("|oFighter [|g" + MaskedId(fighterThatNeedsAnAttackTarget.ID) + "|o] Attacking [|g" + ActiveTarget.Name + "|o]ID[|g" + MaskedId(ActiveTarget.ID) + "|o][|g" + Math.Round(fighterThatNeedsAnAttackTarget.ToEntity.DistanceTo(ActiveTarget) / 1000, 0) + "k]|o DistanceToTravel");
+                                Console.Log("|oFighter [|g" + MaskedId(fighterThatNeedsAnAttackTarget.ID) + "|o] [1]Attacking [|g" + ActiveTarget.Name + "|o][|g" + MaskedId(ActiveTarget.ID) + "|o][|g" + Math.Round(fighterThatNeedsAnAttackTarget.ToEntity.DistanceTo(ActiveTarget) / 1000, 0) + "k|o] FighterToTarget"); //
                                 fighterThatNeedsAnAttackTarget.Slot1.ActivateOnTarget(ActiveTarget);
                                 fightersThatNeedAnAttackTarget.ForEach(a => NextFighterCommand.AddOrUpdate(a, DateTime.Now.AddMilliseconds(800)));
                                 NextFighterCommand.AddOrUpdate(fighterThatNeedsAnAttackTarget, DateTime.Now.AddSeconds(4));
@@ -1357,7 +1357,7 @@ namespace EveComFramework.SimpleDrone
                 if (numofCharacters >= 5)
                 {
                     string maskedID = _unmaskedID.Substring(numofCharacters - 2);
-                    maskedID = "ID#" + maskedID;
+                    maskedID = "|oID#|g" + maskedID;
                     return maskedID;
                 }
 
