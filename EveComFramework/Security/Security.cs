@@ -139,6 +139,7 @@ namespace EveComFramework.Security
 
         SecurityAudio SecurityAudio = SecurityAudio.Instance;
         List<Bookmark> SafeSpots;
+        DateTime _evecomSessionIsReady = DateTime.MinValue;
         /// <summary>
         /// Configuration for this class
         /// </summary>
@@ -215,6 +216,7 @@ namespace EveComFramework.Security
                     SecurityAudio.Enabled(true);
                     LavishScript.Commands.AddCommand("Panic", LSPanic);
                     LavishScript.Commands.AddCommand("ClearPanic", LSClearPanic);
+                    QueueState(WaitForEve, 2000);
                     QueueState(CheckSafe);
                 }
             }
@@ -469,6 +471,43 @@ namespace EveComFramework.Security
         #endregion
 
         #region States
+
+        bool WaitForEve(object[] Params)
+        {
+            try
+            {
+                if (Login.AtLogin || CharSel.AtCharSel)
+                {
+                    //Log.Log("Waiting for Login to complete");
+                    return false;
+                }
+
+                if (!Session.Safe)
+                {
+                    Log.Log("Waiting for Session to be safe");
+                    return false;
+                }
+
+                if (Session.Safe && (Session.InSpace || Session.InStation) && _evecomSessionIsReady.AddSeconds(30) < DateTime.Now)
+                {
+                    _evecomSessionIsReady = DateTime.Now;
+                    //Log.Log("We are InSpace [" + Session.InSpace + "] InStation [" + Session.InStation + "] waiting a few sec");
+                    return false;
+                }
+
+                if (_evecomSessionIsReady.AddSeconds(3) > DateTime.Now)
+                {
+                    return false;
+                }
+
+                //Log.Log("starting...");
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
 
         bool RecallDrones(object[] Params)
         {

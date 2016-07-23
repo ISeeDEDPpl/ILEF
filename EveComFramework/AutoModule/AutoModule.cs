@@ -6,7 +6,6 @@ using EveCom;
 using EveComFramework.Core;
 using EveComFramework.KanedaToolkit;
 using EveComFramework.Move;
-using EveComFramework.Targets;
 
 namespace EveComFramework.AutoModule
 {
@@ -84,7 +83,11 @@ namespace EveComFramework.AutoModule
         private AutoModule()
         {
             DefaultFrequency = 100;
-            if (Config.Enabled) QueueState(Control);
+            if (Config.Enabled)
+            {
+                QueueState(WaitForEve, 2000);
+                QueueState(Control);
+            }
         }
 
         #endregion
@@ -93,6 +96,8 @@ namespace EveComFramework.AutoModule
 
         public Targets.Targets Rats = new Targets.Targets();
         public Logger Console = new Logger("AutoModule");
+        DateTime _evecomSessionIsReady = DateTime.MinValue;
+        private readonly Dictionary<string, DateTime> nextArmorRepAttemptTime = new Dictionary<string, DateTime>();
 
         /// <summary>
         /// Configuration for this module
@@ -136,6 +141,7 @@ namespace EveComFramework.AutoModule
         {
             if (Idle)
             {
+                QueueState(WaitForEve, 10000);
                 QueueState(Control);
             }
 
@@ -159,6 +165,7 @@ namespace EveComFramework.AutoModule
             {
                 if (Idle)
                 {
+                    QueueState(WaitForEve, 2000);
                     QueueState(Control);
                 }
             }
@@ -172,7 +179,42 @@ namespace EveComFramework.AutoModule
 
         #region States
 
-        private readonly Dictionary<string, DateTime> nextArmorRepAttemptTime = new Dictionary<string, DateTime>();
+        bool WaitForEve(object[] Params)
+        {
+            try
+            {
+                if (Login.AtLogin || CharSel.AtCharSel)
+                {
+                    //Log.Log("Waiting for Login to complete");
+                    return false;
+                }
+
+                if (!Session.Safe)
+                {
+                    Console.Log("Waiting for Session to be safe");
+                    return false;
+                }
+
+                if (Session.Safe && (Session.InSpace || Session.InStation) && _evecomSessionIsReady.AddSeconds(30) < DateTime.Now)
+                {
+                    _evecomSessionIsReady = DateTime.Now;
+                    //Console.Log("We are InSpace [" + Session.InSpace + "] InStation [" + Session.InStation + "] waiting a few sec");
+                    return false;
+                }
+
+                if (_evecomSessionIsReady.AddSeconds(3) > DateTime.Now)
+                {
+                    return false;
+                }
+
+                //Console.Log("starting...");
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
 
         bool Control(object[] Params)
         {

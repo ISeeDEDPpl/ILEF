@@ -74,6 +74,7 @@ namespace EveComFramework.SimpleDrone
 
         #region Variables
 
+        private DateTime _evecomSessionIsReady = DateTime.MinValue;
         public Logger Console = new Logger("SimpleDrone");
         public SimpleDroneSettings Config = new SimpleDroneSettings();
         public Targets.Targets Rats = new Targets.Targets();
@@ -275,6 +276,7 @@ namespace EveComFramework.SimpleDrone
                 {
                     LastTargetLocation = MyShip.ToEntity.Position;
                     TryReconnect = true;
+                    QueueState(WaitForEve, 2000);
                     QueueState(Control);
                 }
             }
@@ -298,6 +300,43 @@ namespace EveComFramework.SimpleDrone
         Dictionary<Drone, DateTime> NextDroneCommand = new Dictionary<Drone, DateTime>();
         public Dictionary<Fighters.Fighter, DateTime> NextFighterCommand = new Dictionary<Fighters.Fighter, DateTime>();
         Dictionary<long, Int64> _fighterRocketSalvosLeft = new Dictionary<long, Int64>();
+
+        bool WaitForEve(object[] Params)
+        {
+            try
+            {
+                if (Login.AtLogin || CharSel.AtCharSel)
+                {
+                    Console.Log("Waiting for Login to complete");
+                    return false;
+                }
+
+                if (!Session.Safe)
+                {
+                    Console.Log("Waiting for Session to be safe");
+                    return false;
+                }
+
+                if (Session.Safe && (Session.InSpace || Session.InStation) && _evecomSessionIsReady.AddSeconds(30) < DateTime.Now)
+                {
+                    _evecomSessionIsReady = DateTime.Now;
+                    //Console.Log("We are InSpace [" + Session.InSpace + "] InStation [" + Session.InStation + "] waiting a few sec");
+                    return false;
+                }
+
+                if (_evecomSessionIsReady.AddSeconds(3) > DateTime.Now)
+                {
+                    return false;
+                }
+
+                //Console.Log("starting...");
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
 
         bool DroneReady(Drone drone)
         {
