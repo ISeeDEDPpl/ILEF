@@ -781,7 +781,7 @@ namespace EveComFramework.SimpleDrone
                 // Launch drones
                 if (Deploy.Any())
                 {
-                    Console.Log("|oLaunching drones");
+                    Console.Log("|oLaunching heavy drones.");
                     Deploy.Launch();
                     Deploy.ForEach(a => NextDroneCommand.AddOrUpdate(a, DateTime.Now.AddSeconds(5)));
                 }
@@ -795,7 +795,7 @@ namespace EveComFramework.SimpleDrone
                 // Launch drones
                 if (Deploy.Any())
                 {
-                    Console.Log("|oLaunching drones");
+                    Console.Log("|oLaunching salvage drones");
                     Deploy.Launch();
                     Deploy.ForEach(a => NextDroneCommand.AddOrUpdate(a, DateTime.Now.AddSeconds(5)));
                     return false;
