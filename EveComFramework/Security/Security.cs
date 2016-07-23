@@ -597,11 +597,7 @@ namespace EveComFramework.Security
             {
                 if ((!Session.InSpace && !Session.InStation) || !Session.Safe || (Session.InSpace && Session.Safe && MyShip.ToEntity == null)) return false;
             }
-            catch (Exception ex)
-            {
-                Log.Log("Exception [" + ex + "]");
-                return false;
-            }
+            catch (Exception){return false;}
 
             Entity WarpScrambling = Entity.All.FirstOrDefault(a => a.IsWarpScrambling);
             if (WarpScrambling != null && WarpScrambling.GroupID != Group.EncounterSurveillanceSystem)
