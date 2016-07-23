@@ -6,6 +6,7 @@ using EveComFramework.Core;
 using EveCom;
 using IrcDotNet;
 using EveComFramework.KanedaToolkit;
+using LavishScriptAPI;
 
 namespace EveComFramework.Comms
 {
@@ -19,7 +20,9 @@ namespace EveComFramework.Comms
         public bool UseIRC = false;
         public string Server = "irc1.lavishsoft.com";
         public int Port = 6667;
-        public string SendTo;
+        public string SendTo1;
+        public string SendTo2;
+        public string SendTo3;
         public bool Local = true;
         public bool NPC = false;
         public bool AllChat = false;
@@ -79,7 +82,7 @@ namespace EveComFramework.Comms
         public Queue<string> ChatQueue = new Queue<string>();
         public Queue<string> LocalQueue = new Queue<string>();
 
-        IrcClient IRC = new IrcClient();
+        public IrcClient IRC = new IrcClient();
 
         Targets.Targets NonFleetPlayers = new Targets.Targets();
         List<Entity> NonFleetMemberOnGrid = new List<Entity>();
@@ -127,7 +130,7 @@ namespace EveComFramework.Comms
 
         void PMReceived(object sender, IrcMessageEventArgs e)
         {
-            if (e.Source.Name == Config.SendTo)
+            if (e.Source.Name == Config.SendTo1 || e.Source.Name == Config.SendTo2 || e.Source.Name == Config.SendTo3)
             {
                 if (e.Text.ToLower().StartsWith("?") || e.Text.ToLower().StartsWith("help"))
                 {
@@ -353,12 +356,24 @@ namespace EveComFramework.Comms
             if (!IRC.IsConnected)
             {
                 DislodgeCurState(ConnectIRC);
-                InsertState(Blank, 5000);
+                InsertState(Blank, 10000);
                 QueueState(Control);
                 return false;
             }
             IRC.LocalUser.MessageReceived += PMReceived;
-            IRC.LocalUser.SendMessage(Config.SendTo, "Connected - type ? or help for instructions");
+            if (!string.IsNullOrWhiteSpace(Config.SendTo1))
+            {
+                IRC.LocalUser.SendMessage(Config.SendTo1, "Connected - type ? or help for instructions");
+            }
+            if (!string.IsNullOrWhiteSpace(Config.SendTo2))
+            {
+                IRC.LocalUser.SendMessage(Config.SendTo2, "Connected - type ? or help for instructions");
+            }
+            if (!string.IsNullOrWhiteSpace(Config.SendTo3))
+            {
+                IRC.LocalUser.SendMessage(Config.SendTo3, "Connected - type ? or help for instructions");
+            }
+
             return true;
         }
 
@@ -367,7 +382,7 @@ namespace EveComFramework.Comms
             if (!IRC.IsConnected)
             {
                 DislodgeCurState(ConnectIRC);
-                InsertState(Blank, 5000);
+                InsertState(Blank, 10000);
                 return false;
             }
 
@@ -497,6 +512,7 @@ namespace EveComFramework.Comms
                     ChatQueue.Enqueue("<Security> Non fleet member on grid: " + AddNonFleet.Name + " - http://evewho.com/pilot/" + AddNonFleet.Name.Replace(" ", "%20") + " (" + AddNonFleet.Type + ")");
                     NonFleetMemberOnGrid.Add(AddNonFleet);
                 }
+
                 NonFleetMemberOnGrid = NonFleetPlayers.TargetList.Where(a => NonFleetMemberOnGrid.Contains(a)).ToList();
             }
 
@@ -504,7 +520,20 @@ namespace EveComFramework.Comms
             {
                 if (ChatQueue.Any())
                 {
-                    IRC.LocalUser.SendMessage(Config.SendTo, ChatQueue.Dequeue());
+                    if (!string.IsNullOrWhiteSpace(Config.SendTo1))
+                    {
+                        IRC.LocalUser.SendMessage(Config.SendTo1, ChatQueue.Dequeue());
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(Config.SendTo2))
+                    {
+                        IRC.LocalUser.SendMessage(Config.SendTo2, ChatQueue.Dequeue());
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(Config.SendTo3))
+                    {
+                        IRC.LocalUser.SendMessage(Config.SendTo3, ChatQueue.Dequeue());
+                    }
                 }
             }
 
