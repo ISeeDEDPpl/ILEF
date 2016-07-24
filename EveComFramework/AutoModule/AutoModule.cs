@@ -98,6 +98,7 @@ namespace EveComFramework.AutoModule
         public Logger Console = new Logger("AutoModule");
         DateTime _evecomSessionIsReady = DateTime.MinValue;
         private readonly Dictionary<string, DateTime> nextArmorRepAttemptTime = new Dictionary<string, DateTime>();
+        bool NetworkedSensorArray;
 
         /// <summary>
         /// Configuration for this module
@@ -174,6 +175,23 @@ namespace EveComFramework.AutoModule
             {
                 Clear();
             }
+        }
+
+        public void PrepareToDock()
+        {
+            //
+            // eventually seige / bastion / triage all belong here
+            //
+            NetworkedSensorArray = Config.NetworkedSensorArray;
+            Config.NetworkedSensorArray = false;
+        }
+
+        public void PrepareToUnDock()
+        {
+            //
+            // eventually seige / bastion / triage all belong here
+            //
+            Config.NetworkedSensorArray = NetworkedSensorArray;
         }
 
         #endregion
