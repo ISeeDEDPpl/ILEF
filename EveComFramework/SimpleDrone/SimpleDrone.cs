@@ -702,7 +702,7 @@ namespace EveComFramework.SimpleDrone
 
         bool Control(object[] Params)
         {
-            if (!Session.InSpace)
+            if (!Session.InSpace || MyShip.ToEntity.Velocity.Magnitude > 8000)
             {
                 return false;
             }
@@ -1227,18 +1227,17 @@ namespace EveComFramework.SimpleDrone
                 try
                 {
                     IEnumerable<Fighters.Tube> deployFighters = Fighters.Tubes.Where(a => !a.InSpace && a.Fighter.State == Fighters.States.READY).ToList();
-                    if (deployFighters.Any() && Rats.TargetList.Any())
+                    if (deployFighters.Any() && Rats.LockedAndLockingTargetList.Any())
                     {
-                        foreach (Fighters.Tube deployfighter in deployFighters)
+                        foreach (Fighters.Tube deployfighter in deployFighters.Where(i => DateTime.Now > NextFighterCommand[i.Fighter]))
                         {
                             //Console.Log("Updating _fighterRocketSalvosLeft list for deployFighter ID [" + deployfighter.Fighter.ID + "] to have 12 rockets");
                             _fighterRocketSalvosLeft.AddOrUpdate(deployfighter.Fighter.ID, 12);
                             NextFighterCommand.AddOrUpdate(deployfighter.Fighter, DateTime.Now.AddSeconds(3));
+                            Console.Log("Launching Fighter [" + MaskedId(deployfighter.Fighter.ID) + "]");
+                            deployfighter.Launch();
+                            return false;
                         }
-
-                        Console.Log("Launching Fighters");
-                        Fighters.LaunchAllFighters();
-                        return false;
                     }
                 }
                 catch (Exception ex)
