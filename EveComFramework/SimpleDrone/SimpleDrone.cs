@@ -369,6 +369,11 @@ namespace EveComFramework.SimpleDrone
             return (Data.NPCClasses.All.Any(a => a.Key == target.GroupID && (a.Value == "Capital" || a.Value == "Destroyer" || a.Value == "BattleCruiser" || a.Value == "BattleShip")));
         }
 
+        bool SmallFighterMissileTarget(Entity target)
+        {
+            return (Data.NPCClasses.All.Any(a => a.Key == target.GroupID && (a.Value == "Destroyer" || a.Value == "BattleCruiser")));
+        }
+
         bool SmallTarget(Entity target)
         {
             if (Data.NPCClasses.All.Any(a => a.Key == target.GroupID && (a.Value == "Frigate" || a.Value == "Destroyer")))
@@ -1333,7 +1338,7 @@ namespace EveComFramework.SimpleDrone
                         {
                             foreach (Fighters.Fighter fighterReadyToMissileAttack in fightersReadyToMissileAttack)
                             {
-                                Entity rocketTargetEntity = Entity.All.Where(a => a.LockedTarget && !a.Exploded && !a.Released && (FighterMissileTarget(a) || a.GroupID == Group.LargeCollidableStructure || a.GroupID == Group.LargeCollidableObject || a.GroupID == Group.DestructibleSentryGun) && fighterReadyToMissileAttack.ToEntity.DistanceTo(a) < (double)fighterReadyToMissileAttack["fighterAbilityMissilesRange"] - 3000 && (!missileFired.ContainsKey(a.ID) || missileFired[a.ID].AddSeconds((double)fighterReadyToMissileAttack["fighterAbilityAttackMissileDuration"] / 1000 + 1) < DateTime.Now)).OrderBy(a => a == ActiveTarget).ThenByDescending(a => a.DistanceTo(fighterReadyToMissileAttack.ToEntity)).ThenByDescending(a => a.Velocity).ThenBy(a => a.ShieldPct).FirstOrDefault();
+                                Entity rocketTargetEntity = Entity.All.Where(a => a.LockedTarget && !a.Exploded && !a.Released && (FighterMissileTarget(a) || a.GroupID == Group.LargeCollidableStructure || a.GroupID == Group.LargeCollidableObject || a.GroupID == Group.DestructibleSentryGun) && fighterReadyToMissileAttack.ToEntity.DistanceTo(a) < (double)fighterReadyToMissileAttack["fighterAbilityMissilesRange"] - 3000 && (!missileFired.ContainsKey(a.ID) || missileFired[a.ID].AddSeconds((double)fighterReadyToMissileAttack["fighterAbilityAttackMissileDuration"] / 1000 + 1) < DateTime.Now)).OrderByDescending(a => SmallFighterMissileTarget(a)).ThenByDescending(a => a == ActiveTarget).FirstOrDefault();
                                 if (rocketTargetEntity != null)
                                 {
                                     Console.Log("|oFighter [|g" + MaskedId(fighterReadyToMissileAttack.ID) + "|o] [3]Rocket    [|g" + rocketTargetEntity.Name + "|o][|g" + MaskedId(rocketTargetEntity.ID) + "|o][|g" + Math.Round(rocketTargetEntity.DistanceTo(fighterReadyToMissileAttack.ToEntity) / 1000, 0) + "k|o] FighterToTarget");
