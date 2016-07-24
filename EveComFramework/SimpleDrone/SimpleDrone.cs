@@ -1229,7 +1229,7 @@ namespace EveComFramework.SimpleDrone
                     IEnumerable<Fighters.Tube> deployFighters = Fighters.Tubes.Where(a => !a.InSpace && a.Fighter.State == Fighters.States.READY).ToList();
                     if (deployFighters.Any() && Rats.LockedAndLockingTargetList.Any())
                     {
-                        foreach (Fighters.Tube deployfighter in deployFighters.Where(i => DateTime.Now > NextFighterCommand[i.Fighter]))
+                        foreach (Fighters.Tube deployfighter in deployFighters.Where(i => (NextFighterCommand.ContainsKey(i.Fighter) && DateTime.Now > NextFighterCommand[i.Fighter]) || !NextFighterCommand.ContainsKey(i.Fighter)))
                         {
                             //Console.Log("Updating _fighterRocketSalvosLeft list for deployFighter ID [" + deployfighter.Fighter.ID + "] to have 12 rockets");
                             _fighterRocketSalvosLeft.AddOrUpdate(deployfighter.Fighter.ID, 12);
