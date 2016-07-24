@@ -864,8 +864,12 @@ namespace EveComFramework.SimpleDrone
             if (!ChooseActiveTarget()) return false;
             #endregion
 
-            // Flag offgridFighters
-            offgridFighters.AddRange(Fighters.Tubes.Where(a => a.InSpace && a.Fighter.ToEntity == null && !offgridFighters.Contains(a.Fighter.ID)).Select(a => a.Fighter.ID));
+            try
+            {
+                // Flag offgridFighters
+                offgridFighters.AddRange(Fighters.Tubes.Where(a => a.InSpace && a.Fighter.ToEntity == null && !offgridFighters.Contains(a.Fighter.ID)).Select(a => a.Fighter.ID));
+            }
+            catch (Exception){}
 
             // Remove offgridFighters flagging if fighters are on grid and state is != returning
             Fighters.Tubes.Where(a => a.InSpace && a.Fighter.ToEntity != null && a.Fighter.State != Fighters.States.RECALLING && offgridFighters.Contains(a.Fighter.ID)).Select(a => a.Fighter.ID).ForEach(m => offgridFighters.Remove(m));
@@ -1257,7 +1261,7 @@ namespace EveComFramework.SimpleDrone
                             {
                                 Console.Log("|oFighter [|g" + MaskedId(returningFighterWithAPropMod.ID) + "|o][|g" + Math.Round(returningFighterWithAPropMod.ToEntity.Distance / 1000,0) + "k|o] is Returning: burning back");
                                 returningFighterWithAPropMod.Slot2.ActivateOnSelf();
-                                NextFighterCommand.AddOrUpdate(returningFighterWithAPropMod, DateTime.Now.AddSeconds(5));
+                                NextFighterCommand.AddOrUpdate(returningFighterWithAPropMod, DateTime.Now.AddSeconds(10));
                                 return false;
                             }
                         }
