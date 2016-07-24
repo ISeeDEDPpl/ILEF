@@ -44,6 +44,9 @@ namespace EveComFramework.SimpleDrone
 
     #endregion
 
+    /// <summary>
+    /// SimpleDrone Class - Drone and Fighter Targeting and Damage Application
+    /// </summary>
     public class SimpleDrone : State
     {
         #region Instantiation
@@ -85,6 +88,9 @@ namespace EveComFramework.SimpleDrone
         private readonly Dictionary<long, DateTime> missileFired = new Dictionary<long, DateTime>();
         private readonly List<long> offgridFighters = new List<long>();
         private IEnumerable<Fighters.Fighter> _availableFighters;
+        /// <summary>
+        /// AvailableFighters - Fighters on Grid that are ready for orders and not already being recalled
+        /// </summary>
         public IEnumerable<Fighters.Fighter> AvailableFighters
         {
             get
@@ -156,7 +162,13 @@ namespace EveComFramework.SimpleDrone
             }
         }
 
+        /// <summary>
+        /// PriorityTargets - Targets that should be handles before others: by default there are no priority targets they are added manually using the GUI
+        /// </summary>
         public List<string> PriorityTargets = new List<string>();
+        /// <summary>
+        /// Triggers - NPCs that cause other spawns and thus should be killed last: by default there are no triggers they are added manually using the GUI
+        /// </summary>
         public List<string> Triggers = new List<string>();
 
 
