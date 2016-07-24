@@ -313,13 +313,14 @@ namespace EveComFramework.AutoModule
                     {
                         if (shieldBoosters.Any(i => i.AllowsActivate))
                         {
-                            if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapShieldBoosters && MyShip.ToEntity.ShieldPct <= Config.MinShieldBoosters)
+                            if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapShieldBoosters && MyShip.ToEntity.ShieldPct < Config.MinShieldBoosters)
                             {
                                 IEnumerable<Module> activatableShieldBoosters = shieldBoosters.Where(i => i.AllowsActivate);
                                 foreach (Module activatableShieldBooster in activatableShieldBoosters)
                                 {
                                     //only run one booster per iteration,
                                     //this will potentially save on cap in situations where we have multiple boosters but only need one cycle of one booster at the time
+                                    Console.Log("|o[|gShieldRepairer|o] activated. ShieldPct [|g" + Math.Round(MyShip.ToEntity.ShieldPct, 1) + "|o] MinShieldRepairs [|g" + Config.MinShieldBoosters + "|o] C[|g" + Math.Round((MyShip.Capacitor / MyShip.MaxCapacitor * 100), 0) + "|o] CapShieldRepairs [|g" + Config.CapShieldBoosters + "|o]");
                                     activatableShieldBooster.Activate();
                                     return false;
                                 }
@@ -328,12 +329,13 @@ namespace EveComFramework.AutoModule
 
                         if (shieldBoosters.Any(i => i.AllowsDeactivate))
                         {
-                            if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapShieldBoosters && MyShip.ToEntity.ShieldPct <= Config.MinShieldBoosters)
+                            if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapShieldBoosters && MyShip.ToEntity.ShieldPct >= Config.MaxShieldBoosters)
                             {
                                 IEnumerable<Module> deactivatableShieldBoosters = shieldBoosters.Where(i => i.AllowsDeactivate);
                                 foreach (Module deactivatableShieldBooster in deactivatableShieldBoosters)
                                 {
                                     //only turn off one booster per iteration, if we had 2 on its because incomming damage was high...
+                                    Console.Log("|o[|gShieldRepairer|o] deactivated. ShieldPct [|g" + Math.Round(MyShip.ToEntity.ShieldPct, 1) + "|o] MaxShieldRepairs [|g" + Config.MaxShieldBoosters + "|o] C[|g" + Math.Round((MyShip.Capacitor / MyShip.MaxCapacitor * 100), 0) + "|o] CapShieldRepairs [|g" + Config.CapShieldBoosters + "|o]");
                                     deactivatableShieldBooster.Deactivate();
                                     return false;
                                 }
