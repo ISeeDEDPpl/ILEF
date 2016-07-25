@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using EveCom;
+
 using EveComFramework.Core;
 using EveComFramework.KanedaToolkit;
 using System;
 
 namespace EveComFramework.Move
 {
+    using EveComFramework.AutoModule;
+
     class Location
     {
         internal enum LocationType
@@ -109,6 +112,7 @@ namespace EveComFramework.Move
         public Logger Log = new Logger("Move");
         public MoveSettings Config = new MoveSettings();
         InstaWarp InstaWarpModule = InstaWarp.Instance;
+        public AutoModule AutoModule = AutoModule.Instance;
         #endregion
 
         #region Actions
@@ -169,9 +173,6 @@ namespace EveComFramework.Move
             }
         }
 
-
-
-
         #endregion
 
         #region States
@@ -206,6 +207,7 @@ namespace EveComFramework.Move
             }
             if (Bookmark.Dockable() && Bookmark.LocationID == Session.SolarSystemID)
             {
+                AutoModule.PrepareToDock();
                 QueueState(Dock, -1, Entity.All.FirstOrDefault(a => a.ID == Bookmark.ItemID));
             }
             else
@@ -259,6 +261,7 @@ namespace EveComFramework.Move
                 DoInstaWarp();
                 if (Destination.Dockable() && Destination.LocationID == Session.SolarSystemID)
                 {
+                    AutoModule.PrepareToDock();
                     QueueState(Dock, -1, Entity.All.FirstOrDefault(a => a.ID == Destination.ItemID));
                     return true;
                 }
@@ -299,6 +302,7 @@ namespace EveComFramework.Move
                     DoInstaWarp();
                     if (Destination.Dockable() && Destination.LocationID == Session.SolarSystemID)
                     {
+                        AutoModule.PrepareToDock();
                         QueueState(Dock, -1, Entity.All.FirstOrDefault(a => a.ID == Destination.ItemID));
                         return true;
                     }
@@ -328,6 +332,7 @@ namespace EveComFramework.Move
 
             if (Entity.Dockable())
             {
+                AutoModule.PrepareToDock();
                 QueueState(Dock, -1, Entity);
             }
             else
@@ -416,6 +421,7 @@ namespace EveComFramework.Move
 
             Log.Log("|oUndocking");
             Log.Log(" |-g{0}", Session.StationName);
+            AutoModule.PrepareToDock();
             Station.Exit();
             InsertState(Undock);
             WaitFor(20, () => Session.InSpace);
@@ -876,6 +882,7 @@ namespace EveComFramework.Move
                             return false;
                         }
                     }
+                    AutoModule.PrepareToDock();
                     InsertState(Dock, 500, Route.NextWaypoint);
                     return true;
                 }

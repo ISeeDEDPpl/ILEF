@@ -183,8 +183,8 @@ namespace EveComFramework.Core
                 textServer.TextChanged += (s, a) => { CommsConfig.Server = textServer.Text; CommsConfig.Save(); };
                 numericPort.Value = CommsConfig.Port;
                 numericPort.ValueChanged += (s, a) => { CommsConfig.Port = (int)Math.Floor(numericPort.Value); CommsConfig.Save(); };
-                textSendTo.Text = CommsConfig.SendTo;
-                textSendTo.TextChanged += (s, a) => { CommsConfig.SendTo = textSendTo.Text; CommsConfig.Save(); };
+                textSendTo.Text = CommsConfig.SendTo1;
+                textSendTo.TextChanged += (s, a) => { CommsConfig.SendTo1 = textSendTo.Text; CommsConfig.Save(); };
                 checkLocal.Checked = CommsConfig.Local;
                 checkLocal.CheckedChanged += (s, a) => { CommsConfig.Local = checkLocal.Checked; CommsConfig.Save(); };
                 checkNPC.Checked = CommsConfig.NPC;

@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Text;
+using InnerSpaceAPI;
 
 
 namespace EveComFramework.Core
@@ -84,6 +86,7 @@ namespace EveComFramework.Core
             Console.SelectionColor = DefaultForegroundColor;
             Console.SelectionBackColor = CurrentBackColor;
             CurrentBackColor = (CurrentBackColor == BackColor1)?BackColor2:BackColor1;
+            String TextForInnerspaceConsole = String.Format("[{0}][{1}]", DateTime.Now.ToString("HH:mm:ss"), Module.PadRight(12));
             Console.AppendText(String.Format("{0}", Module.PadRight(12)));
             Queue<char> StringReader = new Queue<char>(Message);
             while (StringReader.Any())
@@ -102,18 +105,23 @@ namespace EveComFramework.Core
                                 break;
                             case 'r':
                                 Console.SelectionColor = Color.DarkRed;
+                                TextForInnerspaceConsole += "\ar";
                                 break;
                             case 'b':
                                 Console.SelectionColor = Color.DarkBlue;
+                                TextForInnerspaceConsole += "\ab";
                                 break;
                             case 'o':
                                 Console.SelectionColor = Color.DarkOrange;
+                                TextForInnerspaceConsole += "\ao";
                                 break;
                             case 'y':
                                 Console.SelectionColor = Color.Goldenrod;
+                                TextForInnerspaceConsole += "\ay";
                                 break;
                             case 'g':
                                 Console.SelectionColor = Color.ForestGreen;
+                                TextForInnerspaceConsole += "\ag";
                                 break;
                         }
                         continue;
@@ -123,28 +131,37 @@ namespace EveComFramework.Core
                     {
                         case 'w':
                             Console.SelectionColor = Color.White;
+                            TextForInnerspaceConsole += "\aw";
                             break;
                         case 'r':
                             Console.SelectionColor = Color.Red;
+                            TextForInnerspaceConsole += "\ar";
                             break;
                         case 'b':
                             Console.SelectionColor = Color.Blue;
+                            TextForInnerspaceConsole += "\ab";
                             break;
                         case 'o':
                             Console.SelectionColor = Color.Orange;
+                            TextForInnerspaceConsole += "\ao";
                             break;
                         case 'y':
                             Console.SelectionColor = Color.Yellow;
+                            TextForInnerspaceConsole += "\ay";
                             break;
                         case 'g':
                             Console.SelectionColor = Color.Green;
+                            TextForInnerspaceConsole += "\ag";
                             break;
                     }
                     continue;
                 }
                 Console.AppendText(a.ToString());
+                TextForInnerspaceConsole += a.ToString();
             }
             Console.AppendText(new string(' ', 1000) + Environment.NewLine);
+            InnerSpace.Echo(TextForInnerspaceConsole);
+
             if (Console.Lines.Length > 100)
             {
                 Console.Select(0, Console.GetFirstCharIndexFromLine(Console.Lines.Length - 50));

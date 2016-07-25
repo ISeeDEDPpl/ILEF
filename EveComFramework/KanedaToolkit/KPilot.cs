@@ -42,6 +42,14 @@ namespace EveComFramework.KanedaToolkit
             return true;
         }
 
+        public static string StandingsStatus(this Pilot pilot)
+        {
+            if (Me.CorpID > 999999 && pilot.CorpID == Me.CorpID) return "blue";
+            if (Me.AllianceID > 0 && pilot.AllianceID == Me.AllianceID) return "blue";
+            if (pilot.DerivedStanding() > 0.0) return "blue";
+            if (pilot.DerivedStanding() < 0.0) return "red";
+            return "neutral";
+        }
     }
 
 }

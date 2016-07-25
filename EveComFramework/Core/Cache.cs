@@ -142,7 +142,13 @@ namespace EveComFramework.Core
                     return false;
                 }
             }
-            AgentMission.All.ForEach(a => { CachedMissions.AddOrUpdate(Agent.Get(a.AgentID).Name, new CachedMission(a.ContentID, a.Name, Agent.Get(a.AgentID).Level, a.State, a.Type)); });
+
+            try
+            {
+                AgentMission.All.ForEach(a => { CachedMissions.AddOrUpdate(Agent.Get(a.AgentID).Name, new CachedMission(a.ContentID, a.Name, Agent.Get(a.AgentID).Level, a.State, a.Type)); });
+            }
+            catch (Exception){}
+
             AvailableAgents = Agent.MyAgents.Select(a => a.Name).ToList();
             if (Session.InStation)
             {
@@ -211,9 +217,13 @@ namespace EveComFramework.Core
 
             if (Session.InSpace)
             {
-                ArmorPercent = MyShip.Armor / MyShip.MaxArmor;
-                HullPercent = MyShip.Hull / MyShip.MaxHull;
-                if (Drone.AllInSpace.Any(a => a.ToEntity.ArmorPct < 100 || a.ToEntity.HullPct < 100)) DamagedDrones = true;
+                try
+                {
+                    ArmorPercent = MyShip.Armor / MyShip.MaxArmor;
+                    HullPercent = MyShip.Hull / MyShip.MaxHull;
+                    if (Drone.AllInSpace.Any(a => a.ToEntity.ArmorPct < 100 || a.ToEntity.HullPct < 100)) DamagedDrones = true;
+                }
+                catch (Exception){}
             }
             return false;
         }

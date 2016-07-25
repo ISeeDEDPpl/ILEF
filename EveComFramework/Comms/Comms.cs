@@ -6,6 +6,7 @@ using EveComFramework.Core;
 using EveCom;
 using IrcDotNet;
 using EveComFramework.KanedaToolkit;
+using LavishScriptAPI;
 
 namespace EveComFramework.Comms
 {
@@ -19,7 +20,9 @@ namespace EveComFramework.Comms
         public bool UseIRC = false;
         public string Server = "irc1.lavishsoft.com";
         public int Port = 6667;
-        public string SendTo;
+        public string SendTo1;
+        public string SendTo2;
+        public string SendTo3;
         public bool Local = true;
         public bool NPC = false;
         public bool AllChat = false;
@@ -70,6 +73,7 @@ namespace EveComFramework.Comms
         /// Config for this module
         /// </summary>
         public CommsSettings Config = new CommsSettings();
+        public Logger Console = new Logger("Comms");
         string LastLocal = "";
         Dictionary<string, string> chatMessages = new Dictionary<string, string>();
         double LastWallet;
@@ -78,7 +82,7 @@ namespace EveComFramework.Comms
         public Queue<string> ChatQueue = new Queue<string>();
         public Queue<string> LocalQueue = new Queue<string>();
 
-        IrcClient IRC = new IrcClient();
+        public IrcClient IRC = new IrcClient();
 
         Targets.Targets NonFleetPlayers = new Targets.Targets();
         List<Entity> NonFleetMemberOnGrid = new List<Entity>();
@@ -126,7 +130,7 @@ namespace EveComFramework.Comms
 
         void PMReceived(object sender, IrcMessageEventArgs e)
         {
-            if (e.Source.Name == Config.SendTo)
+            if (e.Source.Name == Config.SendTo1 || e.Source.Name == Config.SendTo2 || e.Source.Name == Config.SendTo3)
             {
                 if (e.Text.ToLower().StartsWith("?") || e.Text.ToLower().StartsWith("help"))
                 {
@@ -172,13 +176,115 @@ namespace EveComFramework.Comms
                 }
                 if (e.Text.ToLower().StartsWith("listlocal") || e.Text.ToLower().StartsWith("locallist"))
                 {
-                    ChatQueue.Enqueue("---------------Local List---------------");
+                    List<Pilot> tempLocalPilots = new List<Pilot>();
                     EVEFrameUtil.Do(() =>
                     {
-                        foreach (Pilot p in Local.Pilots)
+                        try
                         {
-                            ChatQueue.Enqueue(p.Name + " - http://evewho.com/pilot/" + p.Name.Replace(" ", "%20"));
+                            if (Local.Pilots.Count < 20)
+                            {
+                                ChatQueue.Enqueue("Local has [" + Local.Pilots.Count + "] pilots currently");
+                                tempLocalPilots = Local.Pilots;
+                            }
+                            else
+                            {
+                                ChatQueue.Enqueue("Local has [" + Local.Pilots.Count + "] pilots currently - too many to list details individually");
+                            }
                         }
+                        catch (Exception) { }
+                    });
+
+                    EVEFrameUtil.Do(() =>
+                    {
+                        if (tempLocalPilots != null && tempLocalPilots.Any() && tempLocalPilots.Count < 20)
+                        {
+                            foreach (Pilot tempLocalPilot in tempLocalPilots)
+                            {
+                                //ChatQueue.Enqueue("Name: [" + tempLocalPilot.Name + "]");
+                                if (string.IsNullOrWhiteSpace(tempLocalPilot.CorpName))
+                                {
+                                    ChatQueue.Enqueue("Name: [" + tempLocalPilot.Name + "] CorpName not yet cached");
+                                    try
+                                    {
+                                        Pilot tempPilot = Local.Pilots.FirstOrDefault(i => i.Name == tempLocalPilot.Name);
+                                        if (tempPilot != null)
+                                        {
+                                            ChatQueue.Enqueue("Show info for [" + tempPilot.Name + "]'s corp");
+                                            tempPilot.ShowCorpInfo();
+                                        }
+                                    }
+                                    catch (Exception)
+                                    {
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    int intLocalPilot = 0;
+                    EVEFrameUtil.Do(() =>
+                    {
+                        try
+                        {
+                            if (Local.Pilots.Count < 20)
+                            {
+                                ChatQueue.Enqueue("---Local List (corp members not listed) [" + Local.Pilots.Count + "] total [" + Local.Pilots.Count(i => i.CorpID != Me.CorpID) + "] w/o corp ---");
+                                foreach (Pilot p in Local.Pilots.Where(i => i.CorpID != Me.CorpID))
+                                {
+                                    try
+                                    {
+                                        intLocalPilot++;
+                                        ChatQueue.Enqueue("[" + intLocalPilot + "][" + p.Name + "] Hostile[ " + p.Hostile() + " ] Corp[ " + p.CorpName + " ][" + p.AllianceName + "]" + " - [ http://evewho.com/pilot/" + p.Name.Replace(" ", "%20") + " ]");
+                                    }
+                                    catch (Exception){}
+                                }
+                            }
+                            else
+                            {
+                                ChatQueue.Enqueue("Local has [" + Local.Pilots.Count + "] pilots currently - too many to list details individually");
+                            }
+                        }
+                        catch (Exception){}
+                    });
+
+                    EVEFrameUtil.Do(() =>
+                    {
+                        try
+                        {
+                            foreach (Window w in Window.All.Where(i => i.Name == "infowindow" && i.Ready && (i.Caption.Equals("Corporation: Information") || i.Caption.Equals("Alliance: Information"))))
+                            {
+                                w.Close();
+                            }
+                        }
+                        catch (Exception) { }
+                    });
+                    ChatQueue.Enqueue("----------------End List----------------");
+                }
+                if (e.Text.ToLower().StartsWith("listentities"))
+                {
+                    ChatQueue.Enqueue("---------------Entity List---------------");
+                    EVEFrameUtil.Do(() =>
+                    {
+                        foreach (Entity entity in Entity.All.Where(i => i.Distance < 200000 && i.GroupID != Group.Wreck && i.CategoryID != Category.Drone && i.CategoryID != Category.Charge && i.CategoryID != Category.Asteroid))
+                        {
+                            ChatQueue.Enqueue("Name [" + entity.Name + "] Distance [" + Math.Round(entity.Distance/1000,0) + "k] GroupID [" + entity.GroupID + "] TypeID [" + entity.TypeID + "]");
+                        }
+                    });
+                    ChatQueue.Enqueue("----------------End List----------------");
+                }
+                if (e.Text.ToLower().StartsWith("listwindows") || e.Text.ToLower().StartsWith("windowlist"))
+                {
+                    ChatQueue.Enqueue("---------------Window List---------------");
+                    EVEFrameUtil.Do(() =>
+                    {
+                        try
+                        {
+                            foreach (Window w in EveCom.Window.All)
+                            {
+                                ChatQueue.Enqueue("Name: [" + w.Name + "] Type [" + w.Type + "] Caption [" + w.Caption + "] WindowCaption[" + w.WindowCaption + "]");
+                            }
+                        }
+                        catch (Exception) { }
                     });
                     ChatQueue.Enqueue("----------------End List----------------");
                 }
@@ -218,7 +324,7 @@ namespace EveComFramework.Comms
         {
             if (!Session.Safe || (!Session.InSpace && !Session.InStation)) return false;
 
-            if (Config.UseIRC)
+            if (Config.UseIRC && !IRC.IsConnected)
             {
                 try
                 {
@@ -229,8 +335,9 @@ namespace EveComFramework.Comms
                     IRC.FloodPreventer = new IrcStandardFloodPreventer(4, 2000);
                     IRC.Connect(new Uri("irc://" + Config.Server), reginfo);
                 }
-                catch
+                catch(Exception ex)
                 {
+                    Console.Log("Exception [" + ex + "]");
                     return false;
                 }
             }
@@ -249,16 +356,36 @@ namespace EveComFramework.Comms
             if (!IRC.IsConnected)
             {
                 DislodgeCurState(ConnectIRC);
-                InsertState(Blank, 5000);
+                InsertState(Blank, 10000);
+                QueueState(Control);
                 return false;
             }
             IRC.LocalUser.MessageReceived += PMReceived;
-            IRC.LocalUser.SendMessage(Config.SendTo, "Connected - type ? or help for instructions");
+            if (!string.IsNullOrWhiteSpace(Config.SendTo1))
+            {
+                IRC.LocalUser.SendMessage(Config.SendTo1, "Connected - type ? or help for instructions");
+            }
+            if (!string.IsNullOrWhiteSpace(Config.SendTo2))
+            {
+                IRC.LocalUser.SendMessage(Config.SendTo2, "Connected - type ? or help for instructions");
+            }
+            if (!string.IsNullOrWhiteSpace(Config.SendTo3))
+            {
+                IRC.LocalUser.SendMessage(Config.SendTo3, "Connected - type ? or help for instructions");
+            }
+
             return true;
         }
 
         bool Control(object[] Params)
         {
+            if (!IRC.IsConnected)
+            {
+                DislodgeCurState(ConnectIRC);
+                InsertState(Blank, 10000);
+                return false;
+            }
+
             if (!Session.Safe || (!Session.InSpace && !Session.InStation)) return false;
 
             if (Session.SolarSystemID != SolarSystem)
@@ -267,12 +394,37 @@ namespace EveComFramework.Comms
                 SolarSystem = Session.SolarSystemID;
             }
 
-            if (Config.LocalTraffic)
+            List<Pilot> newPilots = Local.Pilots.Where(a => !PilotCache.Contains(a)).ToList();
+            if (newPilots.Any())
             {
-                List<Pilot> newPilots = Local.Pilots.Where(a => !PilotCache.Contains(a)).ToList();
-                foreach (Pilot pilot in newPilots)
+                try
                 {
-                    ChatQueue.Enqueue("<Local> New Pilot: " + pilot.Name);
+                    foreach (Window w in Window.All.Where(i => i.Name.Contains("infowindow") && i.Ready && (i.Caption.Equals("Corporation: Information") || i.Caption.Equals("Alliance: Information"))))
+                    {
+                        w.Close();
+                        return false;
+                    }
+                }
+                catch (Exception) { }
+
+                if (Config.LocalTraffic)
+                {
+                    foreach (Pilot pilot in newPilots)
+                    {
+                        if (pilot.CorpID != 0 && string.IsNullOrWhiteSpace(pilot.CorpName))
+                        {
+                            pilot.ShowCorpInfo();
+                            return false;
+                        }
+
+                        if (pilot.AllianceID != 0 && string.IsNullOrWhiteSpace(pilot.AllianceName))
+                        {
+                            pilot.ShowAllianceInfo();
+                            return false;
+                        }
+
+                        ChatQueue.Enqueue("<Local> New Pilot: [" + pilot.StandingsStatus() + "][ " + pilot.Name + " ][" + pilot.CorpName + "][" + pilot.AllianceName + "][" + pilot.StandingsStatus() + "] - [ http://evewho.com/pilot/" + pilot.Name.Replace(" ", "%20") + " ]");
+                    }
                 }
             }
 
@@ -360,6 +512,7 @@ namespace EveComFramework.Comms
                     ChatQueue.Enqueue("<Security> Non fleet member on grid: " + AddNonFleet.Name + " - http://evewho.com/pilot/" + AddNonFleet.Name.Replace(" ", "%20") + " (" + AddNonFleet.Type + ")");
                     NonFleetMemberOnGrid.Add(AddNonFleet);
                 }
+
                 NonFleetMemberOnGrid = NonFleetPlayers.TargetList.Where(a => NonFleetMemberOnGrid.Contains(a)).ToList();
             }
 
@@ -367,7 +520,20 @@ namespace EveComFramework.Comms
             {
                 if (ChatQueue.Any())
                 {
-                    IRC.LocalUser.SendMessage(Config.SendTo, ChatQueue.Dequeue());
+                    if (!string.IsNullOrWhiteSpace(Config.SendTo1))
+                    {
+                        IRC.LocalUser.SendMessage(Config.SendTo1, ChatQueue.Dequeue());
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(Config.SendTo2))
+                    {
+                        IRC.LocalUser.SendMessage(Config.SendTo2, ChatQueue.Dequeue());
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(Config.SendTo3))
+                    {
+                        IRC.LocalUser.SendMessage(Config.SendTo3, ChatQueue.Dequeue());
+                    }
                 }
             }
 
