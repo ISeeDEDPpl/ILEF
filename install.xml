@@ -2,7 +2,7 @@
 <Install>
 	<Files>
 		<File>
-			<Get>EveComFramework/bin/Release/EveComFramework.dll</Get>
+			<Get>EveComFramework/bin/Debug/EveComFramework.dll</Get>
 			<Put>EveComFramework.dll</Put>
 			<Dependencies>
 				<Dependency>
@@ -10,6 +10,10 @@
 					<Branch>master</Branch>
 				</Dependency>
 			</Dependencies>
+		</File>
+		<File>
+			<Get>EveComFramework/bin/Debug/EveComFramework.pdb</Get>
+			<Put>IrcDotNet.dll</Put>
 		</File>
 		<File>
 			<Get>EveComFramework/bin/Release/IrcDotNet.dll</Get>
