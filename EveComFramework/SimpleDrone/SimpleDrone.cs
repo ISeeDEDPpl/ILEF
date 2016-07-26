@@ -99,7 +99,7 @@ namespace EveComFramework.SimpleDrone
             {
                 try
                 {
-                    if (!Session.InSpace) return null;
+                    if (!Session.InSpace) return new List<Fighters.Fighter>();
 
                     _availableFighters = Fighters.Active.Where(a => FighterReady(a) && a.ToEntity != null && a.State != Fighters.States.RECALLING).ToList();
                     if (_availableFighters != null)
@@ -429,7 +429,7 @@ namespace EveComFramework.SimpleDrone
             if (Drone.AllInSpace.Any()) return false;
 
             // Recall fighters
-            List<Fighters.Fighter> RecallFighters = AvailableFighters.Where(a => a.State != Fighters.States.RECALLING).ToList();
+            List<Fighters.Fighter> RecallFighters = AvailableFighters.ToList();
             if (RecallFighters.Any() && MyShip.ToEntity.Mode != EntityMode.Warping)
             {
                 Console.Log("|oRecalling fighters: Recall()");
@@ -453,7 +453,7 @@ namespace EveComFramework.SimpleDrone
                 }
             }
 
-            if (Fighters.Active.Any()) return false;
+            if (Fighters.Active.Any(i => i.ToEntity != null && i.ToEntity.Distance < 900000)) return false;
 
             return true;
         }
@@ -461,7 +461,7 @@ namespace EveComFramework.SimpleDrone
         public bool LockManagement()
         {
             TargetCooldown = TargetCooldown.Where(a => a.Value >= DateTime.Now).ToDictionary(a => a.Key, a => a.Value);
-            Rats.LockedAndLockingTargetList.ForEach(a => { TargetCooldown.AddOrUpdate(a, DateTime.Now.AddSeconds(15)); });
+            Rats.LockedAndLockingTargetList.ForEach(a => { TargetCooldown.AddOrUpdate(a, DateTime.Now.AddSeconds(Config.TargetCooldown)); });
 
             if (HostilePilot != null)
             {
@@ -593,7 +593,7 @@ namespace EveComFramework.SimpleDrone
                 if (NewTarget != null && Entity.All.FirstOrDefault(a => a.IsJamming && a.IsTargetingMe) == null)
                 {
                     Console.Log("|oLocking [|-g" + NewTarget.Name + "|o][|g" + MaskedId(NewTarget.ID) + "|o][|g" + Math.Round(NewTarget.Distance / 1000,0) + "k|o]");
-                    TargetCooldown.AddOrUpdate(NewTarget, DateTime.Now.AddSeconds(2));
+                    TargetCooldown.AddOrUpdate(NewTarget, DateTime.Now.AddSeconds(Config.TargetCooldown));
                     NewTarget.LockTarget();
                     OutOfTargets = false;
                     return false;
@@ -786,7 +786,7 @@ namespace EveComFramework.SimpleDrone
                 if (Entity.All.All(b => b.GroupID != Group.ForceField))
                 {
                     IEnumerable<Fighters.Fighter> returningFightersWithAPropMod = ReturningFighters.Where(a => a.HasPropmod() && a.Slot2 != null && a.Slot2.AllowsActivate).ToList();
-                    if (returningFightersWithAPropMod.Any())
+                    if (returningFightersWithAPropMod.Any(i => i.ToEntity != null && i.ToEntity.Distance < 900000))
                     {
                         foreach (Fighters.Fighter returningFighterWithAPropMod in returningFightersWithAPropMod)
                         {
@@ -947,7 +947,7 @@ namespace EveComFramework.SimpleDrone
                         if (Entity.All.All(b => b.GroupID != Group.ForceField))
                         {
                             IEnumerable<Fighters.Fighter> returningFightersWithAPropMod = AvailableFighters.Where(a => a.HasPropmod() && a.Slot2 != null && a.Slot2.AllowsActivate).ToList();
-                            if (returningFightersWithAPropMod.Any())
+                            if (returningFightersWithAPropMod.Any(i => i.ToEntity != null && i.ToEntity.Distance < 900000))
                             {
                                 foreach (Fighters.Fighter returningFighterWithAPropMod in returningFightersWithAPropMod)
                                 {
@@ -1367,7 +1367,7 @@ namespace EveComFramework.SimpleDrone
                     try
                     {
                         // Send fighters to attack, given they have the ability to
-                        IEnumerable<Fighters.Fighter> fightersThatNeedAnAttackTarget = AvailableFighters.Where(a => (a.State != Fighters.States.RECALLING || (a.ToEntity != null && offgridFighters != null && offgridFighters.Contains(a.ID))) && a.Slot1 != null && a.Slot1.AllowsActivate && (double) a["maxTargetRange"] != 0).ToList();  //&& a.ToEntity.DistanceTo(ActiveTarget) < (double)a["maxTargetRange"] - 10).ToList();
+                        IEnumerable<Fighters.Fighter> fightersThatNeedAnAttackTarget = AvailableFighters.Where(a => a.Slot1 != null && a.Slot1.AllowsActivate && (double) a["maxTargetRange"] != 0).ToList();  //&& a.ToEntity.DistanceTo(ActiveTarget) < (double)a["maxTargetRange"] - 10).ToList();
                         if (fightersThatNeedAnAttackTarget.Any() && ActiveTarget != null && ActiveTarget.Exists && !ActiveTarget.Exploded && !ActiveTarget.Released)
                         {
                             foreach (Fighters.Fighter fighterThatNeedsAnAttackTarget in fightersThatNeedAnAttackTarget)
