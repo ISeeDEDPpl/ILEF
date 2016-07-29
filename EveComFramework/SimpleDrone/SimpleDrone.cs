@@ -42,6 +42,7 @@ namespace EveComFramework.SimpleDrone
         public bool ReArmFighters = false;
         public bool AttackAnchoredBubble = true;
         public bool AttackHostile = true;
+        public bool UseFighterMissileAttackOnActiveTarget = true;
     }
 
     #endregion
@@ -870,7 +871,7 @@ namespace EveComFramework.SimpleDrone
                         Console.Log("|o Fighter [|g" + MaskedId(damagedFighter.ID) + "|o][|g" + Math.Round(damagedFighter.ToEntity.Distance / 1000, 0) + "k|o] is Damaged: Recalling");
                         damagedFighter.RecallToTube();
                         NextFighterCommand.AddOrUpdate(damagedFighter, DateTime.Now.AddSeconds(5));
-                        return false;
+                        continue;
                     }
                 }
             }
@@ -1265,8 +1266,10 @@ namespace EveComFramework.SimpleDrone
                             NextFighterCommand.AddOrUpdate(deployfighter.Fighter, DateTime.Now.AddSeconds(3));
                             Console.Log("Launching Fighter [" + MaskedId(deployfighter.Fighter.ID) + "]");
                             deployfighter.Launch();
-                            return false;
+                            continue;
                         }
+
+                        return false;
                     }
                 }
                 catch (Exception ex)
@@ -1287,8 +1290,10 @@ namespace EveComFramework.SimpleDrone
                                 Console.Log("|oFighter [|g" + MaskedId(returningFighterWithAPropMod.ID) + "|o][|g" + Math.Round(returningFighterWithAPropMod.ToEntity.Distance / 1000,0) + "k|o] is Returning: burning back");
                                 returningFighterWithAPropMod.Slot2.ActivateOnSelf();
                                 NextFighterCommand.AddOrUpdate(returningFighterWithAPropMod, DateTime.Now.AddSeconds(10));
-                                return false;
+                                continue;
                             }
+
+                            return false;
                         }
                     }
                 }
@@ -1310,8 +1315,10 @@ namespace EveComFramework.SimpleDrone
                                 Console.Log("|oFighter [|g" + MaskedId(fighterThatNeedsToActivatPropMod.ID) + "|o] [2]MWD toward[|g" + ActiveTarget.Name + "|o][|g" + MaskedId(ActiveTarget.ID) + "|o][|g" + Math.Round(fighterThatNeedsToActivatPropMod.ToEntity.DistanceTo(ActiveTarget)/1000,0) + "k|o] FighterToTarget");
                                 fighterThatNeedsToActivatPropMod.Slot2.ActivateOnSelf();
                                 NextFighterCommand.AddOrUpdate(fighterThatNeedsToActivatPropMod, DateTime.Now.AddSeconds(3));
-                                return false;
+                                continue;
                             }
+
+                            return false;
                         }
                     }
                     catch (Exception ex)
@@ -1344,18 +1351,21 @@ namespace EveComFramework.SimpleDrone
                         IEnumerable<Fighters.Fighter> fightersReadyToMissileAttack = AvailableFighters.Where(a => a.State != Fighters.States.RECALLING && a.HasMissiles() && a.Slot3 != null && a.Slot3.AllowsActivate).ToList();
                         if (fightersReadyToMissileAttack.Any())
                         {
+                            bool slightPauseNeededAfterMissileAttack = false;
                             foreach (Fighters.Fighter fighterReadyToMissileAttack in fightersReadyToMissileAttack)
                             {
-                                Entity rocketTargetEntity = Entity.All.Where(a => a.LockedTarget && !a.Exploded && !a.Released && (SmallFighterMissileTarget(a) || a.GroupID == Group.LargeCollidableStructure || a.GroupID == Group.LargeCollidableObject || a.GroupID == Group.DestructibleSentryGun || a == ActiveTarget) && fighterReadyToMissileAttack.ToEntity.DistanceTo(a) < (double)fighterReadyToMissileAttack["fighterAbilityMissilesRange"] - 3000 && (!missileFired.ContainsKey(a.ID) || missileFired[a.ID].AddSeconds((double)fighterReadyToMissileAttack["fighterAbilityAttackMissileDuration"] / 1000 + 1) < DateTime.Now)).OrderByDescending(a => SmallFighterMissileTarget(a)).FirstOrDefault();
+                                Entity rocketTargetEntity = Entity.All.Where(a => a.LockedTarget && !a.Exploded && !a.Released && (SmallFighterMissileTarget(a) || a.GroupID == Group.LargeCollidableStructure || a.GroupID == Group.LargeCollidableObject || a.GroupID == Group.DestructibleSentryGun || (Config.UseFighterMissileAttackOnActiveTarget && a == ActiveTarget)) && fighterReadyToMissileAttack.ToEntity.DistanceTo(a) < (double)fighterReadyToMissileAttack["fighterAbilityMissilesRange"] - 3000 && (!missileFired.ContainsKey(a.ID) || missileFired[a.ID].AddSeconds((double)fighterReadyToMissileAttack["fighterAbilityAttackMissileDuration"] / 1000 + 1) < DateTime.Now)).OrderByDescending(a => SmallFighterMissileTarget(a)).FirstOrDefault();
                                 if (rocketTargetEntity != null)
                                 {
                                     Console.Log("|oFighter [|g" + MaskedId(fighterReadyToMissileAttack.ID) + "|o] [3]Rocket    [|g" + rocketTargetEntity.Name + "|o][|g" + MaskedId(rocketTargetEntity.ID) + "|o][|g" + Math.Round(rocketTargetEntity.DistanceTo(fighterReadyToMissileAttack.ToEntity) / 1000, 0) + "k|o] FighterToTarget");
                                     fighterReadyToMissileAttack.Slot3.ActivateOnTarget(rocketTargetEntity);
                                     _fighterRocketSalvosLeft.AddOrUpdate(fighterReadyToMissileAttack.ID, _fighterRocketSalvosLeft[fighterReadyToMissileAttack.ID] - 1);
-                                    fightersReadyToMissileAttack.ForEach(a => NextFighterCommand.AddOrUpdate(a, DateTime.Now.AddMilliseconds(800)));
                                     NextFighterCommand.AddOrUpdate(fighterReadyToMissileAttack, DateTime.Now.AddSeconds(4));
-                                    return false;
+                                    slightPauseNeededAfterMissileAttack = true;
+                                    continue;
                                 }
+
+                                if (slightPauseNeededAfterMissileAttack) return false;
                             }
                         }
                     }
@@ -1374,9 +1384,8 @@ namespace EveComFramework.SimpleDrone
                             {
                                 Console.Log("|oFighter [|g" + MaskedId(fighterThatNeedsAnAttackTarget.ID) + "|o] [1]Attacking [|g" + ActiveTarget.Name + "|o][|g" + MaskedId(ActiveTarget.ID) + "|o][|g" + Math.Round(fighterThatNeedsAnAttackTarget.ToEntity.DistanceTo(ActiveTarget) / 1000, 0) + "k|o] FighterToTarget"); //
                                 fighterThatNeedsAnAttackTarget.Slot1.ActivateOnTarget(ActiveTarget);
-                                fightersThatNeedAnAttackTarget.ForEach(a => NextFighterCommand.AddOrUpdate(a, DateTime.Now.AddMilliseconds(800)));
                                 NextFighterCommand.AddOrUpdate(fighterThatNeedsAnAttackTarget, DateTime.Now.AddSeconds(4));
-                                return false;
+                                continue;
                             }
 
                             return false;
@@ -1391,8 +1400,10 @@ namespace EveComFramework.SimpleDrone
                                 Console.Log("|oFighter [|g" + MaskedId(fighterThatShouldReturn.ID) + "|o] should now Return and Orbit. It was not moving");
                                 fighterThatShouldReturn.ReturnAndOrbit();
                                 NextFighterCommand.AddOrUpdate(fighterThatShouldReturn, DateTime.Now.AddSeconds(2));
-                                return false;
+                                continue;
                             }
+
+                            return false;
                         }
                     }
                     catch (Exception ex)
