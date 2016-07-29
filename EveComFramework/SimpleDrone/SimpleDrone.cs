@@ -42,7 +42,7 @@ namespace EveComFramework.SimpleDrone
         public bool ReArmFighters = false;
         public bool AttackAnchoredBubble = true;
         public bool AttackHostile = true;
-        public bool UseFighterMissileAttackOnActiveTarget = true;
+        public bool UseFighterMissileAttackOnActiveTarget = false;
     }
 
     #endregion
