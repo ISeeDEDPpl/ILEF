@@ -1,14 +1,15 @@
 ﻿#pragma warning disable 1591
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using EveCom;
-using EveComFramework.Core;
-using EveComFramework.KanedaToolkit;
-using EveComFramework.Move;
 
 namespace EveComFramework.AutoModule
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using EveCom;
+    using EveComFramework.Core;
+    using EveComFramework.KanedaToolkit;
+    using EveComFramework.Move;
+
     #region Settings
 
     /// <summary>
@@ -16,7 +17,7 @@ namespace EveComFramework.AutoModule
     /// </summary>
     public class AutoModuleSettings : Settings
     {
-        public bool Enabled = false;
+        public bool Enabled = true;
         public bool ActiveHardeners = true;
         public bool ShieldBoosters = true;
         public bool ArmorRepairs = true;
@@ -146,7 +147,6 @@ namespace EveComFramework.AutoModule
                 QueueState(WaitForEve, 10000);
                 QueueState(Control);
             }
-
         }
 
         /// <summary>
