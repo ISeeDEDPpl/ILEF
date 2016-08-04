@@ -72,7 +72,6 @@ namespace EveComFramework.SimpleDrone
             Rats.AddPriorityTargets();
             Rats.AddNPCs();
             Rats.AddTargetingMe();
-
             Rats.Ordering = new RatComparer();
         }
 
@@ -589,17 +588,21 @@ namespace EveComFramework.SimpleDrone
             if (Rats.LockedAndLockingTargetList.Count < Config.TargetSlots)
             {
                 //Console.Log("|oActiveTarget is empty; picking a NewTarget");
-                Entity NewTarget = Rats.UnlockedTargetList.FirstOrDefault(a => !a.Exploded && !a.Released && !TargetCooldown.ContainsKey(a.ID) && a.Distance < MyShip.MaxTargetRange); // && !Config.Triggers.Contains(a.Name));
-                if (NewTarget == null) NewTarget = Rats.UnlockedTargetList.FirstOrDefault(a => !a.Exploded && !a.Released && !TargetCooldown.ContainsKey(a.ID) && a.Distance < MyShip.MaxTargetRange);
-                if (NewTarget != null && Entity.All.FirstOrDefault(a => a.IsJamming && a.IsTargetingMe) == null)
+                IEnumerable<Entity> newTargets = Rats.UnlockedTargetList.Where(a => !a.Exploded && !a.Released && !TargetCooldown.ContainsKey(a.ID) && a.Distance < MyShip.MaxTargetRange).ToList();
+                if (newTargets.Any() && Entity.All.FirstOrDefault(a => a.IsJamming && a.IsTargetingMe) == null)
                 {
-                    Console.Log("|oLocking [|-g" + NewTarget.Name + "|o][|g" + MaskedId(NewTarget.ID) + "|o][|g" + Math.Round(NewTarget.Distance / 1000,0) + "k|o]");
-                    TargetCooldown.AddOrUpdate(NewTarget.ID, DateTime.Now.AddSeconds(Config.TargetCooldown));
-                    NewTarget.LockTarget();
-                    OutOfTargets = false;
+                    foreach (Entity newTarget in newTargets)
+                    {
+                        Console.Log("|oLocking [|-g" + newTarget.Name + "|o][|g" + MaskedId(newTarget.ID) + "|o][|g" + Math.Round(newTarget.Distance / 1000, 0) + "k|o]");
+                        TargetCooldown.AddOrUpdate(newTarget.ID, DateTime.Now.AddSeconds(Config.TargetCooldown));
+                        newTarget.LockTarget();
+                        OutOfTargets = false;
+                        continue;
+                    }
+
                     return false;
                 }
-                if (ActiveTarget != null && !ActiveTarget.LockedTarget && !ActiveTarget.LockingTarget)
+                else if (ActiveTarget != null && !ActiveTarget.LockedTarget && !ActiveTarget.LockingTarget)
                 {
                     //Console.Log("|oif (ActiveTarget != null && !ActiveTarget.LockedTarget && !ActiveTarget.LockingTarget)");
                     ActiveTarget = null;
