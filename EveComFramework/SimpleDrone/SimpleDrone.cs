@@ -587,16 +587,19 @@ namespace EveComFramework.SimpleDrone
 
             if (Rats.LockedAndLockingTargetList.Count < Config.TargetSlots)
             {
+                int freeTargetSlots = Config.TargetSlots - Rats.LockedAndLockingTargetList.Count;
                 //Console.Log("|oActiveTarget is empty; picking a NewTarget");
                 IEnumerable<Entity> newTargets = Rats.UnlockedTargetList.Where(a => !a.Exploded && !a.Released && !TargetCooldown.ContainsKey(a.ID) && a.Distance < MyShip.MaxTargetRange).ToList();
                 if (newTargets.Any() && Entity.All.FirstOrDefault(a => a.IsJamming && a.IsTargetingMe) == null)
                 {
                     foreach (Entity newTarget in newTargets)
                     {
+                        freeTargetSlots--;
                         Console.Log("|oLocking [|-g" + newTarget.Name + "|o][|g" + MaskedId(newTarget.ID) + "|o][|g" + Math.Round(newTarget.Distance / 1000, 0) + "k|o]");
                         TargetCooldown.AddOrUpdate(newTarget.ID, DateTime.Now.AddSeconds(Config.TargetCooldown));
                         newTarget.LockTarget();
                         OutOfTargets = false;
+                        if (freeTargetSlots == 0) return true;
                         continue;
                     }
 
