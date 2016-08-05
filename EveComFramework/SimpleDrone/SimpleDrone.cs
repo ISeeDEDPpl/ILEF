@@ -40,6 +40,7 @@ namespace EveComFramework.SimpleDrone
         public double FighterCriticalHealthLevel = 70;
         public double FighterMaxRange = 800000;
         public bool ReArmFighters = false;
+        public bool RefillRockets = false;
         public bool AttackAnchoredBubble = true;
         public bool AttackHostile = true;
         public bool UseFighterMissileAttackOnActiveTarget = false;
@@ -88,6 +89,7 @@ namespace EveComFramework.SimpleDrone
         private readonly Dictionary<Drone, double> DroneHealthCache = new Dictionary<Drone, double>();
         private readonly IPC IPC = IPC.Instance;
         private readonly Dictionary<long, DateTime> missileFired = new Dictionary<long, DateTime>();
+        private readonly Dictionary<long?, int?> missileEntityTracking = new Dictionary<long?, int?>();
         private readonly List<long> offgridFighters = new List<long>();
         private IEnumerable<Fighters.Fighter> _availableFighters;
         /// <summary>
@@ -454,12 +456,23 @@ namespace EveComFramework.SimpleDrone
             }
 
             if (Fighters.Active.Any(i => i.ToEntity != null && i.ToEntity.Distance < 900000)) return false;
-
+            missileEntityTracking.Clear();
             return true;
         }
         Vector3 LastTargetLocation = Vector3.origin;
         public bool LockManagement()
         {
+            Entity entityToUseForClosestNpcMeasurement = null;
+            if (AvailableFighters.Any())
+            {
+                entityToUseForClosestNpcMeasurement = AvailableFighters.FirstOrDefault().ToEntity;
+            }
+
+            if (entityToUseForClosestNpcMeasurement == null)
+            {
+                entityToUseForClosestNpcMeasurement = MyShip.ToEntity;
+            }
+
             TargetCooldown = TargetCooldown.Where(a => a.Value >= DateTime.Now).ToDictionary(a => a.Key, a => a.Value);
             Rats.LockedAndLockingTargetList.ForEach(a => { TargetCooldown.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(Config.TargetCooldown)); });
 
@@ -589,7 +602,7 @@ namespace EveComFramework.SimpleDrone
             {
                 int freeTargetSlots = Config.TargetSlots - Rats.LockedAndLockingTargetList.Count;
                 //Console.Log("|oActiveTarget is empty; picking a NewTarget");
-                IEnumerable<Entity> newTargets = Rats.UnlockedTargetList.Where(a => !a.Exploded && !a.Released && !TargetCooldown.ContainsKey(a.ID) && a.Distance < MyShip.MaxTargetRange).ToList();
+                IEnumerable<Entity> newTargets = Rats.UnlockedTargetList.OrderBy(i => i.DistanceTo(entityToUseForClosestNpcMeasurement)).Where(a => !a.Exploded && !a.Released && !TargetCooldown.ContainsKey(a.ID) && a.Distance < MyShip.MaxTargetRange).ToList();
                 if (newTargets.Any() && Entity.All.FirstOrDefault(a => a.IsJamming && a.IsTargetingMe) == null)
                 {
                     foreach (Entity newTarget in newTargets)
@@ -686,9 +699,9 @@ namespace EveComFramework.SimpleDrone
                 List<Entity> AvailableTargets = Entity.All.ToList();
                 if (LastTargetLocation != Vector3.origin) AvailableTargets = AvailableTargets.OrderBy(a => a.DistanceTo(LastTargetLocation)).ToList();
                 ActiveTarget = null;
+                AvailableTargets = Rats.LockedAndLockingTargetList.OrderBy(i => i.DistanceTo(entityToUseForClosestNpcMeasurement)).ToList();
                 ActiveTarget = AvailableTargets.FirstOrDefault(a => PriorityTargets.Contains(a.Name) && !a.Exploded && !a.Released && (a.LockedTarget || a.LockingTarget) && !Triggers.Contains(a.Name) && a.Distance < MaxRange);
 
-                AvailableTargets = Rats.LockedAndLockingTargetList.ToList();
                 if (LastTargetLocation != Vector3.origin) AvailableTargets = AvailableTargets.OrderBy(a => a.DistanceTo(LastTargetLocation)).ToList();
                 if (AvailableTargets.Any() && ActiveTarget == null)
                 {
@@ -699,7 +712,7 @@ namespace EveComFramework.SimpleDrone
                             if (entityToUseForClosestNpcMeasurement != null)
                             {
                                //ActiveTarget = AvailableTargets.FirstOrDefault(a => IPC.ActiveTargets.ContainsValue(a.ID) && a.Distance < MaxRange);
-                                ActiveTarget = Rats.LockedTargetList.OrderBy(i => i.DistanceTo(entityToUseForClosestNpcMeasurement)).FirstOrDefault(a => IPC.ActiveTargets.ContainsValue(a.ID) && a.Distance < MaxRange);
+                                ActiveTarget = AvailableTargets.OrderBy(i => i.DistanceTo(entityToUseForClosestNpcMeasurement)).FirstOrDefault(a => IPC.ActiveTargets.ContainsValue(a.ID) && a.Distance < MaxRange);
                             }
                         }
                         else
@@ -1234,11 +1247,34 @@ namespace EveComFramework.SimpleDrone
                     return false;
                 }
 
+                /**
+                try
+                {
+                    foreach (Fighters.Fighter fighterInSpace in Fighters.Active)
+                    {
+                        if (NextFighterCommand.ContainsKey(fighterInSpace.ID) && NextFighterCommand[fighterInSpace.ID] > DateTime.Now)
+                        {
+                            Console.Log("|oFighter [|g" + MaskedId(fighterInSpace.ID) + "|o] is on cooldown for another [" + NextFighterCommand[fighterInSpace.ID].Subtract(DateTime.Now).TotalMilliseconds + "]ms"); //
+                            continue;
+                        }
+
+                        if (NextFighterCommand.ContainsKey(fighterInSpace.ID))
+                        {
+                            Console.Log("|oFighter [|g" + MaskedId(fighterInSpace.ID) + "|o] is not on cooldown");
+                            continue;
+                        }
+                    }
+                }
+                catch (Exception){}
+                **/
+
+                //
+                // Rearm missing fighters
+                //
                 try
                 {
                     if (Config.ReArmFighters)
                     {
-                        // Rearm missing fighters
                         IEnumerable<Fighters.Tube> rearmFightersInTube = Fighters.Tubes.Where(a => a.Fighter != null && !a.InSpace && a.Fighter.State == Fighters.States.READY && a.Fighter.SquadronSize < (int)a.Fighter["fighterSquadronMaxSize"]).ToList();
                         if (rearmFightersInTube.Any())
                         {
@@ -1260,7 +1296,9 @@ namespace EveComFramework.SimpleDrone
                     Console.Log("Exception [" + ex + "]");
                 }
 
+                //
                 // Launch fighters
+                //
                 try
                 {
                     IEnumerable<Fighters.Tube> deployFighters = Fighters.Tubes.Where(a => !a.InSpace && a.Fighter.State == Fighters.States.READY).ToList();
@@ -1284,7 +1322,9 @@ namespace EveComFramework.SimpleDrone
                     Console.Log("Exception [" + ex + "]");
                 }
 
+                //
                 // Speed up Returning Fighters
+                //
                 try
                 {
                     if (Entity.All.All(b => b.GroupID != Group.ForceField))
@@ -1311,9 +1351,11 @@ namespace EveComFramework.SimpleDrone
 
                 if (ActiveTarget != null && AvailableFighters.Any())
                 {
+                    //
+                    // Activate propmod for fighters outside optimal range
+                    //
                     try
                     {
-                        // Activate propmod for fighters outside optimal range
                         IEnumerable<Fighters.Fighter> fightersThatNeedToActivatePropmod = AvailableFighters.Where(a => a.HasPropmod() && a.ToEntity.DistanceTo(ActiveTarget) > ((double)a["fighterAbilityAttackMissileRangeOptimal"] + (double)a["fighterAbilityAttackMissileRangeFalloff"] + 10000) && a.Slot2 != null && a.Slot2.AllowsActivate).ToList();
                         if (fightersThatNeedToActivatePropmod.Any())
                         {
@@ -1333,17 +1375,22 @@ namespace EveComFramework.SimpleDrone
                         Console.Log("Exception [" + ex + "]");
                     }
 
+                    //
+                    // Rearm fighters that have run out of Rockets
+                    //
                     try
                     {
-                        // Rearm fighters that have run out of Rockets
-                        foreach (Fighters.Fighter availableFighter in AvailableFighters)
+                        if (Config.RefillRockets)
                         {
-                            if (_fighterRocketSalvosLeft.ContainsKey(availableFighter.ToEntity.ID) && (_fighterRocketSalvosLeft[availableFighter.ToEntity.ID] <= 0))
+                            foreach (Fighters.Fighter availableFighter in AvailableFighters)
                             {
-                                Console.Log("|oFighter [" + MaskedId(availableFighter.ID) + "|o] Reloading Rockets");
-                                availableFighter.RecallToTube();
-                                NextFighterCommand.AddOrUpdate(availableFighter.ID, DateTime.Now.AddSeconds(7));
-                                return false;
+                                if (_fighterRocketSalvosLeft.ContainsKey(availableFighter.ToEntity.ID) && (_fighterRocketSalvosLeft[availableFighter.ToEntity.ID] <= 0))
+                                {
+                                    Console.Log("|oFighter [" + MaskedId(availableFighter.ID) + "|o] Reloading Rockets");
+                                    availableFighter.RecallToTube();
+                                    NextFighterCommand.AddOrUpdate(availableFighter.ID, DateTime.Now.AddSeconds(7));
+                                    return false;
+                                }
                             }
                         }
                     }
@@ -1361,14 +1408,25 @@ namespace EveComFramework.SimpleDrone
                             bool slightPauseNeededAfterMissileAttack = false;
                             foreach (Fighters.Fighter fighterReadyToMissileAttack in fightersReadyToMissileAttack)
                             {
-                                Entity rocketTargetEntity = Entity.All.Where(a => a.LockedTarget && !a.Exploded && !a.Released && (SmallFighterMissileTarget(a) || a.GroupID == Group.LargeCollidableStructure || a.GroupID == Group.LargeCollidableObject || a.GroupID == Group.DestructibleSentryGun || (Config.UseFighterMissileAttackOnActiveTarget && a == ActiveTarget)) && fighterReadyToMissileAttack.ToEntity.DistanceTo(a) < (double)fighterReadyToMissileAttack["fighterAbilityMissilesRange"] - 3000 && (!missileFired.ContainsKey(a.ID) || missileFired[a.ID].AddSeconds((double)fighterReadyToMissileAttack["fighterAbilityAttackMissileDuration"] / 1000 + 1) < DateTime.Now)).OrderByDescending(a => SmallFighterMissileTarget(a)).FirstOrDefault();
+                                Entity rocketTargetEntity = Entity.All.Where(a => a.LockedTarget && !a.Exploded && !a.Released && (SmallFighterMissileTarget(a) || a.GroupID == Group.LargeCollidableStructure || a.GroupID == Group.LargeCollidableObject || a.GroupID == Group.DestructibleSentryGun || (Config.UseFighterMissileAttackOnActiveTarget && a == ActiveTarget)) && fighterReadyToMissileAttack.ToEntity.DistanceTo(a) < (double)fighterReadyToMissileAttack["fighterAbilityMissilesRange"] - 3000).OrderByDescending(a => SmallFighterMissileTarget(a)).FirstOrDefault();
                                 if (rocketTargetEntity != null)
                                 {
-                                    Console.Log("|oFighter [|g" + MaskedId(fighterReadyToMissileAttack.ID) + "|o] [3]Rocket    [|g" + rocketTargetEntity.Name + "|o][|g" + MaskedId(rocketTargetEntity.ID) + "|o][|g" + Math.Round(rocketTargetEntity.DistanceTo(fighterReadyToMissileAttack.ToEntity) / 1000, 0) + "k|o] FighterToTarget");
-                                    fighterReadyToMissileAttack.Slot3.ActivateOnTarget(rocketTargetEntity);
-                                    _fighterRocketSalvosLeft.AddOrUpdate(fighterReadyToMissileAttack.ID, _fighterRocketSalvosLeft[fighterReadyToMissileAttack.ID] - 1);
-                                    NextFighterCommand.AddOrUpdate(fighterReadyToMissileAttack.ID, DateTime.Now.AddSeconds(3));
-                                    slightPauseNeededAfterMissileAttack = true;
+                                    int missilesAlreadyShotAtThisEntity = 0;
+                                    if (missileEntityTracking[fighterReadyToMissileAttack.ID] != null)
+                                    {
+                                        missilesAlreadyShotAtThisEntity = (int)missileEntityTracking[fighterReadyToMissileAttack.ID];
+                                    }
+                                    if (missilesAlreadyShotAtThisEntity <= 1)
+                                    {
+                                        Console.Log("|oFighter [|g" + MaskedId(fighterReadyToMissileAttack.ID) + "|o] [3]Rocket    [|g" + rocketTargetEntity.Name + "|o][|g" + MaskedId(rocketTargetEntity.ID) + "|o][|g" + Math.Round(rocketTargetEntity.DistanceTo(fighterReadyToMissileAttack.ToEntity) / 1000, 0) + "k|o] FighterToTarget");
+                                        fighterReadyToMissileAttack.Slot3.ActivateOnTarget(rocketTargetEntity);
+                                        _fighterRocketSalvosLeft.AddOrUpdate(fighterReadyToMissileAttack.ID, _fighterRocketSalvosLeft[fighterReadyToMissileAttack.ID] - 1);
+                                        missilesAlreadyShotAtThisEntity++;
+                                        missileEntityTracking.AddOrUpdate(fighterReadyToMissileAttack.ID, missilesAlreadyShotAtThisEntity);
+                                        NextFighterCommand.AddOrUpdate(fighterReadyToMissileAttack.ID, DateTime.Now.AddSeconds(3));
+                                        slightPauseNeededAfterMissileAttack = true;
+                                    }
+
                                     continue;
                                 }
 
