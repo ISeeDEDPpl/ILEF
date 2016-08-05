@@ -1408,13 +1408,13 @@ namespace EveComFramework.SimpleDrone
                             bool slightPauseNeededAfterMissileAttack = false;
                             foreach (Fighters.Fighter fighterReadyToMissileAttack in fightersReadyToMissileAttack)
                             {
-                                Entity rocketTargetEntity = Entity.All.Where(a => a.LockedTarget && !a.Exploded && !a.Released && (SmallFighterMissileTarget(a) || a.GroupID == Group.LargeCollidableStructure || a.GroupID == Group.LargeCollidableObject || a.GroupID == Group.DestructibleSentryGun || (Config.UseFighterMissileAttackOnActiveTarget && a == ActiveTarget)) && fighterReadyToMissileAttack.ToEntity.DistanceTo(a) < (double)fighterReadyToMissileAttack["fighterAbilityMissilesRange"] - 3000).OrderByDescending(a => SmallFighterMissileTarget(a)).FirstOrDefault();
+                                Entity rocketTargetEntity = Entity.All.Where(a => a.LockedTarget && !a.Exploded && !a.Released && (FighterMissileTarget(a) || a.GroupID == Group.LargeCollidableStructure || a.GroupID == Group.LargeCollidableObject || a.GroupID == Group.DestructibleSentryGun || (Config.UseFighterMissileAttackOnActiveTarget && a == ActiveTarget)) && fighterReadyToMissileAttack.ToEntity.DistanceTo(a) < (double)fighterReadyToMissileAttack["fighterAbilityMissilesRange"] - 3000).OrderByDescending(a => FighterMissileTarget(a)).FirstOrDefault();
                                 if (rocketTargetEntity != null)
                                 {
                                     int missilesAlreadyShotAtThisEntity = 0;
-                                    if (missileEntityTracking[fighterReadyToMissileAttack.ID] != null)
+                                    if (missileEntityTracking!= null && missileEntityTracking.Any() && missileEntityTracking.ContainsKey(rocketTargetEntity.ID))
                                     {
-                                        missilesAlreadyShotAtThisEntity = (int)missileEntityTracking[fighterReadyToMissileAttack.ID];
+                                        missilesAlreadyShotAtThisEntity = (int)missileEntityTracking[rocketTargetEntity.ID];
                                     }
                                     if (missilesAlreadyShotAtThisEntity <= 1)
                                     {
