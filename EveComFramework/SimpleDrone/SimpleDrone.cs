@@ -376,7 +376,12 @@ namespace EveComFramework.SimpleDrone
 
         bool FighterMissileTarget(Entity target)
         {
-            return (Data.NPCClasses.All.Any(a => a.Key == target.GroupID && (a.Value == "Capital" || a.Value == "Destroyer" || a.Value == "BattleCruiser" || a.Value == "BattleShip")));
+            return (Data.NPCClasses.All.Any(a => a.Key == target.GroupID && (a.Value == "Capital" || a.Value == "BattleCruiser" || a.Value == "BattleShip")));
+        }
+
+        bool NPCFrigate(Entity target)
+        {
+            return (Data.NPCClasses.All.Any(a => a.Key == target.GroupID && (a.Value == "Destroyer" || a.Value == "Frigate")));
         }
 
         bool SmallFighterMissileTarget(Entity target)
@@ -1408,7 +1413,7 @@ namespace EveComFramework.SimpleDrone
                             bool slightPauseNeededAfterMissileAttack = false;
                             foreach (Fighters.Fighter fighterReadyToMissileAttack in fightersReadyToMissileAttack)
                             {
-                                Entity rocketTargetEntity = Entity.All.Where(a => a.LockedTarget && !a.Exploded && !a.Released && (FighterMissileTarget(a) || a.GroupID == Group.LargeCollidableStructure || a.GroupID == Group.LargeCollidableObject || a.GroupID == Group.DestructibleSentryGun || (Config.UseFighterMissileAttackOnActiveTarget && a == ActiveTarget)) && fighterReadyToMissileAttack.ToEntity.DistanceTo(a) < (double)fighterReadyToMissileAttack["fighterAbilityMissilesRange"] - 3000).OrderByDescending(a => FighterMissileTarget(a)).FirstOrDefault();
+                                Entity rocketTargetEntity = Entity.All.Where(a => a.LockedTarget && !a.Exploded && !a.Released && (FighterMissileTarget(a) || a.GroupID == Group.LargeCollidableStructure || a.GroupID == Group.LargeCollidableObject || a.GroupID == Group.DestructibleSentryGun || (Config.UseFighterMissileAttackOnActiveTarget && a == ActiveTarget && !NPCFrigate(a))) && fighterReadyToMissileAttack.ToEntity.DistanceTo(a) < (double)fighterReadyToMissileAttack["fighterAbilityMissilesRange"] - 3000).OrderByDescending(a => FighterMissileTarget(a)).FirstOrDefault();
                                 if (rocketTargetEntity != null)
                                 {
                                     int missilesAlreadyShotAtThisEntity = 0;
