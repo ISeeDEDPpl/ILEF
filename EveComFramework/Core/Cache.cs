@@ -107,7 +107,7 @@ namespace EveComFramework.Core
 
             if (Bookmarks == null || BookmarkUpdate < DateTime.Now)
             {
-                Bookmarks = Bookmark.All.Select(a => a.Title).ToArray();
+                Bookmarks = Bookmark.All.OrderBy(a => a.Title).Select(a => a.Title).ToArray();
                 CitadelBookmarks = Bookmark.All.Where(a => a.GroupID == Group.MediumCitadel || a.GroupID == Group.LargeCitadel || a.GroupID == Group.XLargeCitadel || a.GroupID == Group.XXLargeCitadel).Select(a => a.Title).ToArray();
                 BookmarkUpdate = DateTime.Now.AddMinutes(1);
             }
@@ -221,7 +221,7 @@ namespace EveComFramework.Core
                 {
                     ArmorPercent = MyShip.Armor / MyShip.MaxArmor;
                     HullPercent = MyShip.Hull / MyShip.MaxHull;
-                    if (Drone.AllInSpace.Any(a => a.ToEntity.ArmorPct < 100 || a.ToEntity.HullPct < 100)) DamagedDrones = true;
+                    if (Drone.AllInSpace.Any(a => a.ToEntity != null && (a.ToEntity.ArmorPct < 100 || a.ToEntity.HullPct < 100))) DamagedDrones = true;
                 }
                 catch (Exception){}
             }
