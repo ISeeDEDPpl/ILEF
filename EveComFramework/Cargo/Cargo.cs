@@ -14,11 +14,11 @@ namespace EveComFramework.Cargo
         private class CargoAction
         {
             internal Func<object[], bool> Action { get; set; }
-            internal Bookmark Bookmark { get; set; }
+            internal Bookmark Bookmark { get; }
             internal Func<Item, bool> QueryString { get; set; }
             internal int Quantity { get; set; }
-            internal Func<InventoryContainer> Source { get; set; }
-            internal string Container { get; set; }
+            internal Func<InventoryContainer> Source { get; }
+            internal string Container { get; }
             internal Func<InventoryContainer> Target { get; set; }
             internal bool Compress { get; set; }
 
