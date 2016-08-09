@@ -39,6 +39,7 @@
   <Group ID="583" Class="Destroyer" Group="Asteroid Serpentis Destroyer" />
   <Group ID="584" Class="BattleCruiser" Group="Asteroid Serpentis BattleCruiser" />
   <Group ID="593" Class="BattleCruiser" Group="Deadspace Angel Cartel BattleCruiser" />
+  <Group ID="594" Class="Battleship" Group="Deadspace Angel Cartel Battleship" />
   <Group ID="595" Class="Cruiser" Group="Deadspace Angel Cartel Cruiser" />
   <Group ID="596" Class="Destroyer" Group="Deadspace Angel Cartel Destroyer" />
   <Group ID="597" Class="Frigate" Group="Deadspace Angel Cartel Frigate" />
