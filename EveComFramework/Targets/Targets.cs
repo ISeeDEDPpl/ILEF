@@ -64,7 +64,7 @@ namespace EveComFramework.Targets
             {
                 if (_LockedTargetList == null)
                 {
-                    _LockedTargetList = LockedAndLockingTargetList.Where(a => a.LockedTarget).ToList();
+                    _LockedTargetList = LockedAndLockingTargetList.Where(a => a.Exists && !a.Exploded && !a.Released && a.LockedTarget).ToList();
                 }
                 return _LockedTargetList;
             }
@@ -279,7 +279,7 @@ namespace EveComFramework.Targets
             // replace parameters in the second lambda expression with parameters from the first
             var secondBody = ParameterRebinder.ReplaceParameters(map, second.Body);
 
-            // apply composition of lambda expression bodies to parameters from the first expression 
+            // apply composition of lambda expression bodies to parameters from the first expression
             return Expression.Lambda<T>(merge(first.Body, secondBody), first.Parameters);
         }
 
