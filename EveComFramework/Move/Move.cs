@@ -840,7 +840,7 @@ namespace EveComFramework.Move
                     if (Route.NextWaypoint.Distance < 2000 || Route.NextWaypoint.Distance > 150000)
                     {
                         Log.Log("|oJumping through to |-g{0}", Route.NextWaypoint.Name);
-                        Route.NextWaypoint.Jump();        
+                        Route.NextWaypoint.Jump();
                     }
                     else
                     {
@@ -1032,16 +1032,29 @@ namespace EveComFramework.Move
 
         bool EnablePropmod(object[] Params)
         {
-            List<Module> propulsionModules = MyShip.Modules.Where(a => a.GroupID == Group.PropulsionModule && a.IsOnline).ToList();
-            if (propulsionModules.Any())
+            try
             {
-                if (propulsionModules.Any(a => a.AllowsActivate))
+                List<Module> propulsionModules =
+                    MyShip.Modules.Where(a => a.GroupID == Group.PropulsionModule && a.IsOnline).ToList();
+                if (propulsionModules.Any())
                 {
-                    Log.Log("|g  InstaWarp turned on the propmod.");
-                    propulsionModules.Where(a => a.AllowsActivate).ForEach(m => m.Activate());
+                    if (propulsionModules.Any(a => a.AllowsActivate))
+                    {
+                        Log.Log("|g  InstaWarp turned on the propmod.");
+                        propulsionModules.Where(a => a.AllowsActivate).ForEach(m => m.Activate());
+                        return true;
+                    }
+
+                    return true;
                 }
+
+                return true;
             }
-            return true;
+            catch (Exception ex)
+            {
+                Log.Log("Exception [" + ex + "]");
+                return false;
+            }
         }
 
         #endregion
