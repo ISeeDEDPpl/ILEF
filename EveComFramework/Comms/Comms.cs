@@ -267,7 +267,7 @@ namespace EveComFramework.Comms
                     {
                         foreach (Entity entity in Entity.All.Where(i => i.Distance < 200000 && i.GroupID != Group.Wreck && i.CategoryID != Category.Drone && i.CategoryID != Category.Charge && i.CategoryID != Category.Asteroid))
                         {
-                            ChatQueue.Enqueue("Name [" + entity.Name + "] Distance [" + Math.Round(entity.Distance/1000,0) + "k] GroupID [" + entity.GroupID + "] TypeID [" + entity.TypeID + "]");
+                            ChatQueue.Enqueue("Name [" + entity.Name + "] Distance [" + Math.Round(entity.Distance/1000,0) + "k] GroupID [" + (int)entity.GroupID + "][" + entity.GroupID + "] TypeID [" + entity.TypeID + "]");
                         }
                     });
                     ChatQueue.Enqueue("----------------End List----------------");
@@ -518,22 +518,26 @@ namespace EveComFramework.Comms
 
             if (Config.UseIRC)
             {
-                if (ChatQueue.Any())
+                if (ChatQueue != null && ChatQueue.Any())
                 {
-                    if (!string.IsNullOrWhiteSpace(Config.SendTo1))
+                    try
                     {
-                        IRC.LocalUser.SendMessage(Config.SendTo1, ChatQueue.Dequeue());
-                    }
+                        if (!string.IsNullOrWhiteSpace(Config.SendTo1))
+                        {
+                            IRC.LocalUser.SendMessage(Config.SendTo1, ChatQueue.Dequeue());
+                        }
 
-                    if (!string.IsNullOrWhiteSpace(Config.SendTo2))
-                    {
-                        IRC.LocalUser.SendMessage(Config.SendTo2, ChatQueue.Dequeue());
-                    }
+                        if (!string.IsNullOrWhiteSpace(Config.SendTo2))
+                        {
+                            IRC.LocalUser.SendMessage(Config.SendTo2, ChatQueue.Dequeue());
+                        }
 
-                    if (!string.IsNullOrWhiteSpace(Config.SendTo3))
-                    {
-                        IRC.LocalUser.SendMessage(Config.SendTo3, ChatQueue.Dequeue());
+                        if (!string.IsNullOrWhiteSpace(Config.SendTo3))
+                        {
+                            IRC.LocalUser.SendMessage(Config.SendTo3, ChatQueue.Dequeue());
+                        }
                     }
+                    catch (Exception){}
                 }
             }
 
