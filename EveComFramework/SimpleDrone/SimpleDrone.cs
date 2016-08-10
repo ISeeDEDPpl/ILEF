@@ -1544,7 +1544,7 @@ namespace EveComFramework.SimpleDrone
                             bool slightPauseNeededAfterMissileAttack = false;
                             foreach (Fighters.Fighter fighterReadyToMissileAttack in fightersReadyToMissileAttack)
                             {
-                                Entity rocketTargetEntity = _rats.LockedTargetList.FirstOrDefault(a => HostilePilot.ID == a.ID && fighterReadyToMissileAttack.ToEntity.DistanceTo(a) < (double)fighterReadyToMissileAttack["fighterAbilityMissilesRange"] - 3000);
+                                Entity rocketTargetEntity = _rats.LockedTargetList.FirstOrDefault(a => HostilePilot != null && HostilePilot.ID == a.ID && fighterReadyToMissileAttack.ToEntity.DistanceTo(a) < (double)fighterReadyToMissileAttack["fighterAbilityMissilesRange"] - 3000);
                                 if (rocketTargetEntity == null) rocketTargetEntity = _rats.LockedTargetList.OrderByDescending(FighterMissileTarget).FirstOrDefault(a => !Triggers.Contains(a.Name) && a.ArmorPct > 40 &&  (FighterMissileTarget(a) || (Config.UseFighterMissileAttackOnActiveTarget && a == ActiveTarget && !NPCFrigate(a))) && fighterReadyToMissileAttack.ToEntity.DistanceTo(a) < (double)fighterReadyToMissileAttack["fighterAbilityMissilesRange"] - 3000);
                                 if (rocketTargetEntity == null) rocketTargetEntity = _rats.LockedTargetList.OrderByDescending(FighterMissileTarget).FirstOrDefault(a => a.ArmorPct > 40 && (FighterMissileTarget(a) || (Config.UseFighterMissileAttackOnActiveTarget && a == ActiveTarget && !NPCFrigate(a))) && fighterReadyToMissileAttack.ToEntity.DistanceTo(a) < (double)fighterReadyToMissileAttack["fighterAbilityMissilesRange"] - 3000);
                                 if (rocketTargetEntity != null)
