@@ -432,6 +432,11 @@ namespace EveComFramework.SimpleDrone
 
         bool DroneReady(long droneID)
         {
+            if (Drone.AllInSpace.Any(droneInSpace => droneInSpace.ID == droneID && (droneInSpace.State == EntityState.Departing || droneInSpace.State == EntityState.Incapacitated)))
+            {
+                return false;
+            }
+
             if (NextDroneCommand != null && NextDroneCommand.Any())
             {
                 if (NextDroneCommand.ContainsKey(droneID))
@@ -1020,7 +1025,7 @@ namespace EveComFramework.SimpleDrone
             if (!_rats.TargetList.Any() && !Entity.All.Any(a => PriorityTargets.Contains(a.Name)) && !Config.StayDeployedWithNoTargets)
             {
                 // Recall drones
-                List<Drone> Recall = Drone.AllInSpace.Where(droneInSpace => droneInSpace.ToEntity != null && DroneReady(droneInSpace.ID) && droneInSpace.State != EntityState.Departing && droneInSpace.State != EntityState.Incapacitated).ToList();
+                List<Drone> Recall = Drone.AllInSpace.Where(droneInSpace => droneInSpace.ToEntity != null && DroneReady(droneInSpace.ID)).ToList();
                 if (Recall.Any())
                 {
                     Console.Log("|oRecalling drones |-gNo rats available");
@@ -1092,7 +1097,7 @@ namespace EveComFramework.SimpleDrone
                 }
             }
 
-            List<Drone> RecallDamaged = Drone.AllInSpace.Where(a => DroneReady(a.ID) && a.State != EntityState.Departing).ToList();
+            List<Drone> RecallDamaged = Drone.AllInSpace.Where(a => _droneCooldown.Contains(a) && DroneReady(a.ID)).ToList();
             if (RecallDamaged.Any())
             {
                 Console.Log("|oRecalling damaged drones");
@@ -1152,7 +1157,7 @@ namespace EveComFramework.SimpleDrone
                 if (ActiveTarget == null)
                 {
                     // Recall drones if in point defense and no frig/destroyers in range
-                    List<Drone> Recall = Drone.AllInSpace.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && a.State != EntityState.Departing).ToList();
+                    List<Drone> Recall = Drone.AllInSpace.Where(a => DroneReady(a.ID)).ToList();
                     if (Recall.Any())
                     {
                         Console.Log("|oRecalling drones");
@@ -1183,7 +1188,7 @@ namespace EveComFramework.SimpleDrone
                 if (SmallTarget(ActiveTarget))
                 {
                     // Recall sentries
-                    List<Drone> Recall = Drone.AllInSpace.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group != "Light Scout Drones") && a.State != EntityState.Departing).ToList();
+                    List<Drone> Recall = Drone.AllInSpace.Where(a => _droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group != "Light Scout Drones")).ToList();
                     if (Recall.Any())
                     {
                         Console.Log("|oRecalling non scout drones");
@@ -1192,7 +1197,7 @@ namespace EveComFramework.SimpleDrone
                         return false;
                     }
                     // Send drones to attack
-                    List<Drone> Attack = Drone.AllInSpace.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Light Scout Drones") && (a.State != EntityState.Combat || a.Target == null || a.Target != ActiveTarget)).ToList();
+                    List<Drone> Attack = Drone.AllInSpace.Where(a => DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Light Scout Drones") && (a.State != EntityState.Combat || a.Target == null || a.Target != ActiveTarget)).ToList();
                     if (Attack.Any())
                     {
                         Console.Log("|oSending scout drones to attack");
@@ -1218,7 +1223,7 @@ namespace EveComFramework.SimpleDrone
                 }
                 else if (Config.Mode == Mode.PointDefense)
                 {
-                    List<Drone> Recall = Drone.AllInSpace.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && a.State != EntityState.Departing).ToList();
+                    List<Drone> Recall = Drone.AllInSpace.Where(a => DroneReady(a.ID)).ToList();
                     // Recall drones if in point defense and no frig/destroyers in range
                     if (Recall.Any())
                     {
@@ -1234,7 +1239,7 @@ namespace EveComFramework.SimpleDrone
             if (Config.Mode == Mode.AgressiveScout)
             {
                 // Recall sentries
-                List<Drone> Recall = Drone.AllInSpace.Where(a => DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group != "Light Scout Drones") && a.State != EntityState.Departing).ToList();
+                List<Drone> Recall = Drone.AllInSpace.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group != "Light Scout Drones")).ToList();
                 if (Recall.Any())
                 {
                     Console.Log("|oRecalling non scout drones");
@@ -1243,7 +1248,7 @@ namespace EveComFramework.SimpleDrone
                     return false;
                 }
                 // Send drones to attack
-                List<Drone> Attack = Drone.AllInSpace.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Light Scout Drones") && (a.State != EntityState.Combat || a.Target == null || a.Target != ActiveTarget)).ToList();
+                List<Drone> Attack = Drone.AllInSpace.Where(a => DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Light Scout Drones") && (a.State != EntityState.Combat || a.Target == null || a.Target != ActiveTarget)).ToList();
                 if (Attack.Any())
                 {
                     Console.Log("|oSending scout drones to attack");
@@ -1272,7 +1277,7 @@ namespace EveComFramework.SimpleDrone
             if (Config.Mode == Mode.AgressiveMedium)
             {
                 // Recall sentries
-                List<Drone> Recall = Drone.AllInSpace.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group != "Medium Scout Drones") && a.State != EntityState.Departing).ToList();
+                List<Drone> Recall = Drone.AllInSpace.Where(a => _droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group != "Medium Scout Drones") && a.State != EntityState.Departing).ToList();
                 if (Recall.Any())
                 {
                     Console.Log("|oRecalling non medium drones");
@@ -1281,7 +1286,7 @@ namespace EveComFramework.SimpleDrone
                     return false;
                 }
                 // Send drones to attack
-                List<Drone> Attack = Drone.AllInSpace.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Medium Scout Drones") && (a.State != EntityState.Combat || a.Target == null || a.Target != ActiveTarget)).ToList();
+                List<Drone> Attack = Drone.AllInSpace.Where(a => DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Medium Scout Drones") && (a.State != EntityState.Combat || a.Target == null || a.Target != ActiveTarget)).ToList();
                 if (Attack.Any())
                 {
                     Console.Log("|oSending medium drones to attack");
@@ -1310,7 +1315,7 @@ namespace EveComFramework.SimpleDrone
             if (Config.Mode == Mode.AgressiveHeavy)
             {
                 // Recall non heavy
-                List<Drone> Recall = Drone.AllInSpace.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group != "Heavy Attack Drones") && a.State != EntityState.Departing).ToList();
+                List<Drone> Recall = Drone.AllInSpace.Where(a => _droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group != "Heavy Attack Drones")).ToList();
                 if (Recall.Any())
                 {
                     Console.Log("|oRecalling non heavy drones");
@@ -1319,7 +1324,7 @@ namespace EveComFramework.SimpleDrone
                     return false;
                 }
                 // Send drones to attack
-                List<Drone> Attack = Drone.AllInSpace.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Heavy Attack Drones") && (a.State != EntityState.Combat || a.Target == null || a.Target != ActiveTarget)).ToList();
+                List<Drone> Attack = Drone.AllInSpace.Where(a => DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Heavy Attack Drones") && (a.State != EntityState.Combat || a.Target == null || a.Target != ActiveTarget)).ToList();
                 if (Attack.Any())
                 {
                     Console.Log("|oSending heavy drones to attack");

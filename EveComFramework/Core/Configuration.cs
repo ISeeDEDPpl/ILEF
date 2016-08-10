@@ -206,8 +206,6 @@ namespace EveComFramework.Core
 
                 numericDroneTargetSlots.Value = DroneConfig.TargetSlots;
                 numericDroneTargetSlots.ValueChanged += (s, a) => { DroneConfig.TargetSlots = (int)Math.Floor(numericDroneTargetSlots.Value); DroneConfig.Save(); };
-                numericDroneTargetCooldown.Value = DroneConfig.TargetCooldown;
-                numericDroneTargetCooldown.ValueChanged += (s, a) => { DroneConfig.TargetCooldown = (int)Math.Floor(numericDroneTargetCooldown.Value); DroneConfig.Save(); };
                 checkDronePrivateTargets.Checked = DroneConfig.PrivateTargets;
                 checkDronePrivateTargets.CheckedChanged += (s, a) => { DroneConfig.PrivateTargets = checkDronePrivateTargets.Checked; DroneConfig.Save(); };
                 checkDroneFocus.Checked = DroneConfig.SharedTargets;
@@ -221,7 +219,7 @@ namespace EveComFramework.Core
                     case SimpleDrone.Mode.None:
                         comboDroneMode.SelectedItem = "None";
                         break;
-                    case SimpleDrone.Mode.AFKHeavy:
+                    case SimpleDrone.Mode.AfkHeavy:
                         comboDroneMode.SelectedItem = "AFK Heavy";
                         break;
                     case SimpleDrone.Mode.PointDefense:
@@ -242,7 +240,7 @@ namespace EveComFramework.Core
                     case SimpleDrone.Mode.AgressiveSentry:
                         comboDroneMode.SelectedItem = "Agressive Sentry";
                         break;
-                    case SimpleDrone.Mode.AFKSalvage:
+                    case SimpleDrone.Mode.AfkSalvage:
                         comboDroneMode.SelectedItem = "AFK Salvage";
                         break;
                 }
@@ -254,7 +252,7 @@ namespace EveComFramework.Core
                             DroneConfig.Mode = SimpleDrone.Mode.None;
                             break;
                         case "AFK Heavy":
-                            DroneConfig.Mode = SimpleDrone.Mode.AFKHeavy;
+                            DroneConfig.Mode = SimpleDrone.Mode.AfkHeavy;
                             break;
                         case "Point Defense":
                             DroneConfig.Mode = SimpleDrone.Mode.PointDefense;
@@ -275,7 +273,7 @@ namespace EveComFramework.Core
                             DroneConfig.Mode = SimpleDrone.Mode.AgressiveSentry;
                             break;
                         case "AFK Salvage":
-                            DroneConfig.Mode = SimpleDrone.Mode.AFKSalvage;
+                            DroneConfig.Mode = SimpleDrone.Mode.AfkSalvage;
                             break;
                     }
                     DroneConfig.Save();
