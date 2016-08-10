@@ -636,7 +636,7 @@ namespace EveComFramework.SimpleDrone
             if (AvailableFighters.Any())
             {
                 if(!RecallFighters(AvailableFighters, "Recalling")) return false;
-                if (!SpeedUpFighters(AvailableFighters.Where(i => i.State == Fighters.States.RECALLING), "Burning Back")) return false;
+                if (!SpeedUpFighters(ReturningFighters, "Burning Back")) return false;
             }
 
             if (Fighters.Active.Any(i => i.ToEntity != null && i.ToEntity.Distance < 900000)) return false;
@@ -1048,7 +1048,7 @@ namespace EveComFramework.SimpleDrone
             //
             // Speed up Fighters
             //
-            if (AvailableFighters.Any()) if (!SpeedUpFighters(AvailableFighters.Where(i => i.State == Fighters.States.RECALLING), "Burning Back.")) return false;
+            if (ReturningFighters.Any()) if (!SpeedUpFighters(ReturningFighters, "Burning Back.")) return false;
 
             if (Config.Mode == Mode.AfkHeavy && (_rats.TargetList.Any() || Entity.All.Any(a => PriorityTargets.Contains(a.Name))))
             {
@@ -1179,7 +1179,7 @@ namespace EveComFramework.SimpleDrone
                         if (AvailableFighters.Any())
                         {
                             if (!RecallFighters(AvailableFighters, "No ActiveTarget")) return false;
-                            if (!SpeedUpFighters(AvailableFighters.Where(i => i.State == Fighters.States.RECALLING), "Returning")) return false;
+                            if (ReturningFighters.Any()) if (!SpeedUpFighters(ReturningFighters, "Burning Back.")) return false;
                         }
                     }
                 }
@@ -1521,7 +1521,7 @@ namespace EveComFramework.SimpleDrone
                         {
                             if (AvailableFighters.Any(i => _fighterRocketSalvosLeft != null && _fighterRocketSalvosLeft.ContainsKey(i.ID) && (_fighterRocketSalvosLeft[i.ID] <= 0)))
                             {
-                                IEnumerable<Fighters.Fighter> fightersThatNeedToRefillRockets = AvailableFighters.Where(i => _fighterRocketSalvosLeft != null && _fighterRocketSalvosLeft.ContainsKey(i.ID) && (_fighterRocketSalvosLeft[i.ID] <= 0)).ToList();
+                                IEnumerable<Fighters.Fighter> fightersThatNeedToRefillRockets = Fighters.Active.Where(i => FighterReady(i.ID) && _fighterRocketSalvosLeft != null && _fighterRocketSalvosLeft.ContainsKey(i.ID) && (_fighterRocketSalvosLeft[i.ID] <= 0)).ToList();
                                 if (fightersThatNeedToRefillRockets.Any())
                                 {
                                     if (!RecallFighters(fightersThatNeedToRefillRockets, "Refill Rockets")) return false;
