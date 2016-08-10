@@ -321,8 +321,7 @@ namespace EveComFramework.SimpleDrone
             get
             {
                 if (!Session.InSpace) return null;
-
-                _lcoToBlowUp = Entity.All.FirstOrDefault(a => (a.GroupID == Group.LargeCollidableObject || a.GroupID == Group.LargeCollidableStructure) && a.Distance <= 1000 && a.Exists && !a.Exploded && !a.Released);
+                _lcoToBlowUp = Entity.All.FirstOrDefault(a => (a.GroupID == Group.LargeCollidableObject || a.GroupID == Group.LargeCollidableStructure) && !a.Name.ToLower().Contains("rock") && !a.Name.ToLower().Contains("stone") && !a.Name.ToLower().Contains("asteroid") && a.Distance <= 1000 && a.Exists && !a.Exploded && !a.Released);
                 return _lcoToBlowUp ?? null;
             }
         }
