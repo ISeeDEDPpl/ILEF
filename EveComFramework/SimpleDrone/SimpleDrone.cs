@@ -832,7 +832,7 @@ namespace EveComFramework.SimpleDrone
             {
                 int freeTargetSlots = Config.TargetSlots - _rats.LockedAndLockingTargetList.Count;
                 //Console.Log("|oActiveTarget is empty; picking a NewTarget");
-                IEnumerable<Entity> newTargets = _rats.UnlockedTargetList.OrderBy(i => i.DistanceTo(entityToUseForClosestNpcMeasurement)).Where(a => a.Exists && !a.Exploded && !a.Released && !TargetCooldown.ContainsKey(a.ID) && a.Distance < MyShip.MaxTargetRange).ToList();
+                IEnumerable<Entity> newTargets = _rats.UnlockedTargetList.OrderByDescending(i => PriorityTargets.Any() && PriorityTargets.Contains(i.Name)).ThenBy(i => i.DistanceTo(entityToUseForClosestNpcMeasurement)).Where(a => a.Exists && !a.Exploded && !a.Released && !TargetCooldown.ContainsKey(a.ID) && a.Distance < MyShip.MaxTargetRange).ToList();
                 if (newTargets.Any() && Entity.All.FirstOrDefault(a => a.IsJamming && a.IsTargetingMe) == null)
                 {
                     foreach (Entity newTarget in newTargets)
