@@ -407,24 +407,28 @@ namespace EveComFramework.Comms
                 }
                 catch (Exception) { }
 
-                if (Config.LocalTraffic)
+                if (Config.LocalTraffic && Local.Pilots.Count < 100)
                 {
-                    foreach (Pilot pilot in newPilots)
+                    try
                     {
-                        if (pilot.CorpID != 0 && string.IsNullOrWhiteSpace(pilot.CorpName))
+                        foreach (Pilot pilot in newPilots)
                         {
-                            pilot.ShowCorpInfo();
-                            return false;
-                        }
+                            if (pilot.CorpID != 0 && string.IsNullOrWhiteSpace(pilot.CorpName))
+                            {
+                                pilot.ShowCorpInfo();
+                                return false;
+                            }
 
-                        if (pilot.AllianceID != 0 && string.IsNullOrWhiteSpace(pilot.AllianceName))
-                        {
-                            pilot.ShowAllianceInfo();
-                            return false;
-                        }
+                            if (pilot.AllianceID != 0 && string.IsNullOrWhiteSpace(pilot.AllianceName))
+                            {
+                                pilot.ShowAllianceInfo();
+                                return false;
+                            }
 
-                        ChatQueue.Enqueue("<Local> New Pilot: [" + pilot.StandingsStatus() + "][ " + pilot.Name + " ][" + pilot.CorpName + "][" + pilot.AllianceName + "][" + pilot.StandingsStatus() + "] - [ http://evewho.com/pilot/" + pilot.Name.Replace(" ", "%20") + " ]");
+                            ChatQueue.Enqueue("<Local> New Pilot: [" + pilot.StandingsStatus() + "][ " + pilot.Name + " ][" + pilot.CorpName + "][" + pilot.AllianceName + "][" + pilot.StandingsStatus() + "] - [ http://evewho.com/pilot/" + pilot.Name.Replace(" ", "%20") + " ]");
+                        }
                     }
+                    catch (Exception){}
                 }
             }
 

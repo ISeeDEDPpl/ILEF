@@ -45,24 +45,29 @@ namespace EveComFramework.Security
 
         bool Control(object[] Params)
         {
-            if (!Session.InSpace && !Session.InStation) return false;
-
-            if (solarSystem == Session.SolarSystemID && localPilots != null)
+            try
             {
-                if (localPilots.Count != Local.Pilots.Count || Local.Pilots.Any(p => !localPilots.Contains(p)) || localPilots.Any(p => !Local.Pilots.Contains(p)))
+                if (!Session.InSpace && !Session.InStation) return false;
+
+                if (solarSystem == Session.SolarSystemID && localPilots != null)
                 {
-                    if (OnLocalChange != null)
-                        OnLocalChange();
+                    if (Local.Pilots.Count < 100 && (localPilots.Count != Local.Pilots.Count || Local.Pilots.Any(p => !localPilots.Contains(p)) || localPilots.Any(p => !Local.Pilots.Contains(p))))
+                    {
+                        if (OnLocalChange != null)
+                            OnLocalChange();
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
-                else
-                {
-                    return false;
-                }
+
+                solarSystem = Session.SolarSystemID;
+                localPilots = Local.Pilots;
+
+                return false;
             }
-
-            solarSystem = Session.SolarSystemID;
-            localPilots = Local.Pilots;
-
+            catch (Exception){}
             return false;
         }
 

@@ -308,6 +308,11 @@ namespace EveComFramework.AutoModule
             {
                 try
                 {
+                    if (Config.MinShieldBoosters == Config.MaxShieldBoosters)
+                    {
+                        Console.Log("ShieldBoosters: MinShieldBoosters[" + Config.MinShieldBoosters + "] cannot be equal to MaxArmorRepairs[" + Config.MaxArmorRepairs + "]: Setting MinShieldBoosters to [" + (Config.MinShieldBoosters - 1) + "]");
+                        Config.MinShieldBoosters = Config.MinShieldBoosters - 1;
+                    }
                     List<Module> shieldBoosters = MyShip.Modules.Where(a => a.GroupID == Group.ShieldBooster && a.IsOnline).ToList();
                     if (shieldBoosters.Any())
                     {
@@ -357,6 +362,11 @@ namespace EveComFramework.AutoModule
             {
                 try
                 {
+                    if (Config.MinArmorRepairs == Config.MaxArmorRepairs)
+                    {
+                        Console.Log("ArmorRepairs: MinArmorRepairs[" + Config.MinArmorRepairs + "] cannot be equal to MaxArmorRepairs[" + Config.MaxArmorRepairs + "]: Setting MinArmorRepaires to [" + (Config.MinArmorRepairs - 1) + "]");
+                        Config.MinArmorRepairs = Config.MinArmorRepairs - 1;
+                    }
                     List<Module> armorRepairers = MyShip.Modules.Where(a => a.GroupID == Group.ArmorRepairUnit && a.IsOnline).ToList();
                     if (armorRepairers.Any())
                     {
