@@ -33,51 +33,82 @@ namespace EveComFramework.Targets
         {
             get
             {
-                if (_TargetList == null)
+                try
                 {
-                    if (Ordering != null)
+                    if (_TargetList == null)
                     {
-                        _TargetList = Entity.All.Where(QueriesCompiled).Where(ent => !ent.Exploded && !ent.Released).OrderBy(ent => ent, Ordering).ThenBy(ent => ent.Distance).ToList();
+                        if (Ordering != null)
+                        {
+                            _TargetList = Entity.All.Where(QueriesCompiled).Where(ent => ent.Exists && !ent.Exploded && !ent.Released).OrderBy(ent => ent, Ordering).ThenBy(ent => ent.Distance).ToList();
+                        }
+                        else
+                        {
+                            _TargetList = Entity.All.Where(QueriesCompiled).Where(ent => ent.Exists && !ent.Exploded && !ent.Released).OrderBy(ent => ent.Distance).ToList();
+                        }
                     }
-                    else
-                    {
-                        _TargetList = Entity.All.Where(QueriesCompiled).Where(ent => !ent.Exploded && !ent.Released).OrderBy(ent => ent.Distance).ToList();
-                    }
+                    return _TargetList;
                 }
-                return _TargetList;
+                catch (Exception)
+                {
+                    return new List<Entity>();
+                }
             }
         }
         public List<Entity> UnlockedTargetList
         {
             get
             {
-                if (_UnlockedTargetList == null)
+                try
                 {
-                    _UnlockedTargetList = TargetList.Where(a => !a.LockedTarget && !a.LockingTarget).ToList();
+                    if (_UnlockedTargetList == null)
+                    {
+                        _UnlockedTargetList = TargetList.Where(a => !a.LockedTarget && !a.LockingTarget).ToList();
+                    }
+                    return _UnlockedTargetList;
                 }
-                return _UnlockedTargetList;
+                catch (Exception)
+                {
+                    return new List<Entity>();
+                }
             }
         }
         public List<Entity> LockedTargetList
         {
             get
             {
-                if (_LockedTargetList == null)
+                try
                 {
-                    _LockedTargetList = LockedAndLockingTargetList.Where(a => a.Exists && !a.Exploded && !a.Released && a.LockedTarget).ToList();
+                    if (_LockedTargetList == null)
+                    {
+                        _LockedTargetList =
+                            LockedAndLockingTargetList.Where(
+                                a => a.Exists && !a.Exploded && !a.Released && a.LockedTarget).ToList();
+                    }
+
+                    return _LockedTargetList;
                 }
-                return _LockedTargetList;
+                catch (Exception)
+                {
+                    return new List<Entity>();
+                }
             }
         }
         public List<Entity> LockedAndLockingTargetList
         {
             get
             {
-                if (_LockedAndLockingTargetList == null)
+                try
                 {
-                    _LockedAndLockingTargetList = TargetList.Where(a => a.LockedTarget || a.LockingTarget).ToList();
+                    if (_LockedAndLockingTargetList == null)
+                    {
+                        _LockedAndLockingTargetList = TargetList.Where(a => a.LockedTarget || a.LockingTarget).ToList();
+                    }
+                    return _LockedAndLockingTargetList;
                 }
-                return _LockedAndLockingTargetList;
+                catch (Exception)
+                {
+                    return new List<Entity>();
+                }
             }
         }
 
