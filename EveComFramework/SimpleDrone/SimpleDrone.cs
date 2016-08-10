@@ -980,7 +980,12 @@ namespace EveComFramework.SimpleDrone
 
                 return false;
             }
-
+            int intAttribute = 0;
+            //foreach (KeyValuePair<string, object> a in Entity.ActiveTarget)
+            //{
+            //    intAttribute++;
+            //    Console.Log("ActiveTarget Attribute [" + intAttribute + "] Key[" + a.Key + "] Value [" + a.Value.ToString() + "]");
+            //}
             //Console.Log("|oActivetarget is [" + ActiveTarget.Name + "][" + Math.Round(ActiveTarget.Distance/1000, 0) + "k]");
             return true;
         }
