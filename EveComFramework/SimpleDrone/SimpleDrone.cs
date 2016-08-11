@@ -1026,6 +1026,25 @@ namespace EveComFramework.SimpleDrone
 
             if (MyShip.ToEntity.Mode == EntityMode.Warping) return false;
 
+            try
+            {
+                // Flag _offgridFighters
+                _offgridFighters.AddRange(Fighters.Tubes.Where(a => a.InSpace && a.Fighter.ToEntity == null && !_offgridFighters.Contains(a.Fighter.ID)).Select(a => a.Fighter.ID));
+            }
+            catch (Exception) { }
+
+            // Remove _offgridFighters flagging if fighters are on grid and state is != returning
+            Fighters.Tubes.Where(a => a.InSpace && a.Fighter.ToEntity != null && a.Fighter.State != Fighters.States.RECALLING && _offgridFighters.Contains(a.Fighter.ID)).Select(a => a.Fighter.ID).ForEach(m => _offgridFighters.Remove(m));
+
+            // If _offgridFighters appeared on grid: command orbit
+            Fighters.Tubes.Where(a => a.InSpace && a.Fighter.ToEntity != null && a.Fighter.State == Fighters.States.RECALLING && _offgridFighters.Contains(a.Fighter.ID)).Select(a => a.Fighter).ReturnAndOrbit();
+
+            if (_offgridFighters.Any(i => FighterReady(i)))
+            {
+                IEnumerable<Fighters.Fighter> offGridFightersToRecall = Fighters.Active.Where(a => a.InSpace && a.ToEntity == null && FighterReady(a.ID) && !_offgridFighters.Contains(a.ID));
+                RecallFighters(offGridFightersToRecall, "offgrid fighters");
+            }
+
             if (!_rats.TargetList.Any() && !Entity.All.Any(a => PriorityTargets.Contains(a.Name)) && !Config.StayDeployedWithNoTargets)
             {
                 // Recall drones
@@ -1133,19 +1152,6 @@ namespace EveComFramework.SimpleDrone
             //Console.Log("if (!ChooseActiveTarget()) return false;");
             if (!ChooseActiveTarget()) return false;
             #endregion
-
-            try
-            {
-                // Flag _offgridFighters
-                _offgridFighters.AddRange(Fighters.Tubes.Where(a => a.InSpace && a.Fighter.ToEntity == null && !_offgridFighters.Contains(a.Fighter.ID)).Select(a => a.Fighter.ID));
-            }
-            catch (Exception){}
-
-            // Remove _offgridFighters flagging if fighters are on grid and state is != returning
-            Fighters.Tubes.Where(a => a.InSpace && a.Fighter.ToEntity != null && a.Fighter.State != Fighters.States.RECALLING && _offgridFighters.Contains(a.Fighter.ID)).Select(a => a.Fighter.ID).ForEach(m => _offgridFighters.Remove(m));
-
-            // If _offgridFighters appeared on grid: command orbit
-            Fighters.Tubes.Where(a => a.InSpace && a.Fighter.ToEntity != null && a.Fighter.State == Fighters.States.RECALLING && _offgridFighters.Contains(a.Fighter.ID)).Select(a => a.Fighter).ReturnAndOrbit();
 
             // Make sure ActiveTarget is locked.  If so, make sure it's the active target, if not, return.
             if (ActiveTarget != null && ActiveTarget.Exists && ActiveTarget.LockedTarget)
