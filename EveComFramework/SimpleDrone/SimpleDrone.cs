@@ -82,12 +82,12 @@ namespace EveComFramework.SimpleDrone
         /// </summary>
         public bool UseFighterMissileAttackOnActiveTarget = false;
 
-        internal bool PrivateTargets = true;
-        internal bool SharedTargets = false;
-        internal bool TargetCooldownRandomize = false;
-        internal int TargetSlots = 2;
+        public bool PrivateTargets = true;
+        public bool SharedTargets = false;
+        public bool TargetCooldownRandomize = false;
+        public int TargetSlots = 2;
 
-        internal int TargetCooldown
+        public int TargetCooldown
         {
             get
             {
@@ -100,11 +100,11 @@ namespace EveComFramework.SimpleDrone
                 return 2;
             }
         }
-        internal double FighterCriticalHealthLevel = 70;
-        internal double FighterMaxRange = 800000;
-        internal bool ReArmFighters = false;
-        internal bool RefillRockets = false;
-        internal bool AttackAnchoredBubble = true;
+        public double FighterCriticalHealthLevel = 70;
+        public double FighterMaxRange = 800000;
+        public bool ReArmFighters = false;
+        public bool RefillRockets = false;
+        public bool AttackAnchoredBubble = true;
     }
 
     #endregion

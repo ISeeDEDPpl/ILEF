@@ -34,6 +34,7 @@ namespace EveComFramework.AutoModule
         public bool PropulsionModulesAlwaysOn = false;
         public bool PropulsionModulesApproaching = false;
         public bool PropulsionModulesOrbiting = false;
+        public bool KeepPropulsionModuleActive = false;
 
         public int CapActiveHardeners = 30;
         public int CapShieldBoosters = 30;
@@ -110,11 +111,6 @@ namespace EveComFramework.AutoModule
         /// Set to true to force automodule to decloak you.  Useful for handling non-covops cloaks.
         /// </summary>
         public bool Decloak = false;
-
-        /// <summary>
-        /// Set to true to force automodule to keep your propmod online regardless of state
-        /// </summary>
-        public bool KeepPropulsionModuleActive = false;
 
         private bool? _insidePosForceField = false;
         public bool InsidePosForceField
@@ -673,7 +669,7 @@ namespace EveComFramework.AutoModule
 
             List<Module> propulsionModules = MyShip.Modules.Where(a => a.GroupID == Group.PropulsionModule && a.IsOnline).ToList();
 
-            if (MyShip.ToEntity.Mode == EntityMode.Warping && !KeepPropulsionModuleActive)
+            if (MyShip.ToEntity.Mode == EntityMode.Warping && !Config.KeepPropulsionModuleActive)
             {
                 propulsionModules.Where(a => a.AllowsDeactivate).ForEach(m => m.Deactivate());
                 return false;
@@ -688,7 +684,7 @@ namespace EveComFramework.AutoModule
                 {
                     propulsionModules.Where(a => a.AllowsActivate).ForEach(m => m.Activate());
                 }
-                if (!KeepPropulsionModuleActive && !Config.PropulsionModulesAlwaysOn && ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapPropulsionModules) ||
+                if (!Config.KeepPropulsionModuleActive && !Config.PropulsionModulesAlwaysOn && ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapPropulsionModules) ||
                     MyShip.ToEntity.Mode == EntityMode.Stopped || MyShip.ToEntity.Mode == EntityMode.Aligned)
                 {
                     propulsionModules.Where(a => a.AllowsDeactivate).ForEach(m => m.Deactivate());

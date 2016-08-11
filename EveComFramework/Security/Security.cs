@@ -511,7 +511,21 @@ namespace EveComFramework.Security
 
         bool RecallDrones(object[] Params)
         {
-            if (Session.InSpace && Drone.AllInSpace.Any(droneInSpace => droneInSpace.State != EntityState.Incapacitated && droneInSpace.State != EntityState.Departing) && MyShip.ToEntity.GroupID != Group.Capsule) Drone.AllInSpace.Where(droneInSpace => droneInSpace.State != EntityState.Incapacitated && droneInSpace.State != EntityState.Departing).ReturnToDroneBay();
+            if (Session.InSpace)
+            {
+                if (Drone.AllInSpace.Any(droneInSpace => droneInSpace.State != EntityState.Incapacitated && droneInSpace.State != EntityState.Departing))
+                {
+                    if (MyShip.ToEntity.GroupID != Group.Capsule)
+                    {
+                        Drone.AllInSpace.Where(droneInSpace => droneInSpace.State != EntityState.Incapacitated && droneInSpace.State != EntityState.Departing).ReturnToDroneBay();
+                    }
+
+                    return true;
+                }
+
+                return true;
+            }
+
             return true;
         }
 
@@ -676,11 +690,11 @@ namespace EveComFramework.Security
                 case FleeTrigger.ArmorLow:
                     if (Session.InSpace && Drone.AllInSpace.Any(droneInSpace => droneInSpace.State != EntityState.Incapacitated && droneInSpace.State != EntityState.Departing))
                     {
+                        Drone.AllInSpace.Where(droneInSpace => droneInSpace.State != EntityState.Incapacitated && droneInSpace.State != EntityState.Departing).ReturnToDroneBay();
                         if (Config.FleeDroneWait > 0)
                         {
                             WaitFor(Config.FleeDroneWait, () => !Drone.AllInSpace.Any(droneInSpace => droneInSpace.State != EntityState.Incapacitated && droneInSpace.State != EntityState.Departing));
                         }
-                        Drone.AllInSpace.Where(droneInSpace => droneInSpace.State != EntityState.Incapacitated && droneInSpace.State != EntityState.Departing).ReturnToDroneBay();
                     }
                     goto case FleeTrigger.Pod;
                 case FleeTrigger.Pod:
