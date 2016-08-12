@@ -197,7 +197,7 @@ namespace EveComFramework.SimpleDrone
                 {
                     if (!Session.InSpace) return new List<Fighters.Fighter>();
 
-                    _availableFighters = Fighters.Active.Where(a => FighterReady(a.ID) && a.ToEntity != null && a.State != Fighters.States.RECALLING).ToList();
+                    _availableFighters = Fighters.Active.Where(a => FighterReady(a.ID) && a.ToEntity != null && a.State != Fighters.States.RECALLING && a.State != Fighters.States.LANDING && a.State != Fighters.States.LAUNCHING).ToList();
                     if (_availableFighters != null)
                     {
                         return _availableFighters;
@@ -584,7 +584,7 @@ namespace EveComFramework.SimpleDrone
                     fightersToRecall = fightersToRecall.ToList();
                     if (fightersToRecall.Any(a => FighterReady(a.ID) && a.ToEntity != null && a.State != Fighters.States.RECALLING))
                     {
-                        IEnumerable<Fighters.Fighter> fightersWaitingToBeRecalled = fightersToRecall.Where(fighter => (spamReturning || FighterReady(fighter.ID)) && fighter.ToEntity != null && fighter.State != Fighters.States.RECALLING).ToList();
+                        IEnumerable<Fighters.Fighter> fightersWaitingToBeRecalled = fightersToRecall.Where(fighter => (spamReturning || FighterReady(fighter.ID)) && fighter.ToEntity != null && fighter.State != Fighters.States.RECALLING && fighter.State != Fighters.States.LANDING && fighter.State != Fighters.States.LAUNCHING).ToList();
                         if (SafeToIssueFighterCommands())
                         {
                             foreach (Fighters.Fighter fighterWaitingToBeRecalled in fightersWaitingToBeRecalled)
@@ -611,9 +611,9 @@ namespace EveComFramework.SimpleDrone
                     {
                         foreach (Fighters.Fighter offgridFighterWaitingToBeRecalled in offgridFightersWaitingToBeRecalled)
                         {
-                            Console.Log("|oFighter [" + offgridFighterWaitingToBeRecalled.Type + "][" + MaskedId(offgridFighterWaitingToBeRecalled.ID) + "|o][|g" + Math.Round(offgridFighterWaitingToBeRecalled.ToEntity.Distance / 1000, 0) + "k|o] Recalling from offgrid [|g" + reason + "|o]");
                             offgridFighterWaitingToBeRecalled.RecallToTube();
                             NextFighterCommand.AddOrUpdate(offgridFighterWaitingToBeRecalled.ID, DateTime.Now.AddSeconds(30));
+                            Console.Log("|oFighter [" + offgridFighterWaitingToBeRecalled.Type + "][" + MaskedId(offgridFighterWaitingToBeRecalled.ID) + "|o] Recalling from offgrid [|g" + reason + "|o]");
                             continue;
                         }
 
@@ -681,10 +681,10 @@ namespace EveComFramework.SimpleDrone
             {
                 if (Entity.All.All(b => b.GroupID != Group.ForceField))
                 {
-                    if (fightersThatNeedPropModOn != null && fightersThatNeedPropModOn.Any(a => a.ToEntity != null && a.ToEntity.Velocity.Magnitude < 3000 && a.HasPropmod() && a.Slot2 != null && a.Slot2.AllowsActivate && a.ToEntity.Distance > 15000))
+                    if (fightersThatNeedPropModOn != null && fightersThatNeedPropModOn.Any(a => a.ToEntity != null && a.ToEntity.Velocity.Magnitude < 3000 && a.HasPropmod() && a.Slot2 != null && a.Slot2.AllowsActivate && a.ToEntity.Distance > 15000 && a.State != Fighters.States.LANDING && a.State != Fighters.States.LAUNCHING))
                     {
                         fightersThatNeedPropModOn = fightersThatNeedPropModOn.ToList();
-                        IEnumerable<Fighters.Fighter> availableFightersThatNeedPropModOn = fightersThatNeedPropModOn.Where(a => FighterReady(a.ID) && a.HasPropmod() && a.Slot2 != null && a.Slot2.AllowsActivate && a.ToEntity.Distance > 15000).ToList();
+                        IEnumerable<Fighters.Fighter> availableFightersThatNeedPropModOn = fightersThatNeedPropModOn.Where(a => FighterReady(a.ID) && a.HasPropmod() && a.Slot2 != null && a.Slot2.AllowsActivate && a.ToEntity.Distance > 15000 && a.State != Fighters.States.LANDING && a.State != Fighters.States.LAUNCHING).ToList();
                         if (availableFightersThatNeedPropModOn.Any(i => i.ToEntity != null))
                         {
                             foreach (Fighters.Fighter availableFighterThatNeedPropModOn in availableFightersThatNeedPropModOn)
@@ -1039,7 +1039,7 @@ namespace EveComFramework.SimpleDrone
             // If we're in a POS and fighters are in space, queue delayed stop of the module
             if (Entity.All.Any(a => a.GroupID == Group.ForceField) && Fighters.Active.Any())
             {
-                QueueState(FighterShutdown);
+                QueueState(FighterShutdown, 10000);
                 return true;
             }
 
