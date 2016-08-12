@@ -163,7 +163,28 @@ namespace EveComFramework.SimpleDrone
         private readonly Dictionary<Drone, double> _droneHealthCache = new Dictionary<Drone, double>();
         private readonly IPC _ipc = IPC.Instance;
         private readonly Dictionary<long?, int?> _missileEntityTracking = new Dictionary<long?, int?>();
-        private readonly List<long> _offgridFighters = new List<long>();
+
+        private List<long> _offgridFighters;
+        /// <summary>
+        /// Fighters that are InSpace but not on Grid with us (Fighter.ToEntity == null)
+        /// </summary>
+        public List<long> OffgridFighters
+        {
+            get
+            {
+                try
+                {
+                    // Flag _offgridFighters
+                    _offgridFighters = Fighters.Tubes.Where(a => a.InSpace && a.Fighter.ToEntity == null).Select(a => a.Fighter.ID).ToList();
+                    return _offgridFighters;
+                }
+                catch (Exception) { }
+
+                return null;
+            }
+        }
+
+
         private IEnumerable<Fighters.Fighter> _availableFighters;
         /// <summary>
         /// AvailableFighters - Fighters on Grid that are ready for orders and not already being recalled
@@ -551,8 +572,10 @@ namespace EveComFramework.SimpleDrone
         /// </summary>
         /// <param name="fightersToRecall"></param>
         /// <param name="reason"></param>
+        /// <param name="spamReturning"></param>
+        /// <param name="waitForFightersToReturn"></param>
         /// <returns></returns>
-        public bool RecallFighters(IEnumerable<Fighters.Fighter> fightersToRecall, string reason)
+        public bool RecallFighters(IEnumerable<Fighters.Fighter> fightersToRecall, string reason, bool spamReturning = false, bool waitForFightersToReturn = false)
         {
             try
             {
@@ -561,7 +584,7 @@ namespace EveComFramework.SimpleDrone
                     fightersToRecall = fightersToRecall.ToList();
                     if (fightersToRecall.Any(a => FighterReady(a.ID) && a.ToEntity != null && a.State != Fighters.States.RECALLING))
                     {
-                        IEnumerable<Fighters.Fighter> fightersWaitingToBeRecalled = fightersToRecall.Where(fighter => FighterReady(fighter.ID) && fighter.ToEntity != null && fighter.State != Fighters.States.RECALLING).ToList();
+                        IEnumerable<Fighters.Fighter> fightersWaitingToBeRecalled = fightersToRecall.Where(fighter => (spamReturning || FighterReady(fighter.ID)) && fighter.ToEntity != null && fighter.State != Fighters.States.RECALLING).ToList();
                         if (SafeToIssueFighterCommands())
                         {
                             foreach (Fighters.Fighter fighterWaitingToBeRecalled in fightersWaitingToBeRecalled)
@@ -579,33 +602,36 @@ namespace EveComFramework.SimpleDrone
                         //Console.Log("RecallFighters: fightersToRecall.Where...");
                         return false;
                     }
-
-                    if (_offgridFighters != null && _offgridFighters.Any(fighterId => FighterReady(fighterId)))
-                    {
-                        IEnumerable<Fighters.Fighter> offgridFightersWaitingToBeRecalled = fightersToRecall.Where(fighter => FighterReady(fighter.ID)).ToList();
-                        if (offgridFightersWaitingToBeRecalled.Any() && SafeToIssueFighterCommands())
-                        {
-                            foreach (Fighters.Fighter offgridFighterWaitingToBeRecalled in offgridFightersWaitingToBeRecalled)
-                            {
-                                Console.Log("|oFighter [" + offgridFighterWaitingToBeRecalled.Type + "][" + MaskedId(offgridFighterWaitingToBeRecalled.ID) + "|o][|g" + Math.Round(offgridFighterWaitingToBeRecalled.ToEntity.Distance / 1000, 0) + "k|o] Recalling from offgrid [|g" + reason + "|o]");
-                                offgridFighterWaitingToBeRecalled.RecallToTube();
-                                NextFighterCommand.AddOrUpdate(offgridFighterWaitingToBeRecalled.ID, DateTime.Now.AddSeconds(30));
-                                continue;
-                            }
-
-                            //Console.Log("|oRecallFighters: _offgridFighters All fighters are recalling");
-                            return false;
-                        }
-
-                        //Console.Log("|oRecallFighters: ... _offgridFighters.Any(fighterId => FighterReady(fighterId)))");
-                        return true;
-                    }
-
-                    return true;
                 }
 
-                //Console.Log("|oRecallFighters: We have no fighters to recall at the moment.");
+                if (OffgridFighters != null && OffgridFighters.Any(fighterId => (spamReturning || FighterReady(fighterId))))
+                {
+                    IEnumerable<Fighters.Fighter> offgridFightersWaitingToBeRecalled = Fighters.Active.Where(fighter =>(spamReturning || FighterReady(fighter.ID)) && OffgridFighters.Contains(fighter.ID)).ToList();
+                    if (offgridFightersWaitingToBeRecalled.Any() && SafeToIssueFighterCommands())
+                    {
+                        foreach (Fighters.Fighter offgridFighterWaitingToBeRecalled in offgridFightersWaitingToBeRecalled)
+                        {
+                            Console.Log("|oFighter [" + offgridFighterWaitingToBeRecalled.Type + "][" + MaskedId(offgridFighterWaitingToBeRecalled.ID) + "|o][|g" + Math.Round(offgridFighterWaitingToBeRecalled.ToEntity.Distance / 1000, 0) + "k|o] Recalling from offgrid [|g" + reason + "|o]");
+                            offgridFighterWaitingToBeRecalled.RecallToTube();
+                            NextFighterCommand.AddOrUpdate(offgridFighterWaitingToBeRecalled.ID, DateTime.Now.AddSeconds(30));
+                            continue;
+                        }
+
+                        //Console.Log("|oRecallFighters: _offgridFighters All fighters are recalling");
+                        return false;
+                    }
+
+                    //Console.Log("|oRecallFighters: ... _offgridFighters.Any(fighterId => FighterReady(fighterId)))");
+                    //if (!waitForFightersToReturn) return true;
+                }
+
+                if (waitForFightersToReturn && (fightersToRecall.Any() || OffgridFighters.Any()))
+                {
+                    return false;
+                }
+
                 return true;
+                //Console.Log("|oRecallFighters: We have no fighters to recall at the moment.");
             }
             catch (Exception ex)
             {
@@ -663,6 +689,7 @@ namespace EveComFramework.SimpleDrone
                         {
                             foreach (Fighters.Fighter availableFighterThatNeedPropModOn in availableFightersThatNeedPropModOn)
                             {
+
                                 Console.Log("|oFighter [|g" + MaskedId(availableFighterThatNeedPropModOn.ID) + "|o] propmod on: [|g" + reason + "|o]");
                                 availableFighterThatNeedPropModOn.Slot2.ActivateOnSelf();
                                 NextFighterCommand.AddOrUpdate(availableFighterThatNeedPropModOn.ID, DateTime.Now.AddSeconds(2));
@@ -1026,22 +1053,9 @@ namespace EveComFramework.SimpleDrone
 
             if (MyShip.ToEntity.Mode == EntityMode.Warping) return false;
 
-            try
+            if (OffgridFighters.Any(i => FighterReady(i)))
             {
-                // Flag _offgridFighters
-                _offgridFighters.AddRange(Fighters.Tubes.Where(a => a.InSpace && a.Fighter.ToEntity == null && !_offgridFighters.Contains(a.Fighter.ID)).Select(a => a.Fighter.ID));
-            }
-            catch (Exception) { }
-
-            // Remove _offgridFighters flagging if fighters are on grid and state is != returning
-            Fighters.Tubes.Where(a => a.InSpace && a.Fighter.ToEntity != null && a.Fighter.State != Fighters.States.RECALLING && _offgridFighters.Contains(a.Fighter.ID)).Select(a => a.Fighter.ID).ForEach(m => _offgridFighters.Remove(m));
-
-            // If _offgridFighters appeared on grid: command orbit
-            Fighters.Tubes.Where(a => a.InSpace && a.Fighter.ToEntity != null && a.Fighter.State == Fighters.States.RECALLING && _offgridFighters.Contains(a.Fighter.ID)).Select(a => a.Fighter).ReturnAndOrbit();
-
-            if (_offgridFighters.Any(i => FighterReady(i)))
-            {
-                IEnumerable<Fighters.Fighter> offGridFightersToRecall = Fighters.Active.Where(a => a.InSpace && a.ToEntity == null && FighterReady(a.ID) && !_offgridFighters.Contains(a.ID));
+                IEnumerable<Fighters.Fighter> offGridFightersToRecall = Fighters.Active.Where(a => OffgridFighters.Contains(a.ID));
                 RecallFighters(offGridFightersToRecall, "offgrid fighters");
             }
 
@@ -1626,7 +1640,7 @@ namespace EveComFramework.SimpleDrone
 
         bool FighterShutdown(object[] Params)
         {
-            if (!RecallFighters(Fighters.Active, "FighterShutdown")) return false;
+            if (!RecallFighters(Fighters.Active, "FighterShutdown", true, true)) return false;
             Console.Log("FighterShutdown completed.");
             return true;
         }
