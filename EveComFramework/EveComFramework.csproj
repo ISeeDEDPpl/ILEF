@@ -89,6 +89,7 @@
     <Compile Include="Data\Dungeon.cs" />
     <Compile Include="Data\InvType.cs" />
     <Compile Include="Data\InvGroup.cs" />
+    <Compile Include="GroupControl\FleetAutodiscover.cs" />
     <Compile Include="GroupControl\GroupControl.cs" />
     <Compile Include="GroupControl\UI\Debug.cs">
       <SubType>Form</SubType>
