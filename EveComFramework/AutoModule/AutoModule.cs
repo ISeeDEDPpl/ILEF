@@ -368,7 +368,7 @@ namespace EveComFramework.AutoModule
                     {
                         if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapArmorRepairs || MyShip.ToEntity.ArmorPct > Config.MaxArmorRepairs)
                         {
-                            foreach (var armorRepairer in armorRepairers.Where(a => a.AllowsDeactivate))
+                            foreach (Module armorRepairer in armorRepairers.Where(a => a.AllowsDeactivate))
                             {
                                 Console.Log("|o[|gArmorRepairer|o] deactivated. ArmorPct [|g" + Math.Round(MyShip.ToEntity.ArmorPct, 1) + "|o] MaxArmorRepairs [|g" + Config.MinArmorRepairs + "|o] C[|g" + Math.Round((MyShip.Capacitor / MyShip.MaxCapacitor * 100), 0) + "|o] CapArmorRepairs [|g" + Config.CapArmorRepairs + "|o]");
                                 armorRepairer.Deactivate();
@@ -376,7 +376,7 @@ namespace EveComFramework.AutoModule
                         }
                         else if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapArmorRepairs && MyShip.ToEntity.ArmorPct <= Config.MinArmorRepairs)
                         {
-                            foreach (var armorRepairer in armorRepairers.Where(a => a.AllowsActivate))
+                            foreach (Module armorRepairer in armorRepairers.Where(a => a.AllowsActivate != null && a.AllowsActivate))
                             {
                                 if (!nextArmorRepAttemptTime.ContainsKey(armorRepairer.ID) || (nextArmorRepAttemptTime.ContainsKey(armorRepairer.ID) && DateTime.UtcNow > nextArmorRepAttemptTime[armorRepairer.ID]))
                                 {
