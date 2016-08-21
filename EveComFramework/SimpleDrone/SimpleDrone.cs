@@ -185,7 +185,6 @@ namespace EveComFramework.SimpleDrone
             }
         }
 
-
         private IEnumerable<Fighters.Fighter> _availableFighters;
         /// <summary>
         /// AvailableFighters - Fighters on Grid that are ready for orders and not already being recalled
@@ -258,17 +257,105 @@ namespace EveComFramework.SimpleDrone
             }
         }
 
+        private DateTime lastPriorityTargetListUpdate = DateTime.MinValue;
 
-
+        private List<string> _priorityTargets = new List<string>();
+        /// <summary>
+        /// PriorityTargets Added from the main behavior (Ratter / Copilot / evecombine / MissionMiner, etc)
+        /// </summary>
+        public List<string> PriorityTargetsFromBehavior = new List<string>();
         /// <summary>
         /// PriorityTargets - Targets that should be handles before others: by default there are no priority targets they are added manually using the GUI
         /// </summary>
-        public List<string> PriorityTargets = new List<string>();
+        public List<string> PriorityTargets
+        {
+            get
+            {
+                try
+                {
+                    if (_priorityTargets != null && _priorityTargets.Any() && DateTime.Now < lastPriorityTargetListUpdate.AddSeconds(10))
+                    {
+                        return _priorityTargets ?? new List<string>();
+                    }
+
+                    lastPriorityTargetListUpdate = DateTime.Now;
+                    _priorityTargets = new List<string>();
+                    _priorityTargets.Clear();
+
+                    if (PriorityTargetsFromBehavior != null && PriorityTargetsFromBehavior.Any())
+                    {
+                        _priorityTargets.AddRange(PriorityTargetsFromBehavior.ToList());
+                    }
+
+                    if (MyShip.ToEntity.Mode != EntityMode.Warping)
+                    {
+                        if (_rats.TargetList != null && _rats.TargetList.Any())
+                        {
+                            IEnumerable<Entity> entitiesTargetingMe = Entity.TargetedBy.Where(i => i.Exists && !i.Exploded && !i.Released);
+                            try
+                            {
+                                foreach (Entity entityTargetingMeCanWarpScramble in entitiesTargetingMe.Where(i => (double?) i["entityWarpScrambleChance"] != null && (double) i["entityWarpScrambleChance"] > 0))
+                                {
+                                    if (!_priorityTargets.Contains(entityTargetingMeCanWarpScramble.Name))
+                                    {
+                                        Console.Log("|oAdding PriorityTarget [|g" + entityTargetingMeCanWarpScramble.Name + "|o][|g" + Math.Round(entityTargetingMeCanWarpScramble.Distance/1000, 0) + "|o]k as it can WarpScramble");
+                                        _priorityTargets.Add(entityTargetingMeCanWarpScramble.Name);
+                                    }
+                                }
+                            }
+                            catch (Exception)
+                            {
+                                if (_priorityTargets.Any())
+                                {
+                                    return _priorityTargets;
+                                }
+
+                                return new List<string>();
+                            }
+
+                            IEnumerable<Entity> movingNpcsThatExistOnGrid = Entity.All.Where(i => i.Exists && !i.Exploded && !i.Released && i.IsNPC && i.Distance < 150000 && i.Velocity.Magnitude > 0);
+                            try
+                            {
+                                foreach (Entity warpScramblingNpcThatExistsOnGrid in movingNpcsThatExistOnGrid.Where(i => (double?) i["entityWarpScrambleChance"] != null && (double) i["entityWarpScrambleChance"] > 0))
+                                {
+                                    if (!_priorityTargets.Contains(warpScramblingNpcThatExistsOnGrid.Name))
+                                    {
+                                        Console.Log("|oAdding PriorityTarget [|g" + warpScramblingNpcThatExistsOnGrid.Name + "|o][|g" + Math.Round(warpScramblingNpcThatExistsOnGrid.Distance/1000, 0) + "|o]k as it can WarpScrable");
+                                        _priorityTargets.Add(warpScramblingNpcThatExistsOnGrid.Name);
+                                    }
+                                }
+                            }
+                            catch (Exception)
+                            {
+                                if (_priorityTargets.Any())
+                                {
+                                    return _priorityTargets;
+                                }
+
+                                return new List<string>();
+                            }
+                        }
+                    }
+
+                    if (_priorityTargets.Any())
+                    {
+                        return _priorityTargets;
+                    }
+
+                    return new List<string>();
+                }
+                catch (Exception ex)
+                {
+                    Console.Log("Exception [" + ex + "]");
+                    return new List<string>();
+                }
+            }
+            //(int)a.Fighter["fighterSquadronMaxSize"]
+        }
         /// <summary>
         /// Triggers - NPCs that cause other spawns and thus should be killed last: by default there are no triggers they are added manually using the GUI
         /// </summary>
         public List<string> Triggers = new List<string>();
-
 
         private Entity _hostilePilot = null;
 
