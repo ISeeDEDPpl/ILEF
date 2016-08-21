@@ -105,6 +105,7 @@ namespace EveComFramework.SimpleDrone
         public bool ReArmFighters = false;
         public bool RefillRockets = false;
         public bool AttackAnchoredBubble = true;
+        public int FighterSquadronMaxSize = 9;
     }
 
     #endregion
@@ -1470,19 +1471,23 @@ namespace EveComFramework.SimpleDrone
                 {
                     if (Config.ReArmFighters)
                     {
-                        IEnumerable<Fighters.Tube> rearmFightersInTube = Fighters.Tubes.Where(a => a.Fighter != null && !a.InSpace && a.Fighter.State == Fighters.States.READY && a.Fighter.SquadronSize < (int)a.Fighter["fighterSquadronMaxSize"]).ToList();
+                        IEnumerable<Fighters.Tube> rearmFightersInTube = Fighters.Tubes.Where(a => !a.InSpace && a.Fighter.State == Fighters.States.READY && a.Fighter.SquadronSize < Config.FighterSquadronMaxSize);
                         if (rearmFightersInTube.Any())
                         {
-                            foreach (Fighters.Tube rearmFighter in rearmFightersInTube)
+                            Console.Log("|oMissing Fighters in a squadron");
+                            if (Fighters.Bay.Items.Any(a => a.TypeID == rearmFightersInTube.FirstOrDefault().Fighter.TypeID))
                             {
-                                Item fighterItemToReload = Fighters.Bay.Items.FirstOrDefault(a => a.TypeID == rearmFighter.Fighter.TypeID);
+                                Item fighterItemToReload = Fighters.Bay.Items.FirstOrDefault(a => a.TypeID == rearmFightersInTube.FirstOrDefault().Fighter.TypeID);
                                 if (fighterItemToReload != null)
                                 {
-                                    Console.Log("|oMissing Fighters in a squadron: Loading a [|g" + fighterItemToReload.Name + "|o] into the Tube");
-                                    rearmFighter.LoadFightersToTube(fighterItemToReload);
+                                    Console.Log("|oLoading [|g" + fighterItemToReload.Name + "|o] into the Tube");
+                                    rearmFightersInTube.FirstOrDefault().LoadFightersToTube(fighterItemToReload);
                                     return false;
                                 }
                             }
+
+                            Console.Log("|oWe are missing fighters in a squadron and have none in the drone bay to add to the squadron: panic");
+                            _securityCore.Panic();
                         }
                     }
                 }
