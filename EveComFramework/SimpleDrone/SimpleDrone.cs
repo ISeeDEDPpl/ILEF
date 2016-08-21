@@ -832,7 +832,7 @@ namespace EveComFramework.SimpleDrone
         }
 
         Vector3 LastTargetLocation = Vector3.origin;
-        public bool LockManagement()
+        private bool LockManagement()
         {
             Entity entityToUseForClosestNpcMeasurement = null;
             if (AvailableFighters != null && AvailableFighters.Any())
@@ -1726,7 +1726,7 @@ namespace EveComFramework.SimpleDrone
                             {
                                 Console.Log("|oFighter [|g" + MaskedId(fighterThatNeedsAnAttackTarget.ID) + "|o] [1]Attacking [|g" + ActiveTarget.Name + "|o][|g" + MaskedId(ActiveTarget.ID) + "|o][|g" + Math.Round(fighterThatNeedsAnAttackTarget.ToEntity.DistanceTo(ActiveTarget) / 1000, 0) + "k|o] FighterToTarget"); //
                                 fighterThatNeedsAnAttackTarget.Slot1.ActivateOnTarget(ActiveTarget);
-                                NextFighterCommand.AddOrUpdate(fighterThatNeedsAnAttackTarget.ID, DateTime.Now.AddSeconds(2));
+                                NextFighterCommand.AddOrUpdate(fighterThatNeedsAnAttackTarget.ID, DateTime.Now.AddSeconds(Math.Max(2, Math.Round(ActiveTarget.Distance/1000, 0) / 15)));
                                 continue;
                             }
 
