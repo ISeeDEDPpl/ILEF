@@ -526,22 +526,29 @@ namespace EveComFramework.Comms
                 {
                     try
                     {
+                        List<string> listOfIrcUsersToSendTo = new List<string>();
                         if (!string.IsNullOrWhiteSpace(Config.SendTo1))
                         {
-                            IRC.LocalUser.SendMessage(Config.SendTo1, ChatQueue.Dequeue());
+                            listOfIrcUsersToSendTo.Add(Config.SendTo1);
                         }
 
                         if (!string.IsNullOrWhiteSpace(Config.SendTo2))
                         {
-                            IRC.LocalUser.SendMessage(Config.SendTo2, ChatQueue.Dequeue());
+                            listOfIrcUsersToSendTo.Add(Config.SendTo2);
                         }
 
                         if (!string.IsNullOrWhiteSpace(Config.SendTo3))
                         {
-                            IRC.LocalUser.SendMessage(Config.SendTo3, ChatQueue.Dequeue());
+                            listOfIrcUsersToSendTo.Add(Config.SendTo3);
                         }
+
+                        IEnumerable<string> ienumerableOfIrcUsersToSendTo = listOfIrcUsersToSendTo;
+                        IRC.LocalUser.SendMessage(ienumerableOfIrcUsersToSendTo, ChatQueue.Dequeue());
                     }
-                    catch (Exception){}
+                    catch (Exception ex)
+                    {
+                        Console.Log("Exception [" + ex + "]");
+                    }
                 }
             }
 
