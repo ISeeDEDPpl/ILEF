@@ -667,28 +667,56 @@ namespace EveComFramework.SimpleDrone
         {
             try
             {
-                if (fightersToRecall != null && fightersToRecall.Any())
+                if (fightersToRecall != null)
                 {
-                    fightersToRecall = fightersToRecall.ToList();
-                    if (fightersToRecall.Any(a => FighterReady(a.ID) && a.ToEntity != null && a.State != Fighters.States.RECALLING))
+                    if (fightersToRecall.Any())
                     {
-                        IEnumerable<Fighters.Fighter> fightersWaitingToBeRecalled = fightersToRecall.Where(fighter => (spamReturning || FighterReady(fighter.ID)) && fighter.ToEntity != null && fighter.State != Fighters.States.RECALLING && fighter.State != Fighters.States.LANDING && fighter.State != Fighters.States.LAUNCHING).ToList();
-                        if (SafeToIssueFighterCommands())
+                        fightersToRecall = fightersToRecall.ToList();
+                        if (fightersToRecall.Any(i => i.ToEntity != null && i.ToEntity.Distance > 300000))
                         {
-                            foreach (Fighters.Fighter fighterWaitingToBeRecalled in fightersWaitingToBeRecalled)
+                            IEnumerable<Fighters.Fighter> fightersTooFarAway = fightersToRecall.Where(i => i.ToEntity != null && i.ToEntity.Distance > 300000).ToList();
+                            if (fightersTooFarAway.Any())
                             {
-                                Console.Log("|oFighter [" + fighterWaitingToBeRecalled.Type + "][" + MaskedId(fighterWaitingToBeRecalled.ID) + "|o][|g" + Math.Round(fighterWaitingToBeRecalled.ToEntity.Distance / 1000, 0) + "k|o] Recalling [|g" + reason + "|o]");
-                                fighterWaitingToBeRecalled.RecallToTube();
-                                NextFighterCommand.AddOrUpdate(fighterWaitingToBeRecalled.ID, DateTime.Now.AddSeconds(7));
-                                continue;
-                            }
+                                foreach (Fighters.Fighter fighterTooFarAway in fightersTooFarAway.Where(i => i.ToEntity != null && (i.ToEntity.Distance > i.ToEntity.Velocity.Magnitude * 2)))
+                                {
+                                    if (fighterTooFarAway.Slot1.AllowsActivate && ActiveTarget != null)
+                                    {
+                                        Console.Log("|oFighter [|g" + MaskedId(fighterTooFarAway.ID) + "|o] is [|g" + Math.Round(fighterTooFarAway.ToEntity.Distance / 1000, 0) + "|o]k away going [|g" + fighterTooFarAway.ToEntity.Velocity.Magnitude + "|o]m/s is not likely to make it back to the ship before we warp: engaging fighter on a target");
+                                        fighterTooFarAway.Slot1.ActivateOnTarget(ActiveTarget);
+                                    }
+                                    else
+                                    {
+                                        Console.Log("|oFighter [|g" + MaskedId(fighterTooFarAway.ID) + "|o] is [|g" + Math.Round(fighterTooFarAway.ToEntity.Distance / 1000, 0) + "|o]k away going [|g" + fighterTooFarAway.ToEntity.Velocity.Magnitude + "|o]m/s is not likely to make it back to the ship before we warp: stopping fighter");
+                                        fighterTooFarAway.Stop();
+                                    }
 
-                            //Console.Log("RecallFighters: All Fighters are recalling");
-                            return false;
+                                    NextFighterCommand.AddOrUpdate(fighterTooFarAway.ID, DateTime.Now.AddSeconds(10));
+                                    continue;
+                                }
+                            }
                         }
 
-                        //Console.Log("RecallFighters: fightersToRecall.Where...");
-                        return false;
+                        fightersToRecall = fightersToRecall.ToList();
+                        if (fightersToRecall.Any(a => FighterReady(a.ID) && a.ToEntity != null && a.State != Fighters.States.RECALLING))
+                        {
+                            IEnumerable<Fighters.Fighter> fightersWaitingToBeRecalled = fightersToRecall.Where(fighter => (spamReturning || FighterReady(fighter.ID)) && fighter.ToEntity != null && fighter.State != Fighters.States.RECALLING && fighter.State != Fighters.States.LANDING && fighter.State != Fighters.States.LAUNCHING).ToList();
+                            if (SafeToIssueFighterCommands())
+                            {
+                                foreach (Fighters.Fighter fighterWaitingToBeRecalled in fightersWaitingToBeRecalled)
+                                {
+                                    Console.Log("|oFighter [" + fighterWaitingToBeRecalled.Type + "][" + MaskedId(fighterWaitingToBeRecalled.ID) + "|o][|g" + Math.Round(fighterWaitingToBeRecalled.ToEntity.Distance / 1000, 0) + "k|o] Recalling [|g" + reason + "|o]");
+                                    fighterWaitingToBeRecalled.RecallToTube();
+                                    NextFighterCommand.AddOrUpdate(fighterWaitingToBeRecalled.ID, DateTime.Now.AddSeconds(7));
+                                    continue;
+                                }
+
+                                //Console.Log("RecallFighters: All Fighters are recalling");
+                                return false;
+                            }
+
+                            //Console.Log("RecallFighters: fightersToRecall.Where...");
+                            return false;
+                        }
                     }
                 }
 
