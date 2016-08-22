@@ -1760,7 +1760,7 @@ namespace EveComFramework.SimpleDrone
 
         bool FighterShutdown(object[] Params)
         {
-            if (!RecallFighters(Fighters.Active, "FighterShutdown", true, true)) return false;
+            if (!RecallFighters(Fighters.Active, "FighterShutdown", false, true)) return false;
             Console.Log("FighterShutdown completed.");
             return true;
         }
