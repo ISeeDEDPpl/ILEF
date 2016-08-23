@@ -679,17 +679,17 @@ namespace EveComFramework.SimpleDrone
                             {
                                 foreach (Fighters.Fighter fighterTooFarAway in fightersTooFarAway.Where(i => i.ToEntity != null && (i.ToEntity.Distance > i.ToEntity.Velocity.Magnitude * 2)))
                                 {
-                                    if (fighterTooFarAway.Slot1.AllowsActivate && ActiveTarget != null)
+                                    Entity closestEntityToOrbit = Entity.All.OrderByDescending(i => i.DistanceTo(fighterTooFarAway.ToEntity)).FirstOrDefault();
+                                    if (closestEntityToOrbit != null)
                                     {
-                                        Console.Log("|oFighter [|g" + MaskedId(fighterTooFarAway.ID) + "|o] is [|g" + Math.Round(fighterTooFarAway.ToEntity.Distance / 1000, 0) + "|o]k away going [|g" + fighterTooFarAway.ToEntity.Velocity.Magnitude + "|o]m/s is not likely to make it back to the ship before we warp: engaging fighter on a target");
-                                        fighterTooFarAway.Slot1.ActivateOnTarget(ActiveTarget);
-                                    }
-                                    else
-                                    {
-                                        Console.Log("|oFighter [|g" + MaskedId(fighterTooFarAway.ID) + "|o] is [|g" + Math.Round(fighterTooFarAway.ToEntity.Distance / 1000, 0) + "|o]k away going [|g" + fighterTooFarAway.ToEntity.Velocity.Magnitude + "|o]m/s is not likely to make it back to the ship before we warp: stopping fighter");
-                                        fighterTooFarAway.Stop();
+                                        Console.Log("|oFighter [|g" + MaskedId(fighterTooFarAway.ID) + "|o] is [|g" + Math.Round(fighterTooFarAway.ToEntity.Distance / 1000, 0) + "|o]k away going [|g" + fighterTooFarAway.ToEntity.Velocity.Magnitude + "|o]m/s is not likely to make it back to the ship before we warp: telling fighter to orbit");
+                                        fighterTooFarAway.Follow(closestEntityToOrbit, 100000);
+                                        NextFighterCommand.AddOrUpdate(fighterTooFarAway.ID, DateTime.Now.AddSeconds(10));
+                                        continue;
                                     }
 
+                                    Console.Log("|oFighter [|g" + MaskedId(fighterTooFarAway.ID) + "|o] is [|g" + Math.Round(fighterTooFarAway.ToEntity.Distance / 1000, 0) + "|o]k away going [|g" + fighterTooFarAway.ToEntity.Velocity.Magnitude + "|o]m/s is not likely to make it back to the ship before we warp: stopping fighter");
+                                    fighterTooFarAway.Stop();
                                     NextFighterCommand.AddOrUpdate(fighterTooFarAway.ID, DateTime.Now.AddSeconds(10));
                                     continue;
                                 }
