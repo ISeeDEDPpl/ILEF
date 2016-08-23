@@ -484,6 +484,7 @@ namespace EveComFramework.SimpleDrone
             {
                 Clear();
                 QueueState(Recall);
+                Config.Save();
             }
         }
 
