@@ -80,7 +80,7 @@ namespace EveComFramework.SimpleDrone
         /// <summary>
         /// Use the Fighters Missle Attack on the ActiveTarget?
         /// </summary>
-        public bool UseFighterMissileAttackOnActiveTarget = false;
+        public bool UseFighterMissileAttackOnActiveTarget = true;
 
         public bool PrivateTargets = true;
         public bool SharedTargets = false;
