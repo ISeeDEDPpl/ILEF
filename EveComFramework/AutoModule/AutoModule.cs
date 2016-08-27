@@ -693,7 +693,7 @@ namespace EveComFramework.AutoModule
                         return false;
                     }
 
-                    if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapPropulsionModules && ((Config.PropulsionModulesApproaching && MyShip.ToEntity.Mode == EntityMode.Approaching) || (Config.PropulsionModulesOrbiting && MyShip.ToEntity.Mode == EntityMode.Orbiting) || Config.PropulsionModulesAlwaysOn))
+                    if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapPropulsionModules && ((Config.PropulsionModulesApproaching && MyShip.ToEntity.Mode == EntityMode.Approaching) || (Config.PropulsionModulesApproaching && MyShip.ToEntity.Mode == EntityMode.Aligned) || (Config.PropulsionModulesOrbiting && MyShip.ToEntity.Mode == EntityMode.Orbiting) || Config.PropulsionModulesAlwaysOn))
                     {
                         propulsionModules.Where(a => a.AllowsActivate).ForEach(m => m.Activate());
                     }
