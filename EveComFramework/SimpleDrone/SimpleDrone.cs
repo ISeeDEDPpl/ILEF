@@ -530,6 +530,7 @@ namespace EveComFramework.SimpleDrone
                     return false;
                 }
 
+                Config.Save();
                 //Console.Log("starting...");
                 return true;
             }
