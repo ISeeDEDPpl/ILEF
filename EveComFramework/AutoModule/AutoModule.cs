@@ -102,7 +102,7 @@ namespace EveComFramework.AutoModule
         DateTime _evecomSessionIsReady = DateTime.MinValue;
         private readonly Dictionary<string, DateTime> _nextArmorRepAttemptTime = new Dictionary<string, DateTime>();
         private readonly Dictionary<string, DateTime> _nextBoosterAttemptTime = new Dictionary<string, DateTime>();
-        public bool UseNetworkedSensorArray;
+        public bool UseNetworkedSensorArray = true;
 
         /// <summary>
         /// Configuration for this module
@@ -165,6 +165,7 @@ namespace EveComFramework.AutoModule
             {
                 if (Idle)
                 {
+                    UseNetworkedSensorArray = Config.NetworkedSensorArray;
                     QueueState(WaitForEve, 2000);
                     QueueState(Control);
                 }
@@ -180,6 +181,7 @@ namespace EveComFramework.AutoModule
             //
             // eventually seige / bastion / triage all belong here
             //
+            Console.Log("Preparing to dock: Disabling use of any NetworkedSensorArray");
             UseNetworkedSensorArray = false;
         }
 
@@ -188,6 +190,7 @@ namespace EveComFramework.AutoModule
             //
             // eventually seige / bastion / triage all belong here
             //
+            Console.Log("Preparing to undock: Enabling use of any NetworkedSensorArray");
             UseNetworkedSensorArray = Config.NetworkedSensorArray;
         }
 

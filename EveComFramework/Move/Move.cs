@@ -421,7 +421,7 @@ namespace EveComFramework.Move
 
             Log.Log("|oUndocking");
             Log.Log(" |-g{0}", Session.StationName);
-            AutoModule.PrepareToDock();
+            AutoModule.PrepareToUnDock();
             Station.Exit();
             InsertState(Undock);
             WaitFor(20, () => Session.InSpace);
