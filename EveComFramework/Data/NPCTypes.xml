@@ -161,6 +161,11 @@
   <Type Name="Asteroid Serpentis Commander Battleship">852</Type>
   <Type Name="Mission Faction Battleship">924</Type>
   <Type Name="Incursion Sansha's Nation Battleship">1056</Type>
+  <!-- Overseer -->
+  <Type Name="Overseer Personal Effects">493</Type>
+  <Type Name="Deadspace Overseers Structure">494</Type>
+  <Type Name="Deadspace Overseers Sentry">495</Type>
+  <Type Name="Deadspace Overseers Belongings">496</Type>
   <!-- Officer -->
   <Type Name="Asteroid Angel Cartel Officer">553</Type>
   <Type Name="Asteroid Blood Raiders Officer">559</Type>
