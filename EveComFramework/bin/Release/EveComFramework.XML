@@ -709,6 +709,22 @@
             <param name="Name">Name</param>
             <returns>List of InvGroups</returns>
         </member>
+        <member name="T:EveComFramework.GroupControl.FleetAutodiscover">
+            <summary>
+            Fleet autodiscovery
+            </summary>
+        </member>
+        <member name="M:EveComFramework.GroupControl.FleetAutodiscover.Request">
+            <summary>
+            Request fleet invite from booster
+            </summary>
+        </member>
+        <member name="M:EveComFramework.GroupControl.FleetAutodiscover.Respond(System.Int64)">
+            <summary>
+            Respond to fleet invite request, telling the character to accept a fleet invite once
+            </summary>
+            <param name="CharacterID"></param>
+        </member>
         <member name="F:EveComFramework.GroupControl.UI.Debug.components">
             <summary>
             Required designer variable.
