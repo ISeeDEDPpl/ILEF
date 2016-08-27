@@ -86,6 +86,7 @@ namespace EveComFramework.SimpleDrone
         public bool SharedTargets = false;
         public bool TargetCooldownRandomize = false;
         public int TargetSlots = 2;
+        public bool LockTargetsOneAtaTime = false;
 
         public int TargetCooldown
         {
@@ -987,6 +988,7 @@ namespace EveComFramework.SimpleDrone
                         newTarget.LockTarget();
                         OutOfTargets = false;
                         if (freeTargetSlots == 0) return true;
+                        if (Config.LockTargetsOneAtaTime) return true;
                         continue;
                     }
 
