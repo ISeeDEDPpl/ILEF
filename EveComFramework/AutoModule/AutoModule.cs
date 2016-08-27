@@ -102,7 +102,7 @@ namespace EveComFramework.AutoModule
         DateTime _evecomSessionIsReady = DateTime.MinValue;
         private readonly Dictionary<string, DateTime> _nextArmorRepAttemptTime = new Dictionary<string, DateTime>();
         private readonly Dictionary<string, DateTime> _nextBoosterAttemptTime = new Dictionary<string, DateTime>();
-        bool NetworkedSensorArray;
+        public bool UseNetworkedSensorArray;
 
         /// <summary>
         /// Configuration for this module
@@ -180,8 +180,7 @@ namespace EveComFramework.AutoModule
             //
             // eventually seige / bastion / triage all belong here
             //
-            NetworkedSensorArray = Config.NetworkedSensorArray;
-            Config.NetworkedSensorArray = false;
+            UseNetworkedSensorArray = false;
         }
 
         public void PrepareToUnDock()
@@ -189,7 +188,7 @@ namespace EveComFramework.AutoModule
             //
             // eventually seige / bastion / triage all belong here
             //
-            Config.NetworkedSensorArray = NetworkedSensorArray;
+            UseNetworkedSensorArray = Config.NetworkedSensorArray;
         }
 
         #endregion
@@ -613,7 +612,7 @@ namespace EveComFramework.AutoModule
 
             #region Networked Sensor Array
 
-            if (Config.NetworkedSensorArray && MyShip.ToEntity.Mode != EntityMode.Warping)
+            if (UseNetworkedSensorArray && MyShip.ToEntity.Mode != EntityMode.Warping)
             {
                 try
                 {

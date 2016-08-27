@@ -716,7 +716,7 @@ namespace EveComFramework.Security
             FleeTrigger Trigger = (FleeTrigger)Params[0];
             int FleeWait = (Trigger == FleeTrigger.ArmorLow || Trigger == FleeTrigger.CapacitorLow || Trigger == FleeTrigger.ShieldLow || Trigger == FleeTrigger.Forced || Trigger == FleeTrigger.Panic) ? 0 : Config.FleeWait;
             AutoModule.AutoModule.Instance.Decloak = false;
-            AutoModule.AutoModule.Instance.Config.NetworkedSensorArray = false;
+            AutoModule.AutoModule.Instance.UseNetworkedSensorArray = false;
             //If we are not in a POS Shield
             //if (!Entity.All.Any(a => a.GroupID == Group.ForceField && a.SurfaceDistance < 100000))
             //{
@@ -779,8 +779,7 @@ namespace EveComFramework.Security
             Move.Clear();
 
             Decloak = AutoModule.AutoModule.Instance.Decloak;
-            NetworkedSensorArray = AutoModule.AutoModule.Instance.Config.NetworkedSensorArray;
-            AutoModule.AutoModule.Instance.Config.NetworkedSensorArray = false;
+            AutoModule.AutoModule.Instance.UseNetworkedSensorArray = false;
 
             QueueState(WaitFlee);
             QueueState(SignalSuccessful);
@@ -868,7 +867,7 @@ namespace EveComFramework.Security
         {
             _isAlert = false;
             AutoModule.AutoModule.Instance.Decloak = Decloak;
-            AutoModule.AutoModule.Instance.Config.NetworkedSensorArray = NetworkedSensorArray;
+            AutoModule.AutoModule.Instance.UseNetworkedSensorArray = AutoModule.AutoModule.Instance.Config.NetworkedSensorArray;
             if (ClearAlert != null)
             {
                 Log.Log("|oSending ClearAlert command - resume operations");
