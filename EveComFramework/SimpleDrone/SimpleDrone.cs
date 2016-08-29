@@ -1035,7 +1035,7 @@ namespace EveComFramework.SimpleDrone
             if (HostilePilot != null)
             {
                 //Console.Log("|Found HostilePilot");
-                if (!HostilePilot.LockedTarget && !HostilePilot.LockingTarget && HostilePilot.Exists && !HostilePilot.Released && !HostilePilot.Exploded)
+                if (!HostilePilot.LockedTarget && !HostilePilot.LockingTarget && HostilePilot.Exists && !HostilePilot.Released && !HostilePilot.Exploded && HostilePilot.Mode != EntityMode.Warping)
                 {
                     if (Entity.Targeting.Count + Entity.Targets.Count >= Me.TrueMaxTargetLocks)
                     {
@@ -1073,7 +1073,7 @@ namespace EveComFramework.SimpleDrone
             else if (WarpScrambling != null)
             {
                 //Console.Log("|Found WarpScrambling entity");
-                if (!WarpScrambling.LockedTarget && !WarpScrambling.LockingTarget && !WarpScrambling.Released && !WarpScrambling.Exploded)
+                if (!WarpScrambling.LockedTarget && !WarpScrambling.LockingTarget && !WarpScrambling.Released && !WarpScrambling.Exploded && WarpScrambling.Mode != EntityMode.Warping)
                 {
                     if (_rats.LockedAndLockingTargetList.Count >= Me.TrueMaxTargetLocks)
                     {
@@ -1111,7 +1111,7 @@ namespace EveComFramework.SimpleDrone
             else if (Neuting != null)
             {
                 //Console.Log("|Found Neuting entity");
-                if (!Neuting.LockedTarget && !Neuting.LockingTarget && !Neuting.Released && !Neuting.Exploded)
+                if (!Neuting.LockedTarget && !Neuting.LockingTarget && !Neuting.Released && !Neuting.Exploded && Neuting.Mode != EntityMode.Warping)
                 {
                     if (_rats.LockedAndLockingTargetList.Count >= Me.TrueMaxTargetLocks)
                     {
@@ -1127,7 +1127,7 @@ namespace EveComFramework.SimpleDrone
                     return false;
                 }
             }
-            else if (ActiveTarget != null && ActiveTarget.Exists && !ActiveTarget.Exploded && !ActiveTarget.Released) //&& Config.PriorityTargets.Contains(ActiveTarget.Name)
+            else if (ActiveTarget != null && ActiveTarget.Exists && !ActiveTarget.Exploded && !ActiveTarget.Released && ActiveTarget.Mode != EntityMode.Warping) //&& Config.PriorityTargets.Contains(ActiveTarget.Name)
             {
                 //Console.Log("|oActiveTarget is not null");
                 if (!ActiveTarget.LockedTarget && !ActiveTarget.LockingTarget)
@@ -1158,7 +1158,7 @@ namespace EveComFramework.SimpleDrone
             {
                 int freeTargetSlots = Config.TargetSlots - _rats.LockedAndLockingTargetList.Count;
                 //Console.Log("|oActiveTarget is empty; picking a NewTarget");
-                IEnumerable<Entity> newTargets = _rats.UnlockedTargetList.OrderByDescending(i => PriorityTargets.Any() && PriorityTargets.Contains(i.Name)).ThenBy(i => i.DistanceTo(entityToUseForClosestNpcMeasurement)).Where(a => a.Exists && !a.Exploded && !a.Released && !TargetCooldown.ContainsKey(a.ID) && a.Distance < MyShip.MaxTargetRange).ToList();
+                IEnumerable<Entity> newTargets = _rats.UnlockedTargetList.OrderByDescending(i => PriorityTargets.Any() && PriorityTargets.Contains(i.Name)).ThenBy(i => i.DistanceTo(entityToUseForClosestNpcMeasurement)).Where(a => a.Exists && !a.Exploded && !a.Released && !TargetCooldown.ContainsKey(a.ID) && a.Distance < MyShip.MaxTargetRange && a.Mode != EntityMode.Warping).ToList();
                 if (newTargets.Any() && Entity.All.FirstOrDefault(a => a.IsJamming && a.IsTargetingMe) == null)
                 {
                     foreach (Entity newTarget in newTargets)
