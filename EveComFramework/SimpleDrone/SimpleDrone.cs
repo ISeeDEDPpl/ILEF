@@ -436,6 +436,23 @@ namespace EveComFramework.SimpleDrone
             }
         }
 
+        private bool? _insidePosForceField = false;
+        public bool InsidePosForceField
+        {
+            get
+            {
+                try
+                {
+                    _insidePosForceField = Entity.All.Where(i => i.Distance < 60000).Any(b => b.GroupID == Group.ForceField && b.SurfaceDistance <= 0);
+                    return _insidePosForceField ?? false;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            }
+        }
+
         private Double _maxRange = 0;
         private Double MaxRange
         {
@@ -677,24 +694,27 @@ namespace EveComFramework.SimpleDrone
                         fightersToRecall = fightersToRecall.ToList();
                         if (fightersToRecall.Any(i => i.ToEntity != null && i.ToEntity.Distance > 300000))
                         {
-                            IEnumerable<Fighters.Fighter> fightersTooFarAway = fightersToRecall.Where(i => i.ToEntity != null && i.ToEntity.Distance > 300000).ToList();
+                            IEnumerable<Fighters.Fighter> fightersTooFarAway = fightersToRecall.Where(i => i.ToEntity != null && FighterReady(i.ID) && i.ToEntity.Distance > 300000).ToList();
                             if (fightersTooFarAway.Any())
                             {
-                                foreach (Fighters.Fighter fighterTooFarAway in fightersTooFarAway.Where(i => i.ToEntity != null && (i.ToEntity.Distance > i.ToEntity.Velocity.Magnitude * 2)))
+                                if (!InsidePosForceField)
                                 {
-                                    Entity closestEntityToOrbit = Entity.All.OrderByDescending(i => i.DistanceTo(fighterTooFarAway.ToEntity)).FirstOrDefault();
-                                    if (closestEntityToOrbit != null)
+                                    foreach (Fighters.Fighter fighterTooFarAway in fightersTooFarAway.Where(i => i.ToEntity != null && (i.ToEntity.Distance > i.ToEntity.Velocity.Magnitude * 2)))
                                     {
-                                        Console.Log("|oFighter [|g" + MaskedId(fighterTooFarAway.ID) + "|o] is [|g" + Math.Round(fighterTooFarAway.ToEntity.Distance / 1000, 0) + "|o]k away going [|g" + Math.Round(fighterTooFarAway.ToEntity.Velocity.Magnitude, 0) + "|o]m/s is not likely to make it back to the ship before we warp: telling fighter to orbit");
-                                        fighterTooFarAway.Follow(closestEntityToOrbit, 100000);
-                                        NextFighterCommand.AddOrUpdate(fighterTooFarAway.ID, DateTime.Now.AddSeconds(10));
+                                        Entity closestEntityToOrbit = Entity.All.OrderByDescending(i => i.DistanceTo(fighterTooFarAway.ToEntity)).FirstOrDefault();
+                                        if (closestEntityToOrbit != null)
+                                        {
+                                            Console.Log("|oFighter [|g" + MaskedId(fighterTooFarAway.ID) + "|o] is [|g" + Math.Round(fighterTooFarAway.ToEntity.Distance / 1000, 0) + "|o]k away going [|g" + Math.Round(fighterTooFarAway.ToEntity.Velocity.Magnitude, 0) + "|o]m/s is not likely to make it back before we warp: telling fighter to orbit");
+                                            fighterTooFarAway.Follow(closestEntityToOrbit, 100000);
+                                            NextFighterCommand.AddOrUpdate(fighterTooFarAway.ID, DateTime.Now.AddSeconds(30));
+                                            continue;
+                                        }
+
+                                        Console.Log("|oFighter [|g" + MaskedId(fighterTooFarAway.ID) + "|o] is [|g" + Math.Round(fighterTooFarAway.ToEntity.Distance / 1000, 0) + "|o]k away going [|g" + Math.Round(fighterTooFarAway.ToEntity.Velocity.Magnitude, 0) + "|o]m/s is not likely to make it back before we warp: stopping fighter");
+                                        fighterTooFarAway.Stop();
+                                        NextFighterCommand.AddOrUpdate(fighterTooFarAway.ID, DateTime.Now.AddSeconds(30));
                                         continue;
                                     }
-
-                                    Console.Log("|oFighter [|g" + MaskedId(fighterTooFarAway.ID) + "|o] is [|g" + Math.Round(fighterTooFarAway.ToEntity.Distance / 1000, 0) + "|o]k away going [|g" + Math.Round(fighterTooFarAway.ToEntity.Velocity.Magnitude, 0) + "|o]m/s is not likely to make it back to the ship before we warp: stopping fighter");
-                                    fighterTooFarAway.Stop();
-                                    NextFighterCommand.AddOrUpdate(fighterTooFarAway.ID, DateTime.Now.AddSeconds(10));
-                                    continue;
                                 }
                             }
                         }
@@ -759,27 +779,89 @@ namespace EveComFramework.SimpleDrone
             }
         }
 
+        public bool CollectSentriesInSpace(List<Drone> recallTheseSentryDrones, string reason = "|oRecalling Sentry Drones: CollectSentriesInSpace")
+        {
+            if (MyShip.ToEntity.Mode == EntityMode.Warping) return true;
+
+            IEnumerable<Drone> sentriesInSpace = recallTheseSentryDrones.Where(a => DroneType.All.Any(b => b.ID == a.ID && b.Group == "Sentry Drones")).ToList();
+            if (sentriesInSpace.Any())
+            {
+                Console.Log(reason);
+                foreach (Drone sentryInSpace in sentriesInSpace)
+                {
+                    if (sentryInSpace.ToEntity.Distance < 2400)
+                    {
+                        Console.Log("|oScooping Sentry [" + sentryInSpace.Name + "][" + Math.Round(sentryInSpace.ToEntity.Distance, 0) + "m]");
+                        sentryInSpace.ReturnToDroneBay();
+                        DislodgeWaitFor(1);
+                    }
+                    else
+                    {
+                        Console.Log("|Approaching Sentry [" + sentryInSpace.Name + "][" + Math.Round(sentryInSpace.ToEntity.Distance, 0) + "m]");
+                        sentryInSpace.ToEntity.Approach();
+                    }
+
+                    return false;
+                }
+
+                return false;
+            }
+
+            return true;
+        }
+
         bool Recall(object[] Params)
+        {
+            if (!RecallDronesAndFighters()) return false;
+            return true;
+        }
+
+        public bool RecallDrones(List<Drone> recallTheseDrones, string reason = "|oRecalling drones: Recall()")
         {
             if (Session.InStation) return true;
 
-            // Recall drones
-            List<Drone> Recall = DronesInSpace.Where(droneInSpace => DroneReady(droneInSpace.ID)).ToList();
-            if (Recall.Any())
+            if (recallTheseDrones == null) return true;
+
+            // Recall sentry drones
+            if (!CollectSentriesInSpace(recallTheseDrones, reason)) return false;
+
+            try
             {
-                Console.Log("|oRecalling drones: Recall()");
-                Recall.ReturnToDroneBay();
-                Recall.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(7)));
-                return false;
+                // Recall drones
+                List<Drone> recall = recallTheseDrones.Where(droneInSpace => DroneReady(droneInSpace.ID)).ToList();
+                if (recall.Any())
+                {
+                    Console.Log(reason);
+                    recall.ReturnToDroneBay();
+                    recall.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(7)));
+                    return false;
+                }
             }
-            if (DronesInSpace.Any()) return false;
+            catch (Exception ex)
+            {
+                Console.Log("Exception [" + ex + "]");
+            }
+
+            if (recallTheseDrones != null && recallTheseDrones.Any()) return false;
+
+            return true;
+        }
+
+        public bool RecallDronesAndFighters(string reason = "|oRecalling drones and fighters: Recall()")
+        {
+            if (Session.InStation) return true;
+
+            //
+            // Recall drones
+            //
+            if (!RecallDrones(DronesInSpace.ToList())) return false;
 
             //
             // Recall fighters
             //
             if (AvailableFighters.Any())
             {
-                if(!RecallFighters(AvailableFighters, "Recalling")) return false;
+                if(!RecallFighters(AvailableFighters, reason)) return false;
                 if (!SpeedUpFighters(ReturningFighters, "Burning Back")) return false;
             }
 
@@ -1151,8 +1233,7 @@ namespace EveComFramework.SimpleDrone
             // If we're warping and drones are in space, recall them and stop the module
             if (MyShip.ToEntity.Mode == EntityMode.Warping && MyShip.ToEntity.Velocity.Magnitude < 2000 && DronesInSpace.Any(droneInSpace => DroneReady(droneInSpace.ID)))
             {
-                Drone.AllInSpace.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(7)));
-                Drone.AllInSpace.ReturnToDroneBay();
+                RecallDrones(DronesInSpace.ToList(), "We are warping: pull drones!");
                 return true;
             }
 
@@ -1181,20 +1262,8 @@ namespace EveComFramework.SimpleDrone
 
             if (!_rats.TargetList.Any() && !Entity.All.Any(a => PriorityTargets.Contains(a.Name)) && !Config.StayDeployedWithNoTargets)
             {
-                // Recall drones
-                List<Drone> Recall = Drone.AllInSpace.Where(droneInSpace => droneInSpace.ToEntity != null && DroneReady(droneInSpace.ID)).ToList();
-                if (Recall.Any())
-                {
-                    Console.Log("|oRecalling drones |-gNo rats available");
-                    Recall.ReturnToDroneBay();
-                    Recall.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(5)));
-                    return false;
-                }
-
-                //
-                // Recall fighters
-                //
-                if (AvailableFighters.Any()) if (!RecallFighters(AvailableFighters, "No rats available")) return false;
+                // Recall drones and fighters
+                if (!RecallDronesAndFighters("|oRecalling drones and fighters [|gNo rats available|o]")) return false;
             }
 
             //
@@ -1254,13 +1323,17 @@ namespace EveComFramework.SimpleDrone
                 }
             }
 
-            List<Drone> RecallDamaged = Drone.AllInSpace.Where(a => _droneCooldown.Contains(a) && DroneReady(a.ID)).ToList();
-            if (RecallDamaged.Any())
+            try
             {
-                Console.Log("|oRecalling damaged drones");
-                RecallDamaged.ReturnToDroneBay();
-                RecallDamaged.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(5)));
-                return false;
+                List<Drone> recallDamaged = Drone.AllInSpace.Where(a => _droneCooldown.Contains(a) && DroneReady(a.ID)).ToList();
+                if (recallDamaged.Any())
+                {
+                    RecallDrones(recallDamaged, "Recalling Damaged Drones");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Log("Exception [" + ex + "]");
             }
 
             try
@@ -1274,7 +1347,7 @@ namespace EveComFramework.SimpleDrone
             }
             catch (Exception ex)
             {
-                Console.Log(ex.ToString(), LogType.DEBUG);
+                Console.Log("Exception [" + ex + "]");
             }
 
             #region LockManagement
@@ -1300,21 +1373,17 @@ namespace EveComFramework.SimpleDrone
             {
                 if (ActiveTarget == null)
                 {
-                    // Recall drones if in point defense and no frig/destroyers in range
-                    List<Drone> Recall = Drone.AllInSpace.Where(a => DroneReady(a.ID)).ToList();
-                    if (Recall.Any())
-                    {
-                        Console.Log("|oRecalling drones");
-                        Recall.ReturnToDroneBay();
-                        Recall.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(5)));
-                        return false;
-                    }
-
                     //
-                    // Recall Fighters if there is no ActiveTarget and Config.StayDeployedWithNoTargets is false
+                    // Recall Drones / Fighters if there is no ActiveTarget and Config.StayDeployedWithNoTargets is false
                     //
                     if (!Config.StayDeployedWithNoTargets)
                     {
+                        List<Drone> Recall = Drone.AllInSpace.Where(a => DroneReady(a.ID)).ToList();
+                        if (Recall.Any())
+                        {
+                            if (!RecallDrones(Recall, "|oRecalling drones: No ActiveTarget")) return false;
+                        }
+
                         if (AvailableFighters.Any())
                         {
                             if (!RecallFighters(AvailableFighters, "No ActiveTarget")) return false;
@@ -1335,10 +1404,7 @@ namespace EveComFramework.SimpleDrone
                     List<Drone> Recall = Drone.AllInSpace.Where(a => _droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group != "Light Scout Drones")).ToList();
                     if (Recall.Any())
                     {
-                        Console.Log("|oRecalling non scout drones");
-                        Recall.ReturnToDroneBay();
-                        Recall.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(5)));
-                        return false;
+                        if (!RecallDrones(Recall, "|oRecalling non scout drones")) return false;
                     }
                     // Send drones to attack
                     List<Drone> Attack = Drone.AllInSpace.Where(a => DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Light Scout Drones") && (a.State != EntityState.Combat || a.Target == null || a.Target != ActiveTarget)).ToList();
@@ -1371,10 +1437,7 @@ namespace EveComFramework.SimpleDrone
                     // Recall drones if in point defense and no frig/destroyers in range
                     if (Recall.Any())
                     {
-                        Console.Log("|oRecalling drones");
-                        Recall.ReturnToDroneBay();
-                        Recall.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(5)));
-                        return false;
+                        if (!RecallDrones(Recall, "|oRecalling drones: no frigs/destroyers in range")) return false;
                     }
                 }
             }
@@ -1386,10 +1449,7 @@ namespace EveComFramework.SimpleDrone
                 List<Drone> Recall = Drone.AllInSpace.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group != "Light Scout Drones")).ToList();
                 if (Recall.Any())
                 {
-                    Console.Log("|oRecalling non scout drones");
-                    Recall.ReturnToDroneBay();
-                    Recall.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(5)));
-                    return false;
+                    if (!RecallDrones(Recall, "|oRecalling non scout drones")) return false;
                 }
                 // Send drones to attack
                 List<Drone> Attack = Drone.AllInSpace.Where(a => DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Light Scout Drones") && (a.State != EntityState.Combat || a.Target == null || a.Target != ActiveTarget)).ToList();
@@ -1424,10 +1484,7 @@ namespace EveComFramework.SimpleDrone
                 List<Drone> Recall = Drone.AllInSpace.Where(a => _droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group != "Medium Scout Drones") && a.State != EntityState.Departing).ToList();
                 if (Recall.Any())
                 {
-                    Console.Log("|oRecalling non medium drones");
-                    Recall.ReturnToDroneBay();
-                    Recall.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(5)));
-                    return false;
+                    if (!RecallDrones(Recall, "|oRecalling non medium drones")) return false;
                 }
                 // Send drones to attack
                 List<Drone> Attack = Drone.AllInSpace.Where(a => DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Medium Scout Drones") && (a.State != EntityState.Combat || a.Target == null || a.Target != ActiveTarget)).ToList();
@@ -1462,10 +1519,7 @@ namespace EveComFramework.SimpleDrone
                 List<Drone> Recall = Drone.AllInSpace.Where(a => _droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group != "Heavy Attack Drones")).ToList();
                 if (Recall.Any())
                 {
-                    Console.Log("|oRecalling non heavy drones");
-                    Recall.ReturnToDroneBay();
-                    Recall.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(5)));
-                    return false;
+                    if (!RecallDrones(Recall, "|oRecalling non heavy drones")) return false;
                 }
                 // Send drones to attack
                 List<Drone> Attack = Drone.AllInSpace.Where(a => DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Heavy Attack Drones") && (a.State != EntityState.Combat || a.Target == null || a.Target != ActiveTarget)).ToList();
@@ -1500,10 +1554,7 @@ namespace EveComFramework.SimpleDrone
                 List<Drone> Recall = Drone.AllInSpace.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group != "Sentry Drones") && a.State != EntityState.Departing).ToList();
                 if (Recall.Any())
                 {
-                    Console.Log("|oRecalling non sentry drones");
-                    Recall.ReturnToDroneBay();
-                    Recall.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(5)));
-                    return false;
+                    if (!RecallDrones(Recall, "|oRecalling non sentry drones")) return false;
                 }
                 // Send drones to attack
                 List<Drone> Attack = Drone.AllInSpace.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Sentry Drones") && (a.State != EntityState.Combat || a.Target == null || a.Target != ActiveTarget)).ToList();
@@ -1541,10 +1592,7 @@ namespace EveComFramework.SimpleDrone
                     // Recall non sentries
                     if (Recall.Any())
                     {
-                        Console.Log("|oRecalling drones");
-                        Recall.ReturnToDroneBay();
-                        Recall.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(5)));
-                        return false;
+                        if (!RecallDrones(Recall, "|oRecalling non-sentry drones")) return false;
                     }
                     List<Drone> Attack = Drone.AllInSpace.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Sentry Drones") && (a.State != EntityState.Combat || a.Target == null || a.Target != ActiveTarget)).ToList();
                     // Send drones to attack

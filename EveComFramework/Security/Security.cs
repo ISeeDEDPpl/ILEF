@@ -513,17 +513,7 @@ namespace EveComFramework.Security
         {
             if (Session.InSpace)
             {
-                if (Drone.AllInSpace.Any(droneInSpace => droneInSpace.State != EntityState.Incapacitated && droneInSpace.State != EntityState.Departing))
-                {
-                    if (MyShip.ToEntity.GroupID != Group.Capsule)
-                    {
-                        Drone.AllInSpace.Where(droneInSpace => droneInSpace.State != EntityState.Incapacitated && droneInSpace.State != EntityState.Departing).ReturnToDroneBay();
-                    }
-
-                    return true;
-                }
-
-                return true;
+                if (!SimpleDrone.SimpleDrone.Instance.RecallDrones(SimpleDrone.SimpleDrone.Instance.DronesInSpace.ToList(), "Recall Drones: Security!")) return false;
             }
 
             return true;
