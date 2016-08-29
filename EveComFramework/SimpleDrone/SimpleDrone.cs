@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using EveCom;
 using EveComFramework.Core;
+using EveComFramework.Data;
 using EveComFramework.Targets;
 using EveComFramework.KanedaToolkit;
 
@@ -165,6 +166,104 @@ namespace EveComFramework.SimpleDrone
         private readonly Dictionary<Drone, double> _droneHealthCache = new Dictionary<Drone, double>();
         private readonly IPC _ipc = IPC.Instance;
         private readonly Dictionary<long?, int?> _missileEntityTracking = new Dictionary<long?, int?>();
+
+        private int _availableDroneSlots;
+        /// <summary>
+        /// BroneBandwidth / M3 of the correct drone type in DroneBay based on the configured simpledrone mode
+        /// </summary>
+        public int AvailableDroneSlots
+        {
+            get
+            {
+                try
+                {
+                    double myShipsDroneBandwidth = (double)MyShip.ToItem["droneBandwidth"];
+                    _availableDroneSlots = 0;
+                    if (Drone.AllInBay.Any())
+                    {
+                        double myDronesM3 = Drone.AllInBay.FirstOrDefault().Volume;
+                        string droneGroupName;
+                        switch (Config.Mode)
+                        {
+                            case Mode.None:
+                                myDronesM3 = Drone.AllInBay.FirstOrDefault().Volume;
+                                break;
+                            case Mode.AfkHeavy:
+                                myDronesM3 = 25;
+                                droneGroupName = "Heavy Attack Drones";
+                                if (Drone.AllInBay.Any(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == droneGroupName)))
+                                {
+                                    myDronesM3 = Drone.AllInBay.OrderByDescending(i => i.Volume).FirstOrDefault(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == droneGroupName)).Volume;
+                                }
+                                break;
+                            case Mode.PointDefense:
+                                myDronesM3 = Drone.AllInBay.FirstOrDefault().Volume;
+                                break;
+                            case Mode.Sentry:
+                                myDronesM3 = 25;
+                                droneGroupName = "Sentry Drones";
+                                if (Drone.AllInBay.Any(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == droneGroupName)))
+                                {
+                                    myDronesM3 = Drone.AllInBay.OrderByDescending(i => i.Volume).FirstOrDefault(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == droneGroupName)).Volume;
+                                }
+                                break;
+                            case Mode.AgressiveScout:
+                                myDronesM3 = 5;
+                                droneGroupName = "Light Scout Drones";
+                                if (Drone.AllInBay.Any(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == droneGroupName)))
+                                {
+                                    myDronesM3 = Drone.AllInBay.OrderByDescending(i => i.Volume).FirstOrDefault(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == droneGroupName)).Volume;
+                                }
+                                break;
+                            case Mode.AgressiveMedium:
+                                myDronesM3 = 10;
+                                droneGroupName = "Medium Scout Drones";
+                                if (Drone.AllInBay.Any(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == droneGroupName)))
+                                {
+                                    myDronesM3 = Drone.AllInBay.OrderByDescending(i => i.Volume).FirstOrDefault(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == droneGroupName)).Volume;
+                                }
+                                break;
+                            case Mode.AgressiveHeavy:
+                                myDronesM3 = 25;
+                                droneGroupName = "Heavy Attack Drones";
+                                if (Drone.AllInBay.Any(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == droneGroupName)))
+                                {
+                                    myDronesM3 = Drone.AllInBay.OrderByDescending(i => i.Volume).FirstOrDefault(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == droneGroupName)).Volume;
+                                }
+                                break;
+                            case Mode.AgressiveSentry:
+                                myDronesM3 = 25;
+                                droneGroupName = "Sentry Drones";
+                                if (Drone.AllInBay.Any(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == droneGroupName)))
+                                {
+                                    myDronesM3 = Drone.AllInBay.OrderByDescending(i => i.Volume).FirstOrDefault(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == droneGroupName)).Volume;
+                                }
+                                break;
+                            case Mode.AfkSalvage:
+                                myDronesM3 = 5;
+                                break;
+                        }
+
+                        int numOfDronesBandwidthAllowsToLaunch = (int)Math.Round(myShipsDroneBandwidth / myDronesM3, 0);
+                        int totalDroneSlots = Math.Min(Me.MaxActiveDrones, numOfDronesBandwidthAllowsToLaunch);
+                        _availableDroneSlots = totalDroneSlots - Drone.AllInSpace.Count();
+                        if (_availableDroneSlots > 0)
+                        {
+                            return _availableDroneSlots;
+                        }
+
+                        return 0;
+                    }
+
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.Log("Exception [" + ex + "]");
+                    return 0;
+                }
+            }
+        }
 
         private List<long> _offgridFighters;
         /// <summary>
@@ -783,7 +882,7 @@ namespace EveComFramework.SimpleDrone
         {
             if (MyShip.ToEntity.Mode == EntityMode.Warping) return true;
 
-            IEnumerable<Drone> sentriesInSpace = recallTheseSentryDrones.Where(a => DroneType.All.Any(b => b.ID == a.ID && b.Group == "Sentry Drones")).ToList();
+            IEnumerable<Drone> sentriesInSpace = recallTheseSentryDrones.Where(a => a.State == EntityState.Incapacitated || DroneType.All.Any(b => b.ID == a.ID && b.Group == "Sentry Drones")).ToList();
             if (sentriesInSpace.Any())
             {
                 Console.Log(reason);
@@ -1273,22 +1372,27 @@ namespace EveComFramework.SimpleDrone
 
             if (Config.Mode == Mode.AfkHeavy && (_rats.TargetList.Any() || Entity.All.Any(a => PriorityTargets.Contains(a.Name))))
             {
-                int AvailableSlots = ((MyShip.ToEntity.TypeID == 17918 /* Rattlesnake */) ? 2 : Me.MaxActiveDrones) - Drone.AllInSpace.Count();
-                List<Drone> Deploy = Drone.AllInBay.Where(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Heavy Attack Drones")).Take(AvailableSlots).ToList();
-                // Launch drones
-                if (Deploy.Any())
+                try
                 {
-                    Console.Log("|oLaunching heavy drones.");
-                    Deploy.Launch();
-                    Deploy.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(5)));
+                    List<Drone> Deploy = Drone.AllInBay.Where(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Heavy Attack Drones")).Take(AvailableDroneSlots).ToList();
+                    // Launch drones
+                    if (Deploy.Any())
+                    {
+                        Console.Log("|oLaunching [|g" + Deploy.Count + "|o] heavy drones.");
+                        Deploy.Launch();
+                        Deploy.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(5)));
+                    }
+                    return false;
                 }
-                return false;
+                catch (Exception ex)
+                {
+                    Console.Log("Exception [" + ex + "]");
+                }
             }
 
             if (Config.Mode == Mode.AfkSalvage)
             {
-                int AvailableSlots = Me.MaxActiveDrones - Drone.AllInSpace.Count();
-                List<Drone> Deploy = Drone.AllInBay.Where(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Salvage Drone")).Take(AvailableSlots).ToList();
+                List<Drone> Deploy = Drone.AllInBay.Where(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Salvage Drone")).Take(AvailableDroneSlots).ToList();
                 // Launch drones
                 if (Deploy.Any())
                 {
@@ -1415,9 +1519,8 @@ namespace EveComFramework.SimpleDrone
                         Attack.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(3)));
                         return false;
                     }
-                    int AvailableSlots = ((MyShip.ToEntity.TypeID == 17918 /* Rattlesnake */) ? 2 : Me.MaxActiveDrones) - Drone.AllInSpace.Count();
-                    List<Drone> Deploy = Drone.AllInBay.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Light Scout Drones")).Take(AvailableSlots).ToList();
-                    List<Drone> DeployIgnoreCooldown = Drone.AllInBay.Where(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Light Scout Drones")).Take(AvailableSlots).ToList();
+                    List<Drone> Deploy = Drone.AllInBay.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Light Scout Drones")).Take(AvailableDroneSlots).ToList();
+                    List<Drone> DeployIgnoreCooldown = Drone.AllInBay.Where(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Light Scout Drones")).Take(AvailableDroneSlots).ToList();
                     // Launch drones
                     if (Deploy.Any() && _rats.LockedAndLockingTargetList.Any())
                     {
@@ -1426,7 +1529,7 @@ namespace EveComFramework.SimpleDrone
                         Deploy.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(3)));
                         return false;
                     }
-                    else if (AvailableSlots > 0 && DeployIgnoreCooldown.Any())
+                    else if (AvailableDroneSlots > 0 && DeployIgnoreCooldown.Any())
                     {
                         _droneCooldown.Clear();
                     }
@@ -1460,9 +1563,8 @@ namespace EveComFramework.SimpleDrone
                     Attack.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(3)));
                     return false;
                 }
-                int AvailableSlots = Me.MaxActiveDrones - Drone.AllInSpace.Count();
-                List<Drone> Deploy = Drone.AllInBay.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Light Scout Drones")).Take(AvailableSlots).ToList();
-                List<Drone> DeployIgnoreCooldown = Drone.AllInBay.Where(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Light Scout Drones")).Take(AvailableSlots).ToList();
+                List<Drone> Deploy = Drone.AllInBay.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Light Scout Drones")).Take(AvailableDroneSlots).ToList();
+                List<Drone> DeployIgnoreCooldown = Drone.AllInBay.Where(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Light Scout Drones")).Take(AvailableDroneSlots).ToList();
                 // Launch drones
                 if (Deploy.Any() && _rats.LockedAndLockingTargetList.Any())
                 {
@@ -1471,7 +1573,7 @@ namespace EveComFramework.SimpleDrone
                     Deploy.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(3)));
                     return false;
                 }
-                else if (AvailableSlots > 0 && DeployIgnoreCooldown.Any())
+                else if (AvailableDroneSlots > 0 && DeployIgnoreCooldown.Any())
                 {
                     _droneCooldown.Clear();
                 }
@@ -1495,9 +1597,8 @@ namespace EveComFramework.SimpleDrone
                     Attack.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(3)));
                     return false;
                 }
-                int AvailableSlots = ((MyShip.ToEntity.TypeID == 17715 /* Gila */) ? 2 : Me.MaxActiveDrones) - Drone.AllInSpace.Count();
-                List<Drone> Deploy = Drone.AllInBay.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Medium Scout Drones")).Take(AvailableSlots).ToList();
-                List<Drone> DeployIgnoreCooldown = Drone.AllInBay.Where(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Medium Scout Drones")).Take(AvailableSlots).ToList();
+                List<Drone> Deploy = Drone.AllInBay.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Medium Scout Drones")).Take(AvailableDroneSlots).ToList();
+                List<Drone> DeployIgnoreCooldown = Drone.AllInBay.Where(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Medium Scout Drones")).Take(AvailableDroneSlots).ToList();
                 // Launch drones
                 if (Deploy.Any() && _rats.LockedAndLockingTargetList.Any())
                 {
@@ -1506,7 +1607,7 @@ namespace EveComFramework.SimpleDrone
                     Deploy.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(3)));
                     return false;
                 }
-                else if (AvailableSlots > 0 && DeployIgnoreCooldown.Any())
+                else if (AvailableDroneSlots > 0 && DeployIgnoreCooldown.Any())
                 {
                     _droneCooldown.Clear();
                 }
@@ -1530,9 +1631,8 @@ namespace EveComFramework.SimpleDrone
                     Attack.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(3)));
                     return false;
                 }
-                int AvailableSlots = ((MyShip.ToEntity.TypeID == 17918 /* Rattlesnake */) ? 2 : Me.MaxActiveDrones) - Drone.AllInSpace.Count();
-                List<Drone> Deploy = Drone.AllInBay.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Heavy Attack Drones")).Take(AvailableSlots).ToList();
-                List<Drone> DeployIgnoreCooldown = Drone.AllInBay.Where(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Heavy Attack Drones")).Take(AvailableSlots).ToList();
+                List<Drone> Deploy = Drone.AllInBay.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Heavy Attack Drones")).Take(AvailableDroneSlots).ToList();
+                List<Drone> DeployIgnoreCooldown = Drone.AllInBay.Where(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Heavy Attack Drones")).Take(AvailableDroneSlots).ToList();
                 // Launch drones
                 if (Deploy.Any() && _rats.LockedAndLockingTargetList.Any())
                 {
@@ -1541,7 +1641,7 @@ namespace EveComFramework.SimpleDrone
                     Deploy.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(3)));
                     return false;
                 }
-                else if (AvailableSlots > 0 && DeployIgnoreCooldown.Any())
+                else if (AvailableDroneSlots > 0 && DeployIgnoreCooldown.Any())
                 {
                     _droneCooldown.Clear();
                 }
@@ -1565,9 +1665,8 @@ namespace EveComFramework.SimpleDrone
                     Attack.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(3)));
                     return false;
                 }
-                int AvailableSlots = ((MyShip.ToEntity.TypeID == 17918 /* Rattlesnake */) ? 2 : Me.MaxActiveDrones) - Drone.AllInSpace.Count();
-                List<Drone> Deploy = Drone.AllInBay.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Sentry Drones")).Take(AvailableSlots).ToList();
-                List<Drone> DeployIgnoreCooldown = Drone.AllInBay.Where(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Sentry Drones")).Take(AvailableSlots).ToList();
+                List<Drone> Deploy = Drone.AllInBay.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Sentry Drones")).Take(AvailableDroneSlots).ToList();
+                List<Drone> DeployIgnoreCooldown = Drone.AllInBay.Where(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Sentry Drones")).Take(AvailableDroneSlots).ToList();
                 // Launch drones
                 if (Deploy.Any() && _rats.LockedAndLockingTargetList.Any())
                 {
@@ -1576,7 +1675,7 @@ namespace EveComFramework.SimpleDrone
                     Deploy.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(3)));
                     return false;
                 }
-                else if (AvailableSlots > 0 && DeployIgnoreCooldown.Any())
+                else if (AvailableDroneSlots > 0 && DeployIgnoreCooldown.Any())
                 {
                     _droneCooldown.Clear();
                 }
@@ -1603,9 +1702,8 @@ namespace EveComFramework.SimpleDrone
                         Attack.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(3)));
                         return false;
                     }
-                    int AvailableSlots = ((MyShip.ToEntity.TypeID == 17918) ? 2 : Me.MaxActiveDrones) - Drone.AllInSpace.Count();
-                    List<Drone> Deploy = Drone.AllInBay.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Sentry Drones")).Take(AvailableSlots).ToList();
-                    List<Drone> DeployIgnoreCooldown = Drone.AllInBay.Where(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Sentry Drones")).Take(AvailableSlots).ToList();
+                    List<Drone> Deploy = Drone.AllInBay.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Sentry Drones")).Take(AvailableDroneSlots).ToList();
+                    List<Drone> DeployIgnoreCooldown = Drone.AllInBay.Where(a => Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Sentry Drones")).Take(AvailableDroneSlots).ToList();
                     // Launch drones
                     if (Deploy.Any() && _rats.LockedAndLockingTargetList.Any())
                     {
@@ -1614,7 +1712,7 @@ namespace EveComFramework.SimpleDrone
                         Deploy.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(3)));
                         return false;
                     }
-                    else if (AvailableSlots > 0 && DeployIgnoreCooldown.Any())
+                    else if (AvailableDroneSlots > 0 && DeployIgnoreCooldown.Any())
                     {
                         _droneCooldown.Clear();
                     }
