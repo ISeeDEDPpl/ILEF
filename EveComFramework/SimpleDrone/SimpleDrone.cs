@@ -1396,7 +1396,7 @@ namespace EveComFramework.SimpleDrone
                 // Launch drones
                 if (Deploy.Any())
                 {
-                    Console.Log("|oLaunching salvage drones");
+                    Console.Log("|oLaunching [|g" + Deploy.Count + "|o] salvage drones");
                     Deploy.Launch();
                     Deploy.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(5)));
                     return false;
@@ -1432,7 +1432,7 @@ namespace EveComFramework.SimpleDrone
                 List<Drone> recallDamaged = Drone.AllInSpace.Where(a => _droneCooldown.Contains(a) && DroneReady(a.ID)).ToList();
                 if (recallDamaged.Any())
                 {
-                    RecallDrones(recallDamaged, "Recalling Damaged Drones");
+                    RecallDrones(recallDamaged, "|oRecalling [|g" + recallDamaged.Count + "|o] Damaged Drones");
                 }
             }
             catch (Exception ex)
@@ -1514,7 +1514,7 @@ namespace EveComFramework.SimpleDrone
                     List<Drone> Attack = Drone.AllInSpace.Where(a => DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Light Scout Drones") && (a.State != EntityState.Combat || a.Target == null || a.Target != ActiveTarget)).ToList();
                     if (Attack.Any())
                     {
-                        Console.Log("|oSending scout drones to attack");
+                        Console.Log("|oSending scout drones to attack [|g" + ActiveTarget.Name + "|o][|g" + Math.Round(ActiveTarget.Distance / 1000, 0) + "|ok]");
                         Attack.Attack();
                         Attack.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(3)));
                         return false;
@@ -1524,7 +1524,7 @@ namespace EveComFramework.SimpleDrone
                     // Launch drones
                     if (Deploy.Any() && _rats.LockedAndLockingTargetList.Any())
                     {
-                        Console.Log("|oLaunching scout drones");
+                        Console.Log("|oLaunching [|g" + Deploy.Count + "|o] scout drones");
                         Deploy.Launch();
                         Deploy.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(3)));
                         return false;
@@ -1558,7 +1558,7 @@ namespace EveComFramework.SimpleDrone
                 List<Drone> Attack = Drone.AllInSpace.Where(a => DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Light Scout Drones") && (a.State != EntityState.Combat || a.Target == null || a.Target != ActiveTarget)).ToList();
                 if (Attack.Any())
                 {
-                    Console.Log("|oSending scout drones to attack");
+                    Console.Log("|oSending scout drones to attack [|g" + ActiveTarget.Name + "|o][|g" + Math.Round(ActiveTarget.Distance / 1000, 0) + "|ok]");
                     Attack.Attack();
                     Attack.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(3)));
                     return false;
@@ -1568,7 +1568,7 @@ namespace EveComFramework.SimpleDrone
                 // Launch drones
                 if (Deploy.Any() && _rats.LockedAndLockingTargetList.Any())
                 {
-                    Console.Log("|oLaunching scout drones");
+                    Console.Log("|oLaunching [|g" + Deploy.Count + "|o] scout drones");
                     Deploy.Launch();
                     Deploy.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(3)));
                     return false;
@@ -1592,7 +1592,7 @@ namespace EveComFramework.SimpleDrone
                 List<Drone> Attack = Drone.AllInSpace.Where(a => DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Medium Scout Drones") && (a.State != EntityState.Combat || a.Target == null || a.Target != ActiveTarget)).ToList();
                 if (Attack.Any())
                 {
-                    Console.Log("|oSending medium drones to attack");
+                    Console.Log("|oSending medium drones to attack [|g" + ActiveTarget.Name + "|o][|g" + Math.Round(ActiveTarget.Distance / 1000, 0) + "|ok]");
                     Attack.Attack();
                     Attack.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(3)));
                     return false;
@@ -1602,7 +1602,7 @@ namespace EveComFramework.SimpleDrone
                 // Launch drones
                 if (Deploy.Any() && _rats.LockedAndLockingTargetList.Any())
                 {
-                    Console.Log("|oLaunching medium drones");
+                    Console.Log("|oLaunching [|g" + Deploy.Count + "|o] medium drones");
                     Deploy.Launch();
                     Deploy.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(3)));
                     return false;
@@ -1626,7 +1626,7 @@ namespace EveComFramework.SimpleDrone
                 List<Drone> Attack = Drone.AllInSpace.Where(a => DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Heavy Attack Drones") && (a.State != EntityState.Combat || a.Target == null || a.Target != ActiveTarget)).ToList();
                 if (Attack.Any())
                 {
-                    Console.Log("|oSending heavy drones to attack");
+                    Console.Log("|oSending heavy drones to attack [|g" + ActiveTarget.Name + "|o][|g" + Math.Round(ActiveTarget.Distance / 1000, 0) + "|ok]");
                     Attack.Attack();
                     Attack.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(3)));
                     return false;
@@ -1636,7 +1636,7 @@ namespace EveComFramework.SimpleDrone
                 // Launch drones
                 if (Deploy.Any() && _rats.LockedAndLockingTargetList.Any())
                 {
-                    Console.Log("|oLaunching heavy drones");
+                    Console.Log("|oLaunching [|g" + Deploy.Count + "|o] heavy drones");
                     Deploy.Launch();
                     Deploy.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(3)));
                     return false;
@@ -1660,7 +1660,7 @@ namespace EveComFramework.SimpleDrone
                 List<Drone> Attack = Drone.AllInSpace.Where(a => !_droneCooldown.Contains(a) && DroneReady(a.ID) && Data.DroneType.All.Any(b => b.ID == a.TypeID && b.Group == "Sentry Drones") && (a.State != EntityState.Combat || a.Target == null || a.Target != ActiveTarget)).ToList();
                 if (Attack.Any())
                 {
-                    Console.Log("|oSending sentry drones to attack");
+                    Console.Log("|oSending sentry drones to attack [|g" + ActiveTarget.Name + "|o][|g" + Math.Round(ActiveTarget.Distance / 1000, 0) + "|ok]");
                     Attack.Attack();
                     Attack.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(3)));
                     return false;
@@ -1670,7 +1670,7 @@ namespace EveComFramework.SimpleDrone
                 // Launch drones
                 if (Deploy.Any() && _rats.LockedAndLockingTargetList.Any())
                 {
-                    Console.Log("|oLaunching sentry drones");
+                    Console.Log("|oLaunching [|g" + Deploy.Count + "|o] sentry drones");
                     Deploy.Launch();
                     Deploy.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(3)));
                     return false;
@@ -1697,7 +1697,7 @@ namespace EveComFramework.SimpleDrone
                     // Send drones to attack
                     if (Attack.Any())
                     {
-                        Console.Log("|oOrdering sentry drones to attack");
+                        Console.Log("|oOrdering sentry drones to attack [|g" + ActiveTarget.Name + "|o][|g" + Math.Round(ActiveTarget.Distance / 1000, 0) + "|ok]");
                         Attack.Attack();
                         Attack.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(3)));
                         return false;
@@ -1707,7 +1707,7 @@ namespace EveComFramework.SimpleDrone
                     // Launch drones
                     if (Deploy.Any() && _rats.LockedAndLockingTargetList.Any())
                     {
-                        Console.Log("|oLaunching sentry drones");
+                        Console.Log("|oLaunching [|g" + Deploy.Count + "|o] sentry drones");
                         Deploy.Launch();
                         Deploy.ForEach(a => NextDroneCommand.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(3)));
                         return false;
