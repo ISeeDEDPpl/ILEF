@@ -698,7 +698,6 @@ namespace EveComFramework.Security
         }
 
         bool Decloak;
-        bool NetworkedSensorArray;
 
         bool CheckClear(object[] Params)
         {
