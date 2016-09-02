@@ -102,7 +102,7 @@ namespace EveComFramework.SimpleDrone
                 return 2;
             }
         }
-        public double FighterCriticalHealthLevel = 70;
+        public double FighterCriticalHealthLevel = 80;
         public double FighterMaxRange = 800000;
         public bool ReArmFighters = false;
         public bool RefillRockets = false;
