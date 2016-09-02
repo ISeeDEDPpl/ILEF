@@ -718,14 +718,14 @@ namespace EveComFramework.Security
                     // FYI, I think reconnecting to drones (fighters) is currently broken!
             //    }
             //}
-            if (Trigger == FleeTrigger.CapacitorLow && Trigger == FleeTrigger.ShieldLow) AutoModule.AutoModule.Instance.Decloak = true;
-            if (Trigger == FleeTrigger.ArmorLow && MyShip.Modules.Any(a => a.GroupID == Group.ArmorRepairUnit && a.IsOnline)) AutoModule.AutoModule.Instance.Decloak = true;
+            if (Trigger == FleeTrigger.ShieldLow && MyShip.Capacitor > AutoModule.AutoModule.Instance.Config.CapShieldBoosters && MyShip.Modules.Any(a => a.GroupID == Group.ShieldBooster && a.IsOnline)) AutoModule.AutoModule.Instance.Decloak = true;
+            if (Trigger == FleeTrigger.ArmorLow && MyShip.Capacitor > AutoModule.AutoModule.Instance.Config.CapArmorRepairs && MyShip.Modules.Any(a => a.GroupID == Group.ArmorRepairUnit && a.IsOnline)) AutoModule.AutoModule.Instance.Decloak = true;
 
             if (SafeTrigger() != FleeTrigger.None) return false;
             if (Config.IncludeBroadcastTriggers && BroadcastSafe.ContainsValue(false)) return false;
-            Log.Log("|oArea is now safe");
-            Log.Log(" |-gWaiting for |w{0}|-g minutes", FleeWait);
-            Comms.ChatQueue.Enqueue(string.Format("<Security> Area is now safe, waiting for {0} minutes", FleeWait));
+            Log.Log("|oArea is now safe. Waiting for [" + FleeWait + "] minutes");
+            Comms.ChatQueue.Enqueue(string.Format("<Security> Area is now safe, waiting for [" + FleeWait + "] minutes"));
+            AutoModule.AutoModule.Instance.UseNetworkedSensorArray = true;
             QueueState(CheckReset);
             QueueState(Resume);
 
