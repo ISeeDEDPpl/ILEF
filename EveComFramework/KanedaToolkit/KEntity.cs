@@ -58,7 +58,5 @@ namespace EveComFramework.KanedaToolkit
             if (entity.GroupID != Group.ControlTower) return false;
             return (entity.Distance < (double) entity["shieldRadius"]);
         }
-
     }
-
 }
