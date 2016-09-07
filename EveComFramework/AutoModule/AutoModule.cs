@@ -403,10 +403,16 @@ namespace EveComFramework.AutoModule
 
             if (Config.NetworkedSensorArray && MyShip.ToEntity.Mode != EntityMode.Warping)
             {
-                List<Module> networkedSensorArrays = MyShip.Modules.Where(a => (int) a.GroupID == 1706 && a.IsOnline).ToList();
+                List<Module> networkedSensorArrays = MyShip.Modules.Where(a => (int)a.GroupID == 1706 && a.IsOnline).ToList();
                 if (networkedSensorArrays.Any())
                 {
-                    if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapNetworkedSensorArray)
+                    if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapNetworkedSensorArray && !MyShip.ToEntity.InsideForcefield() &&
+                        Entity.All.Any(a => a.SurfaceDistance < 150000 && (
+                            a.GroupID == Group.Station
+                            || a.GroupID == Group.MediumCitadel
+                            || a.GroupID == Group.LargeCitadel
+                            || a.GroupID == Group.XLargeCitadel
+                            || a.GroupID == Group.XXLargeCitadel)))
                     {
                         networkedSensorArrays.Where(a => a.AllowsActivate).ForEach(m => m.Activate());
                     }

@@ -194,7 +194,7 @@ namespace EveComFramework.SimpleDrone
                 return false;
             }
 
-            if (!Entity.All.Any(b => b.GroupID == Group.ForceField))
+            if (!MyShip.ToEntity.InsideForcefield() && MyShip.ToEntity.Mode != EntityMode.Warping)
             {
                 // Speed up Returning Fighters
                 IEnumerable<Fighters.Fighter> ReturningFighters = Fighters.Active.Where(a => a.State == Fighters.States.RECALLING && a.HasPropmod() && a.Slot2.AllowsActivate);
