@@ -406,8 +406,8 @@ namespace EveComFramework.AutoModule
                 List<Module> networkedSensorArrays = MyShip.Modules.Where(a => (int)a.GroupID == 1706 && a.IsOnline).ToList();
                 if (networkedSensorArrays.Any())
                 {
-                    if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapNetworkedSensorArray && !MyShip.ToEntity.InsideForcefield() &&
-                        Entity.All.Any(a => a.SurfaceDistance < 150000 && (
+                    if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapNetworkedSensorArray && Entity.All.All(a => !a.InsideForcefield()) &&
+                        !Entity.All.Any(a => a.SurfaceDistance < 150000 && (
                             a.GroupID == Group.Station
                             || a.GroupID == Group.MediumCitadel
                             || a.GroupID == Group.LargeCitadel
