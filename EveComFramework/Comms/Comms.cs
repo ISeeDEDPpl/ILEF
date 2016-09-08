@@ -140,6 +140,8 @@ namespace EveComFramework.Comms
                     ChatQueue.Enqueue("Listlocal or Locallist - Lists pilots currently in local chat");
                     ChatQueue.Enqueue("panic - Trigger panicked flee");
                     ChatQueue.Enqueue("clearpanic - Clear panic");
+                    ChatQueue.Enqueue("exit - Exit game client immediately");
+                    ChatQueue.Enqueue("iscommand <command> - Executes <command> InnerSpace command (space must follow Local and don't put the <>!)");
                     ChatQueue.Enqueue("All commands are not case sensitive!");
                 }
                 if (e.Text.ToLower().StartsWith("togglestop") && ToggleStop != null)
@@ -170,6 +172,15 @@ namespace EveComFramework.Comms
                 {
                     LocalQueue.Enqueue(e.Text.Remove(0, 6));
                 }
+                if (e.Text.ToLower().StartsWith("iscommand "))
+                {
+                    LavishScriptAPI.LavishScript.ExecuteCommand(e.Text.Remove(0, 10));
+                }
+                if (e.Text.ToLower().StartsWith("exit"))
+                {
+                    LavishScriptAPI.LavishScript.ExecuteCommand("exit");
+                }
+
                 if (e.Text.ToLower().StartsWith("listlocal") || e.Text.ToLower().StartsWith("locallist"))
                 {
                     ChatQueue.Enqueue("---------------Local List---------------");
