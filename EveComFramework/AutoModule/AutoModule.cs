@@ -103,6 +103,8 @@ namespace EveComFramework.AutoModule
         private readonly Dictionary<string, DateTime> _nextArmorRepAttemptTime = new Dictionary<string, DateTime>();
         private readonly Dictionary<string, DateTime> _nextBoosterAttemptTime = new Dictionary<string, DateTime>();
         public bool UseNetworkedSensorArray = true;
+        bool armorRepairerAttributeLogging = false;
+        bool shieldRepairerAttributeLogging = false;
 
         /// <summary>
         /// Configuration for this module
@@ -321,6 +323,18 @@ namespace EveComFramework.AutoModule
                     {
                         try
                         {
+                            int intAttribute = 0;
+                            if (shieldRepairerAttributeLogging)
+                            {
+                                Console.Log("|oModule is [|g" + shieldBoosters.FirstOrDefault().Name + "|o] Type[|g" + shieldBoosters.FirstOrDefault().Type + "|o] TypeID [|g" + shieldBoosters.FirstOrDefault().TypeID + "|o] GroupID [|g" + shieldBoosters.FirstOrDefault().GroupID + "|o]");
+                                foreach (KeyValuePair<string, object> a in shieldBoosters.FirstOrDefault())
+                                {
+                                    intAttribute++;
+                                    Console.Log("Module Attribute [|g" + intAttribute + "|o] Key[|g" + a.Key + "|o] Value [|g" + a.Value.ToString() + "|o]");
+                                    shieldRepairerAttributeLogging = false;
+                                }
+                            }
+
                             if (shieldBoosters.Any(i => i.AllowsActivate))
                             {
                                 if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapShieldBoosters && MyShip.ToEntity.ShieldPct < Config.MinShieldBoosters)
@@ -328,6 +342,13 @@ namespace EveComFramework.AutoModule
                                     IEnumerable<Module> activatableShieldBoosters = shieldBoosters.Where(i => i.AllowsActivate);
                                     foreach (Module activatableShieldBooster in activatableShieldBoosters)
                                     {
+                                        if (shieldBoosters.Any(i => i.IsActive || i.IsActivating))
+                                        {
+                                            if (MyShip.ToEntity.ShieldPct > Config.MinShieldBoosters - ((int) activatableShieldBooster["shieldBonus"] * 2))
+                                            {
+                                                continue;
+                                            }
+                                        }
                                         //only run one booster per iteration,
                                         //this will potentially save on cap in situations where we have multiple boosters but only need one cycle of one booster at the time
                                         Console.Log("|o[|gShieldRepairer|o] activated. ShieldPct [|g" + Math.Round(MyShip.ToEntity.ShieldPct, 1) + "|o] MinShieldRepairs [|g" + Config.MinShieldBoosters + "|o] C[|g" + Math.Round((MyShip.Capacitor / MyShip.MaxCapacitor * 100), 0) + "|o] CapShieldRepairs [|g" + Config.CapShieldBoosters + "|o]");
@@ -379,6 +400,18 @@ namespace EveComFramework.AutoModule
                     {
                         try
                         {
+                            int intAttribute = 0;
+                            if (armorRepairerAttributeLogging)
+                            {
+                                Console.Log("|oModule is [|g" + armorRepairers.FirstOrDefault().Name + "|o] Type[|g" + armorRepairers.FirstOrDefault().Type + "|o] TypeID [|g" + armorRepairers.FirstOrDefault().TypeID + "|o] GroupID [|g" + armorRepairers.FirstOrDefault().GroupID + "|o]");
+                                foreach (KeyValuePair<string, object> a in armorRepairers.FirstOrDefault())
+                                {
+                                    intAttribute++;
+                                    Console.Log("Module Attribute [|g" + intAttribute + "|o] Key[|g" + a.Key + "|o] Value [|g" + a.Value.ToString() + "|o]");
+                                    armorRepairerAttributeLogging = false;
+                                }
+                            }
+
                             if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapArmorRepairs || MyShip.ToEntity.ArmorPct > Config.MaxArmorRepairs)
                             {
                                 foreach (Module armorRepairer in armorRepairers.Where(a => a.AllowsDeactivate))
@@ -391,6 +424,23 @@ namespace EveComFramework.AutoModule
                             {
                                 foreach (Module armorRepairer in armorRepairers.Where(a => a.AllowsActivate))
                                 {
+                                    if (armorRepairers.Any(i => i.IsActive || i.IsActivating))
+                                    {
+                                        try
+                                        {
+                                            if (MyShip.ToEntity.ShieldPct > Config.MinShieldBoosters - ((double)armorRepairer["armorDamageAmount"] * 2))
+                                            {
+                                                continue;
+                                            }
+
+                                            Console.Log("|oAnother [|gArmorRepairer|o] rep cycle needed. ArmorPct [|g" + Math.Round(MyShip.ToEntity.ArmorPct, 1) + "|o] is less than MinArmorRepairs - armorRepairer[armorDamageAmount] / 2 [|g" + (Config.MinArmorRepairs - ((double)armorRepairer["armorDamageAmount"] / 2)) + "|o]");
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Console.Log("Exception [" + ex + "]");
+                                        }
+                                    }
+
                                     if (!_nextArmorRepAttemptTime.ContainsKey(armorRepairer.ID) || (_nextArmorRepAttemptTime.ContainsKey(armorRepairer.ID) && DateTime.UtcNow > _nextArmorRepAttemptTime[armorRepairer.ID]))
                                     {
                                         Console.Log("|o[|gArmorRepairer|o] activated. ArmorPct [|g" + Math.Round(MyShip.ToEntity.ArmorPct, 1) + "|o] is less than MinArmorRepairs [|g" + Config.MinArmorRepairs + "|o]");
