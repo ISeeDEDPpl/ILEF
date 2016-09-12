@@ -1849,7 +1849,7 @@ namespace EveComFramework.SimpleDrone
                                     }
                                     if (missilesAlreadyShotAtThisEntity <= 1)
                                     {
-                                        Console.Log("|oFighter [|g" + MaskedId(fighterReadyToMissileAttack.ID) + "|o] [3]Rocket    [|g" + rocketTargetEntity.Name + "|o][|g" + MaskedId(rocketTargetEntity.ID) + "|o][|g" + Math.Round(rocketTargetEntity.DistanceTo(fighterReadyToMissileAttack.ToEntity) / 1000, 0) + "k|o] FighterToTarget");
+                                        Console.Log("|oFighter [|g" + MaskedId(fighterReadyToMissileAttack.ID) + "|o] [3]Rocket [range" + Math.Round((double)fighterReadyToMissileAttack["fighterAbilityMissilesRange"] - 2000 / 1000, 0) + "k][|g" + rocketTargetEntity.Name + "|o][|g" + MaskedId(rocketTargetEntity.ID) + "|o][|g" + Math.Round(rocketTargetEntity.DistanceTo(fighterReadyToMissileAttack.ToEntity) / 1000, 0) + "k|o] FighterToTarget");
                                         fighterReadyToMissileAttack.Slot3.ActivateOnTarget(rocketTargetEntity);
                                         _fighterRocketSalvosLeft.AddOrUpdate(fighterReadyToMissileAttack.ID, _fighterRocketSalvosLeft[fighterReadyToMissileAttack.ID] - 1);
                                         missilesAlreadyShotAtThisEntity++;
