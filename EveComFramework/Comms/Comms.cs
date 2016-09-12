@@ -142,6 +142,8 @@ namespace EveComFramework.Comms
                     ChatQueue.Enqueue("clearpanic - Clear panic");
                     ChatQueue.Enqueue("exit - Exit game client immediately");
                     ChatQueue.Enqueue("iscommand <command> - Executes <command> InnerSpace command (space must follow Local and don't put the <>!)");
+                    ChatQueue.Enqueue("setdestination <solarsystemid/stationid> - Set ingame destination");
+                    ChatQueue.Enqueue("autopilot <enabled/disabled> - Control ECF autopilot");
                     ChatQueue.Enqueue("All commands are not case sensitive!");
                 }
                 if (e.Text.ToLower().StartsWith("togglestop") && ToggleStop != null)
@@ -179,6 +181,28 @@ namespace EveComFramework.Comms
                 if (e.Text.ToLower().StartsWith("exit"))
                 {
                     LavishScriptAPI.LavishScript.ExecuteCommand("exit");
+                }
+                if (e.Text.ToLower().StartsWith("setdestination"))
+                {
+                    string destionationString = e.Text.Remove(0, 15);
+                    try
+                    {
+                        Route.SetDestination(long.Parse(destionationString));
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+                }
+
+                if (e.Text.ToLower().StartsWith("autopilot enabled"))
+                {
+                    Move.Move.Instance.ToggleAutopilot(true);
+                }
+
+                if (e.Text.ToLower().StartsWith("autopilot disabled"))
+                {
+                    Move.Move.Instance.ToggleAutopilot(false);
                 }
 
                 if (e.Text.ToLower().StartsWith("listlocal") || e.Text.ToLower().StartsWith("locallist"))
