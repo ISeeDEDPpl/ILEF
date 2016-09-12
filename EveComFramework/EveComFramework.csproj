@@ -104,6 +104,7 @@
       <DependentUpon>GroupControl.cs</DependentUpon>
     </Compile>
     <Compile Include="KanedaToolkit\Bot.cs" />
+    <Compile Include="KanedaToolkit\Constants.cs" />
     <Compile Include="KanedaToolkit\KAgent.cs" />
     <Compile Include="KanedaToolkit\KBookmark.cs" />
     <Compile Include="KanedaToolkit\KEntity.cs" />
