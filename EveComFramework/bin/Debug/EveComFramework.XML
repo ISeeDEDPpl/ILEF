@@ -754,6 +754,22 @@
             the contents of this method with the code editor.
             </summary>
         </member>
+        <member name="T:EveComFramework.KanedaToolkit.Constants">
+            <summary>
+            This class provides constants for static values.
+             Naming is not final, so please don't use it outside kaneda projects for now.
+            </summary>
+        </member>
+        <member name="F:EveComFramework.KanedaToolkit.Constants.GridsizeMaxDistance">
+            <summary>
+            This should be used to determine if we are on grid with other things like anomalies, structures, etc.
+            </summary>
+        </member>
+        <member name="F:EveComFramework.KanedaToolkit.Constants.WarpMinDistance">
+            <summary>
+            This defines the minimum distance required from the target to be able to warp to it.
+            </summary>
+        </member>
         <member name="T:EveComFramework.KanedaToolkit.KAgent">
             <summary>
             extension methods for Agent
