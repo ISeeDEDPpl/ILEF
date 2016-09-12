@@ -29,11 +29,6 @@
             Set to true to force automodule to decloak you.  Useful for handling non-covops cloaks.
             </summary>
         </member>
-        <member name="F:EveComFramework.AutoModule.AutoModule.KeepPropulsionModuleActive">
-            <summary>
-            Set to true to force automodule to keep your propmod online regardless of state
-            </summary>
-        </member>
         <member name="M:EveComFramework.AutoModule.AutoModule.Start">
             <summary>
             Start this module
@@ -708,6 +703,22 @@
             </summary>
             <param name="Name">Name</param>
             <returns>List of InvGroups</returns>
+        </member>
+        <member name="T:EveComFramework.GroupControl.FleetAutodiscover">
+            <summary>
+            Fleet autodiscovery
+            </summary>
+        </member>
+        <member name="M:EveComFramework.GroupControl.FleetAutodiscover.Request">
+            <summary>
+            Request fleet invite from booster
+            </summary>
+        </member>
+        <member name="M:EveComFramework.GroupControl.FleetAutodiscover.Respond(System.Int64)">
+            <summary>
+            Respond to fleet invite request, telling the character to accept a fleet invite once
+            </summary>
+            <param name="CharacterID"></param>
         </member>
         <member name="F:EveComFramework.GroupControl.UI.Debug.components">
             <summary>
@@ -1446,6 +1457,16 @@
             Instance of Targets: used for tracking what is locked / locking / unlocked
             </summary>
         </member>
+        <member name="P:EveComFramework.SimpleDrone.SimpleDrone.AvailableDroneSlots">
+            <summary>
+            BroneBandwidth / M3 of the correct drone type in DroneBay based on the configured simpledrone mode
+            </summary>
+        </member>
+        <member name="P:EveComFramework.SimpleDrone.SimpleDrone.OffgridFighters">
+            <summary>
+            Fighters that are InSpace but not on Grid with us (Fighter.ToEntity == null)
+            </summary>
+        </member>
         <member name="P:EveComFramework.SimpleDrone.SimpleDrone.AvailableFighters">
             <summary>
             AvailableFighters - Fighters on Grid that are ready for orders and not already being recalled
@@ -1461,7 +1482,12 @@
             Drones in space that are not Incapacitated or about to Die
             </summary>
         </member>
-        <member name="F:EveComFramework.SimpleDrone.SimpleDrone.PriorityTargets">
+        <member name="F:EveComFramework.SimpleDrone.SimpleDrone.PriorityTargetsFromBehavior">
+            <summary>
+            PriorityTargets Added from the main behavior (Ratter / Copilot / evecombine / MissionMiner, etc)
+            </summary>
+        </member>
+        <member name="P:EveComFramework.SimpleDrone.SimpleDrone.PriorityTargets">
             <summary>
             PriorityTargets - Targets that should be handles before others: by default there are no priority targets they are added manually using the GUI
             </summary>
@@ -1483,12 +1509,14 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:EveComFramework.SimpleDrone.SimpleDrone.RecallFighters(System.Collections.Generic.IEnumerable{EveCom.Fighters.Fighter},System.String)">
+        <member name="M:EveComFramework.SimpleDrone.SimpleDrone.RecallFighters(System.Collections.Generic.IEnumerable{EveCom.Fighters.Fighter},System.String,System.Boolean,System.Boolean)">
             <summary>
             RecallFighters that are on grid and are not yet returning
             </summary>
             <param name="fightersToRecall"></param>
             <param name="reason"></param>
+            <param name="spamReturning"></param>
+            <param name="waitForFightersToReturn"></param>
             <returns></returns>
         </member>
         <member name="M:EveComFramework.SimpleDrone.SimpleDrone.SpeedUpFighters(System.Collections.Generic.IEnumerable{EveCom.Fighters.Fighter},System.String)">
