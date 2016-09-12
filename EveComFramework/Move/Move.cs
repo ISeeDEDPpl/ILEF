@@ -750,6 +750,7 @@ namespace EveComFramework.Move
             {
                 QueueAutoPilotDeactivation = false;
                 Log.Log("|oAutopilot deactivated");
+                Comms.Comms.Instance.ChatQueue.Enqueue("<Move> Autopilot deactivated");
                 return true;
             }
 
@@ -822,6 +823,7 @@ namespace EveComFramework.Move
                         {
                             Log.Log("|rBubble detected!");
                             Log.Log("|oAligning to |-g{0}", Route.NextWaypoint.Name);
+                            Comms.Comms.Instance.ChatQueue.Enqueue("<Move> Bubble Detected! Aligning to " + Route.NextWaypoint.Name);
                             Route.NextWaypoint.AlignTo();
                             InsertState(AutoPilot);
                             WaitFor(10, () => MyShip.ToEntity.Mode != EntityMode.Stopped);
@@ -832,6 +834,7 @@ namespace EveComFramework.Move
                             DoInstaWarp();
                             Log.Log("|oWarping");
                             Log.Log(" |-g{0}", Route.NextWaypoint.Name);
+                            Comms.Comms.Instance.ChatQueue.Enqueue("<Move> Warping " + Route.NextWaypoint.Name);
                             Route.NextWaypoint.WarpTo();
                             return false;
                         }
@@ -840,6 +843,7 @@ namespace EveComFramework.Move
                     if (Route.NextWaypoint.Distance < 2000 || Route.NextWaypoint.Distance > 150000)
                     {
                         Log.Log("|oJumping through to |-g{0}", Route.NextWaypoint.Name);
+                        Comms.Comms.Instance.ChatQueue.Enqueue("<Move> Jumping through to " + Route.NextWaypoint.Name);
                         Route.NextWaypoint.Jump();
                     }
                     else
@@ -847,6 +851,7 @@ namespace EveComFramework.Move
                         if (MyShip.ToEntity.Mode != EntityMode.Approaching)
                         {
                             Log.Log("|oApproaching |-g{0}", Route.NextWaypoint.Name);
+                            Comms.Comms.Instance.ChatQueue.Enqueue("<Move> Approaching " + Route.NextWaypoint.Name);
                             Route.NextWaypoint.Approach();
                         }
                         return false;
@@ -868,6 +873,7 @@ namespace EveComFramework.Move
                         {
                             Log.Log("|rBubble detected!");
                             Log.Log("|oAligning to |-g{0}", Route.NextWaypoint.Name);
+                            Comms.Comms.Instance.ChatQueue.Enqueue("<Move> Bubble Detected! Aligning to " + Route.NextWaypoint.Name);
                             Route.NextWaypoint.AlignTo();
                             InsertState(AutoPilot);
                             WaitFor(10, () => MyShip.ToEntity.Mode != EntityMode.Stopped);
@@ -878,6 +884,7 @@ namespace EveComFramework.Move
                             DoInstaWarp();
                             Log.Log("|oWarping");
                             Log.Log(" |-g{0}", Route.NextWaypoint.Name);
+                            Comms.Comms.Instance.ChatQueue.Enqueue("<Move> Warping " + Route.NextWaypoint.Name);
                             Route.NextWaypoint.WarpTo();
                             return false;
                         }
@@ -919,7 +926,7 @@ namespace EveComFramework.Move
                 }
                 catch (Exception ex)
                 {
-                    Log.Log("Entity name not ready yet? " + ex.ToString(), LogType.DEBUG);
+                    Log.Log("FIXME! Entity name not ready yet? " + ex.ToString(), LogType.DEBUG);
                 }
                 Target.Dock();
                 InsertState(Dock, -1, Target);
