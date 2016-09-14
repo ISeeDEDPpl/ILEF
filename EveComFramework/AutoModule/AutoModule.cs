@@ -407,7 +407,7 @@ namespace EveComFramework.AutoModule
                 if (networkedSensorArrays.Any())
                 {
                     if ((MyShip.Capacitor / MyShip.MaxCapacitor * 100) > Config.CapNetworkedSensorArray && Entity.All.All(a => !a.InsideForcefield()) &&
-                        !Entity.All.Any(a => a.SurfaceDistance < 150000 && (
+                        !Entity.All.Any(a => a.SurfaceDistance < Constants.WarpMinDistance && (
                             a.GroupID == Group.Station
                             || a.GroupID == Group.MediumCitadel
                             || a.GroupID == Group.LargeCitadel

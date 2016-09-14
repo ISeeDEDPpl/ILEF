@@ -250,7 +250,7 @@ namespace EveComFramework.Move
                 DislodgeCurState(AutoPilot, 2000);
                 return false;
             }
-            if (Destination.Distance < 150000 && Destination.Distance > 0)
+            if (Destination.Distance < Constants.WarpMinDistance && Destination.Distance > 0)
             {
                 return true;
             }
@@ -352,7 +352,7 @@ namespace EveComFramework.Move
             {
                 return false;
             }
-            if (Entity.Distance < 150000 && Entity.Distance > 0)
+            if (Entity.Distance < Constants.WarpMinDistance && Entity.Distance > 0)
             {
                 return true;
             }
@@ -388,7 +388,7 @@ namespace EveComFramework.Move
             }
             else if (LCO == null)
             {
-                if (Entity.Exists && Entity.Distance > 150000)
+                if (Entity.Exists && Entity.Distance > Constants.WarpMinDistance)
                 {
                     DoInstaWarp();
                     Log.Log("|oWarping");
@@ -523,7 +523,7 @@ namespace EveComFramework.Move
                 // Start approaching our approach target if we're not currently approaching anything
                 if (!Approaching && ApproachCollision == null)
                 {
-                    if (ApproachTarget.SurfaceDistance > 150000 && ApproachTarget.Warpable())
+                    if (ApproachTarget.SurfaceDistance > Constants.WarpMinDistance && ApproachTarget.Warpable())
                     {
                         DoInstaWarp();
                         Log.Log("|oWarping");
@@ -833,8 +833,8 @@ namespace EveComFramework.Move
                             return false;
                         }
                     }
-                    if (!Entity.All.Any(a => a.Dockable() && a.Distance < 150000)) DoInstaWarp();
-                    if (Route.NextWaypoint.Distance < 2000 || Route.NextWaypoint.Distance > 150000)
+                    if (!Entity.All.Any(a => a.Dockable() && a.Distance < Constants.WarpMinDistance)) DoInstaWarp();
+                    if (Route.NextWaypoint.Distance < 2000 || Route.NextWaypoint.Distance > Constants.WarpMinDistance)
                     {
                         Log.Log("|oJumping through to |-g{0}", Route.NextWaypoint.Name);
                         Comms.Comms.Instance.ChatQueue.Enqueue("<Move> Jumping through to " + Route.NextWaypoint.Name);
@@ -911,7 +911,7 @@ namespace EveComFramework.Move
             }
             if (!Config.WarpCollisionPrevention)
             {
-                if (!Entity.All.Any(a => a.Dockable() && a.Distance < 150000)) DoInstaWarp();
+                if (!Entity.All.Any(a => a.Dockable() && a.Distance < Constants.WarpMinDistance)) DoInstaWarp();
                 Log.Log("|oDocking");
                 try
                 {
@@ -949,7 +949,7 @@ namespace EveComFramework.Move
             }
             else if (LCO == null)
             {
-                if (!Entity.All.Any(a => a.Dockable() && a.Distance < 150000)) DoInstaWarp();
+                if (!Entity.All.Any(a => a.Dockable() && a.Distance < Constants.WarpMinDistance)) DoInstaWarp();
                 Log.Log("|oDocking");
                 Log.Log(" |-g{0}", Target.Name);
                 Target.Dock();

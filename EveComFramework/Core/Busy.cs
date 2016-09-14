@@ -38,23 +38,14 @@ namespace EveComFramework.Core
         /// <summary>
         /// Property indicating if any module is busy
         /// </summary>
-        public bool IsBusy
-        {
-            get
-            {
-                return BusySet.Count > 0;
-            }
-        }
+        public bool IsBusy => BusySet.Count > 0;
 
         /// <summary>
         /// Property indicating if a specific module is busy
         /// </summary>
         /// <param name="Item">The name of the module</param>
         /// <returns>Busy true/false</returns>
-        public bool ItemIsBusy(string Item)
-        {
-            return BusySet.ContainsKey(Item);
-        }
+        public bool ItemIsBusy(string Item) => BusySet.ContainsKey(Item);
 
         /// <summary>
         /// Set a module as busy
@@ -84,9 +75,6 @@ namespace EveComFramework.Core
         /// <summary>
         /// Signal modules that are ready using the actions defined
         /// </summary>
-        public void SignalReady()
-        {
-            BusySet.Values.ToList().ForEach(signal => signal());
-        }
+        public void SignalReady() => BusySet.Values.ToList().ForEach(signal => signal());
     }
 }

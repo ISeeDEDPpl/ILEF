@@ -13,5 +13,4 @@ namespace EveComFramework.KanedaToolkit
             return inventoryContainer.MaxCapacity - inventoryContainer.UsedCapacity;
         }
     }
-
 }

@@ -4,13 +4,11 @@ using System.Linq;
 
 namespace EveComFramework.KanedaToolkit
 {
-
     /// <summary>
     /// Bookmark Toolkit
     /// </summary>
     public class BookmarkToolkit
     {
-
         #region Instantiation
         static BookmarkToolkit _Instance;
         /// <summary>
@@ -63,5 +61,4 @@ namespace EveComFramework.KanedaToolkit
 
         #endregion
     }
-    
 }

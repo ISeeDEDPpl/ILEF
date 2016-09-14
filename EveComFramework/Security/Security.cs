@@ -360,7 +360,7 @@ namespace EveComFramework.Security
                             if (Entity.All.Any(a => NPCClasses.All.Any(b => b.Key == a.GroupID && b.Value == "Capital"))) return FleeTrigger.CapitalSpawn;
                             break;
                         case FleeTrigger.CynoGrid:
-							if (Session.InSpace && Entity.All.Any(a => a.Distance < 8000000 && (a.TypeID == 21094 || a.TypeID == 28650))) return FleeTrigger.CynoGrid;
+							if (Session.InSpace && Entity.All.Any(a => a.Distance < Constants.GridsizeMaxDistance && (a.TypeID == 21094 || a.TypeID == 28650))) return FleeTrigger.CynoGrid;
                             break;
                         case FleeTrigger.CynoSystem:
 							if (Session.InSpace && Entity.All.Any(a => a.TypeID == 21094 || a.TypeID == 28650)) return FleeTrigger.CynoSystem;
