@@ -969,21 +969,22 @@ namespace EveComFramework.SimpleDrone
             if (Session.InStation) return true;
 
             //
-            // Recall drones
-            //
-            if (!RecallDrones(DronesInSpace.ToList())) return false;
-
-            //
             // Recall fighters
             //
             if (AvailableFighters.Any())
             {
-                if(!RecallFighters(AvailableFighters, reason)) return false;
                 if (!SpeedUpFighters(ReturningFighters, "Burning Back")) return false;
+                if (!RecallFighters(AvailableFighters, reason)) return false;
             }
 
             if (Fighters.Active.Any(i => i.ToEntity != null && i.ToEntity.Distance < 900000)) return false;
             _missileEntityTracking.Clear();
+
+            //
+            // Recall drones
+            //
+            if (!RecallDrones(DronesInSpace.ToList())) return false;
+
             return true;
         }
 
@@ -1446,8 +1447,8 @@ namespace EveComFramework.SimpleDrone
                 List<Fighters.Fighter> damagedFighters = AvailableFighters.Where(a => a.Health != null && a.Health < Config.FighterCriticalHealthLevel).ToList();
                 if (damagedFighters.Any())
                 {
-                    if (!RecallFighters(damagedFighters, "Low Health")) return false;
                     if (!SpeedUpFighters(damagedFighters.Where(i => i.State == Fighters.States.RECALLING), "Recalling")) return false;
+                    if (!RecallFighters(damagedFighters, "Low Health", false, true)) return false;
                 }
             }
             catch (Exception ex)
@@ -1491,8 +1492,8 @@ namespace EveComFramework.SimpleDrone
 
                         if (AvailableFighters.Any())
                         {
-                            if (!RecallFighters(AvailableFighters, "No ActiveTarget")) return false;
                             if (ReturningFighters.Any()) if (!SpeedUpFighters(ReturningFighters, "Burning Back.")) return false;
+                            if (!RecallFighters(AvailableFighters, "No ActiveTarget", false, true)) return false;
                         }
                     }
                 }
@@ -1754,7 +1755,7 @@ namespace EveComFramework.SimpleDrone
                             }
 
                             Console.Log("|oWe are missing fighters in a squadron and have none in the drone bay to add to the squadron: panic");
-                            if (!RecallFighters(AvailableFighters, "Low On Fighters: panicking")) return false;
+                            if (!RecallFighters(AvailableFighters, "Low On Fighters: panicking", false, true)) return false;
                             _securityCore.Panic();
                         }
                     }
@@ -1816,8 +1817,8 @@ namespace EveComFramework.SimpleDrone
                                 IEnumerable<Fighters.Fighter> fightersThatNeedToRefillRockets = Fighters.Active.Where(i => FighterReady(i.ID) && _fighterRocketSalvosLeft != null && _fighterRocketSalvosLeft.ContainsKey(i.ID) && (_fighterRocketSalvosLeft[i.ID] <= 0)).ToList();
                                 if (fightersThatNeedToRefillRockets.Any())
                                 {
-                                    if (!RecallFighters(fightersThatNeedToRefillRockets, "Refill Rockets")) return false;
                                     if (!SpeedUpFighters(fightersThatNeedToRefillRockets.Where(i => i.State == Fighters.States.RECALLING), "returning")) return false;
+                                    if (!RecallFighters(fightersThatNeedToRefillRockets, "Refill Rockets", false, true)) return false;
                                 }
                             }
                         }
