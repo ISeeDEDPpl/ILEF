@@ -711,7 +711,7 @@ namespace EveComFramework.Security
         {
             if (_isPanic || StopUntilManualClearance) return false;
             FleeTrigger Trigger = (FleeTrigger)Params[0];
-            int FleeWait = (Trigger == FleeTrigger.ArmorLow || Trigger == FleeTrigger.CapacitorLow || Trigger == FleeTrigger.ShieldLow || Trigger == FleeTrigger.Forced || Trigger == FleeTrigger.Panic) ? 0 : Config.FleeWait;
+            int FleeWait = (Trigger == FleeTrigger.ArmorLow || Trigger == FleeTrigger.CapacitorLow || Trigger == FleeTrigger.ShieldLow || Trigger == FleeTrigger.Forced || Trigger == FleeTrigger.Panic || Trigger == FleeTrigger.CapitalSpawn) ? 0 : Config.FleeWait;
             AutoModule.AutoModule.Instance.Decloak = false;
             AutoModule.AutoModule.Instance.UseNetworkedSensorArray = false;
             //If we are not in a POS Shield
