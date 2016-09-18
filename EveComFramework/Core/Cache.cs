@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using EveCom;
 using EveComFramework.KanedaToolkit;
 
@@ -15,6 +16,8 @@ namespace EveComFramework.Core
         #region Instantiation
 
         static Cache _Instance;
+        public readonly Security.Security _securityCore = Security.Security.Instance;
+
         /// <summary>
         /// Singletoner
         /// </summary>
@@ -37,7 +40,8 @@ namespace EveComFramework.Core
             CachedMissions = new Dictionary<string, CachedMission>();
             AvailableAgents = new List<string>();
             ShipNames = new HashSet<string>();
-            QueueState(Control);
+            AllEntities = new List<Entity>();
+            QueueState(Control, 400);
         }
 
         #endregion
@@ -48,26 +52,32 @@ namespace EveComFramework.Core
         /// Your pilot's Name
         /// </summary>
         public string Name { get; set; }
+
         /// <summary>
         /// Your pilot's CharID
         /// </summary>
         public long CharID { get; set; }
+
         /// <summary>
         /// Array of bookmark titles
         /// </summary>
         public string[] Bookmarks { get; set; }
+
         /// <summary>
         /// Array of bookmark titles
         /// </summary>
         public string[] CitadelBookmarks { get; set; }
+
         /// <summary>
         /// Array of fleet member names
         /// </summary>
         public string[] FleetMembers { get; set; }
+
         /// <summary>
         /// Item Volumes, keyed by Types
         /// </summary>
         public Dictionary<string, double> ItemVolume { get; set; }
+
         public Dictionary<string, double> ShipVolume { get; set; }
         public HashSet<string> ShipNames { get; set; }
         public List<string> Fittings { get; set; }
@@ -75,6 +85,167 @@ namespace EveComFramework.Core
         public Double HullPercent = 1;
         public bool DamagedDrones = false;
         public List<string> AvailableAgents { get; set; }
+        public Entity MyShipAsEntity = null;
+        public List<Module> MyShipsModules = null;
+
+        public IEnumerable<EveCom.Entity> AllEntities = new List<Entity>();
+
+        private List<Entity> _hostilePilots = new List<Entity>();
+        private Entity _hostilePilot = null;
+        public Entity HostilePilot
+        {
+            get
+            {
+                try
+                {
+                    if (!Session.InSpace) return null;
+
+                    if (_hostilePilot == null)
+                    {
+                        _hostilePilots = AllEntities.Where(i => i.Distance < 60000 && i.CategoryID != Category.Charge && i.GroupID != Group.Drone && i.GroupID != Group.FighterDrone && i.GroupID != Group.FighterBomber && i.GroupID != Group.Wreck).Where(a => Local.Pilots.Any(pilot => pilot.ID == a.OwnerID && pilot.Hostile())).ToList();
+                        if (_hostilePilots.Any())
+                        {
+                                _hostilePilot = _hostilePilots.OrderByDescending(i => i.IsWarpScrambling)
+                                    .ThenByDescending(i => i.GroupID == Group.Interdictor)
+                                    .ThenByDescending(i => i.GroupID == Group.HeavyInterdictionCruiser)
+                                    .ThenByDescending(i => i.GroupID == Group.BlackOps)
+                                    .ThenByDescending(i => i.GroupID == Group.Battleship)
+                                    .ThenByDescending(i => i.GroupID == Group.Cruiser)
+                                    .ThenByDescending(i => i.GroupID == Group.HeavyAssaultCruiser)
+                                    .ThenByDescending(i => i.GroupID == Group.AttackBattlecruiser)
+                                    .ThenByDescending(i => i.GroupID == Group.CombatBattlecruiser)
+                                    .FirstOrDefault();
+                        }
+
+                        if (_hostilePilot == null)
+                        {
+                                _hostilePilots = AllEntities.Where(i => i.CategoryID != Category.Charge && i.GroupID != Group.Drone && i.GroupID != Group.FighterDrone && i.GroupID != Group.FighterBomber && i.GroupID != Group.Wreck).Where(a => Local.Pilots.Any(pilot => pilot.ID == a.OwnerID && pilot.Hostile())).ToList();
+                                if (_hostilePilots.Any())
+                                {
+                                    _hostilePilot = _hostilePilots.OrderByDescending(i => i.IsWarpScrambling)
+                                        .ThenByDescending(i => i.GroupID == Group.Interdictor)
+                                        .ThenByDescending(i => i.GroupID == Group.HeavyInterdictionCruiser)
+                                        .ThenByDescending(i => i.GroupID == Group.BlackOps)
+                                        .ThenByDescending(i => i.GroupID == Group.Battleship)
+                                        .ThenByDescending(i => i.GroupID == Group.Cruiser)
+                                        .ThenByDescending(i => i.GroupID == Group.HeavyAssaultCruiser)
+                                        .ThenByDescending(i => i.GroupID == Group.AttackBattlecruiser)
+                                        .ThenByDescending(i => i.GroupID == Group.CombatBattlecruiser)
+                                        .FirstOrDefault();
+                                }
+                        }
+
+                        return _hostilePilot ?? null;
+                    }
+
+                    return _hostilePilot ?? null;
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+            }
+        }
+
+        private Entity _anchoredBubble = null;
+
+        public Entity AnchoredBubble
+        {
+            get
+            {
+                try
+                {
+                    if (_anchoredBubble == null)
+                    {
+                        if (!Session.InSpace) return null;
+
+                        _anchoredBubble = AllEntities.Where(i => i.Distance < 240000).FirstOrDefault(a => a.GroupID == Group.MobileWarpDisruptor && a.SurfaceDistance < MyShip.MaxTargetRange);
+                        return _anchoredBubble ?? null;
+                    }
+
+                    return _anchoredBubble ?? null;
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+            }
+        }
+
+        private Entity _warpScrambling = null;
+
+        public Entity WarpScrambling
+        {
+            get
+            {
+                try
+                {
+                    if (_warpScrambling == null)
+                    {
+                        if (!Session.InSpace) return null;
+
+                        _warpScrambling = _securityCore.ValidScramble;
+                        return _warpScrambling ?? null;
+                    }
+
+                    return _warpScrambling ?? null;
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+            }
+        }
+
+        private Entity _neuting = null;
+
+        public Entity Neuting
+        {
+            get
+            {
+                try
+                {
+                    if (_neuting == null)
+                    {
+                        if (!Session.InSpace) return null;
+
+                        _neuting = _securityCore.ValidNeuter;
+                        return _neuting ?? null;
+                    }
+
+                    return _neuting ?? null;
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+            }
+        }
+
+        private Entity _lcoToBlowUp = null;
+
+        public Entity lcoToBlowUp
+        {
+            get
+            {
+                try
+                {
+                    if (_lcoToBlowUp == null)
+                    {
+                        if (!Session.InSpace) return null;
+                        _lcoToBlowUp = AllEntities.FirstOrDefault(a => (a.GroupID == Group.LargeCollidableObject || a.GroupID == Group.LargeCollidableStructure) && !a.Name.ToLower().Contains("rock") && !a.Name.ToLower().Contains("stone") && !a.Name.ToLower().Contains("asteroid") && a.Distance <= 1000 && a.Exists && !a.Exploded && !a.Released);
+                        return _lcoToBlowUp ?? null;
+                    }
+
+                    return _lcoToBlowUp ?? null;
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+            }
+        }
+
 
         public class CachedMission
         {
@@ -92,18 +263,58 @@ namespace EveComFramework.Core
                 this.Type = Type;
             }
         }
+
         public Dictionary<string, CachedMission> CachedMissions { get; set; }
+
+        private void ClearCachedDataEveryPulse()
+        {
+            _hostilePilot = null;
+            _anchoredBubble = null;
+            _warpScrambling = null;
+            _neuting = null;
+            _lcoToBlowUp = null;
+        }
 
         #endregion
 
         #region States
 
         DateTime BookmarkUpdate = DateTime.Now;
+
         bool Control(object[] Params)
         {
             if ((!Session.InSpace && !Session.InStation) || !Session.Safe) return false;
+            ClearCachedDataEveryPulse();
+
             Name = Me.Name;
             CharID = Me.CharID;
+
+            try
+            {
+                AllEntities = Entity.All;
+            }
+            catch (Exception)
+            {
+                AllEntities = new List<Entity>();
+            }
+
+            try
+            {
+                MyShipAsEntity = MyShip.ToEntity;
+            }
+            catch (Exception)
+            {
+                MyShipAsEntity = null;
+            }
+
+            try
+            {
+                MyShipsModules = MyShip.Modules;
+            }
+            catch (Exception)
+            {
+                MyShipsModules = new List<Module>();
+            }
 
             if (Bookmarks == null || BookmarkUpdate < DateTime.Now)
             {

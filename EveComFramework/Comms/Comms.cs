@@ -56,7 +56,7 @@ namespace EveComFramework.Comms
 
         private Comms()
         {
-            DefaultFrequency = 200;
+            DefaultFrequency = 500;
             QueueState(Init);
             QueueState(ConnectIRC);
             QueueState(Blank, 5000);
@@ -300,7 +300,7 @@ namespace EveComFramework.Comms
                     ChatQueue.Enqueue("---------------Entity List---------------");
                     EVEFrameUtil.Do(() =>
                     {
-                        foreach (Entity entity in Entity.All.Where(i => i.Distance < 200000 && i.GroupID != Group.Wreck && i.CategoryID != Category.Drone && i.CategoryID != Category.Charge && i.CategoryID != Category.Asteroid))
+                        foreach (Entity entity in Cache.Instance.AllEntities.Where(i => i.Distance < 200000 && i.GroupID != Group.Wreck && i.CategoryID != Category.Drone && i.CategoryID != Category.Charge && i.CategoryID != Category.Asteroid))
                         {
                             ChatQueue.Enqueue("Name [" + entity.Name + "] Distance [" + Math.Round(entity.Distance/1000,0) + "k] GroupID [" + (int)entity.GroupID + "][" + entity.GroupID + "] TypeID [" + entity.TypeID + "]");
                         }

@@ -9,6 +9,7 @@ using EveComFramework.KanedaToolkit;
 
 namespace EveComFramework.SimpleDrone
 {
+
     #region Enums
 
     /// <summary>
@@ -20,34 +21,42 @@ namespace EveComFramework.SimpleDrone
         /// SimpleDrone Mode: No specific mode defined: used for Fighters
         /// </summary>
         None,
+
         /// <summary>
         /// SimpleDrone Mode: Use Sentry Drones
         /// </summary>
         Sentry,
+
         /// <summary>
         /// SimpleDrone Mode: Point Defense
         /// </summary>
         PointDefense,
+
         /// <summary>
         /// SimpleDrone Mode: Use Scout Drones: Agressively
         /// </summary>
         AgressiveScout,
+
         /// <summary>
         /// SimpleDrone Mode: Use Medium Drones: Agressively
         /// </summary>
         AgressiveMedium,
+
         /// <summary>
         /// SimpleDrone Mode: AFK Heavy Drones
         /// </summary>
         AfkHeavy,
+
         /// <summary>
         /// SimpleDrone Mode: Use Heavy Drones: Agressively
         /// </summary>
         AgressiveHeavy,
+
         /// <summary>
         /// SimpleDrone Mode: Use Sentry Drones: Agressively
         /// </summary>
         AgressiveSentry,
+
         /// <summary>
         /// SimpleDrone Mode: AFK Salvage Drones
         /// </summary>
@@ -102,6 +111,7 @@ namespace EveComFramework.SimpleDrone
                 return 2;
             }
         }
+
         public double FighterCriticalHealthLevel = 80;
         public double FighterMaxRange = 800000;
         public bool ReArmFighters = false;
@@ -120,6 +130,7 @@ namespace EveComFramework.SimpleDrone
         #region Instantiation
 
         static SimpleDrone _instance;
+
         /// <summary>
         /// Instance of SimpleDrone - Allow Only One
         /// </summary>
@@ -149,25 +160,30 @@ namespace EveComFramework.SimpleDrone
         #region Variables
 
         private DateTime _evecomSessionIsReady = DateTime.MinValue;
+
         /// <summary>
         /// Writes Log Entries to the GUI, log file and innerspace console
         /// </summary>
         public Logger Console = new Logger("SimpleDrone");
+
         /// <summary>
         /// Settings for SimpleDrone: Serialized to XML and Deserialized from XML
         /// </summary>
         public SimpleDroneSettings Config = new SimpleDroneSettings();
+
         /// <summary>
         /// Instance of Targets: used for tracking what is locked / locking / unlocked
         /// </summary>
         private readonly Targets.Targets _rats = new Targets.Targets();
-        private readonly Security.Security _securityCore = Security.Security.Instance;
+
+        //private readonly Security.Security _securityCore = Security.Security.Instance;
         private readonly HashSet<Drone> _droneCooldown = new HashSet<Drone>();
         private readonly Dictionary<Drone, double> _droneHealthCache = new Dictionary<Drone, double>();
         private readonly IPC _ipc = IPC.Instance;
         private readonly Dictionary<long?, int?> _missileEntityTracking = new Dictionary<long?, int?>();
 
         private int _availableDroneSlots;
+
         /// <summary>
         /// BroneBandwidth / M3 of the correct drone type in DroneBay based on the configured simpledrone mode
         /// </summary>
@@ -266,6 +282,7 @@ namespace EveComFramework.SimpleDrone
         }
 
         private List<long> _offgridFighters;
+
         /// <summary>
         /// Fighters that are InSpace but not on Grid with us (Fighter.ToEntity == null)
         /// </summary>
@@ -286,6 +303,7 @@ namespace EveComFramework.SimpleDrone
         }
 
         private IEnumerable<Fighters.Fighter> _availableFighters;
+
         /// <summary>
         /// AvailableFighters - Fighters on Grid that are ready for orders and not already being recalled
         /// </summary>
@@ -313,6 +331,7 @@ namespace EveComFramework.SimpleDrone
         }
 
         private IEnumerable<Fighters.Fighter> _returningFighters;
+
         /// <summary>
         /// Fighters in space that are currently returning to the Fighter Bay
         /// </summary>
@@ -340,6 +359,7 @@ namespace EveComFramework.SimpleDrone
         }
 
         private IEnumerable<Drone> _dronesInSpace;
+
         /// <summary>
         /// Drones in space that are not Incapacitated or about to Die
         /// </summary>
@@ -360,10 +380,12 @@ namespace EveComFramework.SimpleDrone
         private DateTime lastPriorityTargetListUpdate = DateTime.MinValue;
 
         private List<string> _priorityTargets = new List<string>();
+
         /// <summary>
         /// PriorityTargets Added from the main behavior (Ratter / Copilot / evecombine / MissionMiner, etc)
         /// </summary>
         public List<string> PriorityTargetsFromBehavior = new List<string>();
+
         /// <summary>
         /// PriorityTargets - Targets that should be handles before others: by default there are no priority targets they are added manually using the GUI
         /// </summary>
@@ -387,7 +409,7 @@ namespace EveComFramework.SimpleDrone
                         _priorityTargets.AddRange(PriorityTargetsFromBehavior.ToList());
                     }
 
-                    if (MyShip.ToEntity.Mode != EntityMode.Warping)
+                    if (Cache.Instance.MyShipAsEntity.Mode != EntityMode.Warping)
                     {
                         if (_rats.TargetList != null && _rats.TargetList.Any())
                         {
@@ -413,7 +435,7 @@ namespace EveComFramework.SimpleDrone
                                 return new List<string>();
                             }
 
-                            IEnumerable<Entity> movingNpcsThatExistOnGrid = Entity.All.Where(i => i.Exists && !i.Exploded && !i.Released && i.IsNPC && i.Distance < 150000 && i.Velocity.Magnitude > 0);
+                            IEnumerable<Entity> movingNpcsThatExistOnGrid = Cache.Instance.AllEntities.Where(i => i.Exists && !i.Exploded && !i.Released && i.IsNPC && i.Distance < 150000 && i.Velocity.Magnitude > 0);
                             try
                             {
                                 foreach (Entity warpScramblingNpcThatExistsOnGrid in movingNpcsThatExistOnGrid.Where(i => (double?) i["entityWarpScrambleChance"] != null && (double) i["entityWarpScrambleChance"] > 0))
@@ -452,115 +474,26 @@ namespace EveComFramework.SimpleDrone
             }
             //(int)a.Fighter["fighterSquadronMaxSize"]
         }
+
         /// <summary>
         /// Triggers - NPCs that cause other spawns and thus should be killed last: by default there are no triggers they are added manually using the GUI
         /// </summary>
         public List<string> Triggers = new List<string>();
 
-        private Entity _hostilePilot = null;
+        private bool? _insidePosForceField = null;
 
-        private Entity HostilePilot
-        {
-            get
-            {
-                if (!Session.InSpace) return null;
-
-                if (Config.AttackHostile)
-                {
-                    _hostilePilot = Entity.All.Where(i => i.Distance < 60000 && i.CategoryID != Category.Charge && i.GroupID != Group.Wreck).Where(a => Local.Pilots.Any(pilot => pilot.ID == a.OwnerID && pilot.Hostile()))
-                            .OrderByDescending(i => i.IsWarpScrambling)
-                            .ThenByDescending(i => i.GroupID == Group.Interdictor)
-                            .ThenByDescending(i => i.GroupID == Group.HeavyInterdictionCruiser)
-                            .ThenByDescending(i => i.GroupID == Group.BlackOps)
-                            .ThenByDescending(i => i.GroupID == Group.Battleship)
-                            .ThenByDescending(i => i.GroupID == Group.Cruiser)
-                            .ThenByDescending(i => i.GroupID == Group.HeavyAssaultCruiser)
-                            .ThenByDescending(i => i.GroupID == Group.AttackBattlecruiser)
-                            .ThenByDescending(i => i.GroupID == Group.CombatBattlecruiser)
-                            .FirstOrDefault();
-
-                    if (_hostilePilot == null)
-                    {
-                        _hostilePilot = Entity.All.Where(i => i.CategoryID != Category.Charge && i.GroupID != Group.Wreck).Where(a => Local.Pilots.Any(pilot => pilot.ID == a.OwnerID && pilot.Hostile()))
-                            .OrderByDescending(i => i.IsWarpScrambling)
-                            .ThenByDescending(i => i.GroupID == Group.Interdictor)
-                            .ThenByDescending(i => i.GroupID == Group.HeavyInterdictionCruiser)
-                            .ThenByDescending(i => i.GroupID == Group.BlackOps)
-                            .ThenByDescending(i => i.GroupID == Group.Battleship)
-                            .ThenByDescending(i => i.GroupID == Group.Cruiser)
-                            .ThenByDescending(i => i.GroupID == Group.HeavyAssaultCruiser)
-                            .ThenByDescending(i => i.GroupID == Group.AttackBattlecruiser)
-                            .ThenByDescending(i => i.GroupID == Group.CombatBattlecruiser)
-                            .FirstOrDefault();
-                    }
-
-                    return _hostilePilot ?? null;
-                }
-
-                return null;
-            }
-        }
-
-        private Entity _anchoredBubble;
-        private Entity AnchoredBubble
-        {
-            get
-            {
-                if (!Session.InSpace) return null;
-
-                if (Config.AttackAnchoredBubble)
-                {
-                    _anchoredBubble = Entity.All.Where(i => i.Distance < 240000).FirstOrDefault(a => a.GroupID == Group.MobileWarpDisruptor && a.SurfaceDistance < MyShip.MaxTargetRange);
-                    return _anchoredBubble ?? null;
-                }
-
-                return null;
-            }
-        }
-
-        private Entity _warpScrambling;
-        private Entity WarpScrambling
-        {
-            get
-            {
-                if (!Session.InSpace) return null;
-
-                _warpScrambling = _securityCore.ValidScramble;
-                return _warpScrambling ?? null;
-            }
-        }
-
-        private Entity _neuting;
-        private Entity Neuting
-        {
-            get
-            {
-                if (!Session.InSpace) return null;
-
-                _neuting = _securityCore.ValidNeuter;
-                return _neuting ?? null;
-            }
-        }
-
-        private Entity _lcoToBlowUp;
-        private Entity lcoToBlowUp
-        {
-            get
-            {
-                if (!Session.InSpace) return null;
-                _lcoToBlowUp = Entity.All.FirstOrDefault(a => (a.GroupID == Group.LargeCollidableObject || a.GroupID == Group.LargeCollidableStructure) && !a.Name.ToLower().Contains("rock") && !a.Name.ToLower().Contains("stone") && !a.Name.ToLower().Contains("asteroid") && a.Distance <= 1000 && a.Exists && !a.Exploded && !a.Released);
-                return _lcoToBlowUp ?? null;
-            }
-        }
-
-        private bool? _insidePosForceField = false;
         public bool InsidePosForceField
         {
             get
             {
                 try
                 {
-                    _insidePosForceField = Entity.All.Where(i => i.Distance < 60000).Any(b => b.GroupID == Group.ForceField && b.SurfaceDistance <= 0);
+                    if (_insidePosForceField == null)
+                    {
+                        _insidePosForceField = Cache.Instance.AllEntities.Where(i => i.Distance < 60000) .Any(b => b.GroupID == Group.ForceField && b.SurfaceDistance <= 0);
+                        return _insidePosForceField ?? false;
+                    }
+
                     return _insidePosForceField ?? false;
                 }
                 catch (Exception)
@@ -570,29 +503,41 @@ namespace EveComFramework.SimpleDrone
             }
         }
 
-        private Double _maxRange = 0;
+        private Double? _maxRange = null;
+
         private Double MaxRange
         {
             get
             {
-                if (!Session.InSpace) return 80000;
+                if (_maxRange == null)
+                {
+                    if (!Session.InSpace) return 0;
 
-                if (Fighters.Tubes.Any())
-                {
-                    _maxRange = Math.Min(Config.FighterMaxRange, MyShip.MaxTargetRange);
-                    return _maxRange;
+                    if (Fighters.Tubes.Any())
+                    {
+                        _maxRange = Math.Min(Config.FighterMaxRange, MyShip.MaxTargetRange);
+                        return (double) _maxRange;
+                    }
+                    else if (Config.Mode == Mode.PointDefense)
+                    {
+                        _maxRange = 20000;
+                        return (double) _maxRange;
+                    }
+                    else
+                    {
+                        _maxRange = Me.DroneControlDistance;
+                        return (double) _maxRange;
+                    }
                 }
-                else if (Config.Mode == Mode.PointDefense)
-                {
-                    _maxRange = 20000;
-                    return _maxRange;
-                }
-                else
-                {
-                    _maxRange = Me.DroneControlDistance;
-                    return _maxRange;
-                }
+
+                return 0;
             }
+        }
+
+        private void ClearCachedDataEveryPulse()
+        {
+            _insidePosForceField = null;
+            _maxRange = null;
         }
 
         #endregion
@@ -609,7 +554,7 @@ namespace EveComFramework.SimpleDrone
             {
                 if (Idle)
                 {
-                    LastTargetLocation = MyShip.ToEntity.Position;
+                    //LastTargetLocation = Cache.Instance.MyShipAsEntity.Position;
                     TryReconnect = true;
                     QueueState(WaitForEve, 2000);
                     QueueState(Control);
@@ -641,6 +586,7 @@ namespace EveComFramework.SimpleDrone
         {
             try
             {
+                ClearCachedDataEveryPulse();
                 if (Login.AtLogin || CharSel.AtCharSel)
                 {
                     Console.Log("Waiting for Login to complete");
@@ -770,7 +716,7 @@ namespace EveComFramework.SimpleDrone
                     target.GroupID == Group.Capsule ||
                     target.GroupID == Group.LogisticsFrigate ||
                     target.GroupID == Group.CommandDestroyers
-                    )
+                )
                 {
                     return true;
                 }
@@ -787,8 +733,8 @@ namespace EveComFramework.SimpleDrone
         {
             if (Session.InStation) return false;
             if (!Session.InSpace) return false;
-            if (MyShip.ToEntity.Mode == EntityMode.Warping) return false;
-            if (MyShip.ToEntity.Velocity.Magnitude > 10000) return false;
+            if (Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping) return false;
+            if (Cache.Instance.MyShipAsEntity.Velocity.Magnitude > 10000) return false;
             return true;
         }
 
@@ -809,25 +755,25 @@ namespace EveComFramework.SimpleDrone
                     if (fightersToRecall.Any())
                     {
                         fightersToRecall = fightersToRecall.ToList();
-                        if (fightersToRecall.Any(i => i.ToEntity != null && i.ToEntity.Distance > 300000))
+                        if (!waitForFightersToReturn && fightersToRecall.Any(i => i.ToEntity != null && i.ToEntity.Distance > 30000))
                         {
-                            IEnumerable<Fighters.Fighter> fightersTooFarAway = fightersToRecall.Where(i => i.ToEntity != null && FighterReady(i.ID) && i.ToEntity.Distance > 300000).ToList();
+                            IEnumerable<Fighters.Fighter> fightersTooFarAway = fightersToRecall.Where(i => i.ToEntity != null && FighterReady(i.ID) && i.ToEntity.Distance > 30000).ToList();
                             if (fightersTooFarAway.Any())
                             {
                                 if (!InsidePosForceField)
                                 {
-                                    foreach (Fighters.Fighter fighterTooFarAway in fightersTooFarAway.Where(i => i.ToEntity != null && (i.ToEntity.Distance > i.ToEntity.Velocity.Magnitude * 2)))
+                                    foreach (Fighters.Fighter fighterTooFarAway in fightersTooFarAway.Where(i => i.ToEntity != null && (i.ToEntity.Distance > i.ToEntity.Velocity.Magnitude*5)))
                                     {
-                                        Entity closestEntityToOrbit = Entity.All.OrderByDescending(i => i.DistanceTo(fighterTooFarAway.ToEntity)).FirstOrDefault();
+                                        Entity closestEntityToOrbit = Cache.Instance.AllEntities.OrderByDescending(i => i.DistanceTo(fighterTooFarAway.ToEntity)).FirstOrDefault();
                                         if (closestEntityToOrbit != null)
                                         {
-                                            Console.Log("|oFighter [|g" + MaskedId(fighterTooFarAway.ID) + "|o] is [|g" + Math.Round(fighterTooFarAway.ToEntity.Distance / 1000, 0) + "|o]k away going [|g" + Math.Round(fighterTooFarAway.ToEntity.Velocity.Magnitude, 0) + "|o]m/s is not likely to make it back before we warp: telling fighter to orbit");
-                                            fighterTooFarAway.Follow(closestEntityToOrbit, 100000);
+                                            Console.Log("|oFighter [|g" + MaskedId(fighterTooFarAway.ID) + "|o] is [|g" + Math.Round(fighterTooFarAway.ToEntity.Distance/1000, 0) + "|o]k away going [|g" + Math.Round(fighterTooFarAway.ToEntity.Velocity.Magnitude, 0) + "|o]m/s is not likely to make it back before we warp: telling fighter to orbit");
+                                            fighterTooFarAway.Follow(closestEntityToOrbit, 60000);
                                             NextFighterCommand.AddOrUpdate(fighterTooFarAway.ID, DateTime.Now.AddSeconds(30));
                                             continue;
                                         }
 
-                                        Console.Log("|oFighter [|g" + MaskedId(fighterTooFarAway.ID) + "|o] is [|g" + Math.Round(fighterTooFarAway.ToEntity.Distance / 1000, 0) + "|o]k away going [|g" + Math.Round(fighterTooFarAway.ToEntity.Velocity.Magnitude, 0) + "|o]m/s is not likely to make it back before we warp: stopping fighter");
+                                        Console.Log("|oFighter [|g" + MaskedId(fighterTooFarAway.ID) + "|o] is [|g" + Math.Round(fighterTooFarAway.ToEntity.Distance/1000, 0) + "|o]k away going [|g" + Math.Round(fighterTooFarAway.ToEntity.Velocity.Magnitude, 0) + "|o]m/s is not likely to make it back before we warp: stopping fighter");
                                         fighterTooFarAway.Stop();
                                         NextFighterCommand.AddOrUpdate(fighterTooFarAway.ID, DateTime.Now.AddSeconds(30));
                                         continue;
@@ -839,12 +785,17 @@ namespace EveComFramework.SimpleDrone
                         fightersToRecall = fightersToRecall.ToList();
                         if (fightersToRecall.Any(a => FighterReady(a.ID) && a.ToEntity != null && a.State != Fighters.States.RECALLING))
                         {
-                            IEnumerable<Fighters.Fighter> fightersWaitingToBeRecalled = fightersToRecall.Where(fighter => (spamReturning || FighterReady(fighter.ID)) && fighter.ToEntity != null && fighter.State != Fighters.States.RECALLING && fighter.State != Fighters.States.LANDING && fighter.State != Fighters.States.LAUNCHING).ToList();
+                            IEnumerable<Fighters.Fighter> fightersWaitingToBeRecalled = fightersToRecall.Where(fighter =>
+                                        (spamReturning || FighterReady(fighter.ID)) &&
+                                        fighter.ToEntity != null &&
+                                        fighter.State != Fighters.States.RECALLING &&
+                                        fighter.State != Fighters.States.LANDING &&
+                                        fighter.State != Fighters.States.LAUNCHING).ToList();
                             if (SafeToIssueFighterCommands())
                             {
                                 foreach (Fighters.Fighter fighterWaitingToBeRecalled in fightersWaitingToBeRecalled)
                                 {
-                                    Console.Log("|oFighter [" + fighterWaitingToBeRecalled.Type + "][" + MaskedId(fighterWaitingToBeRecalled.ID) + "|o][|g" + Math.Round(fighterWaitingToBeRecalled.ToEntity.Distance / 1000, 0) + "k|o] Recalling [|g" + reason + "|o]");
+                                    Console.Log("|oFighter [" + fighterWaitingToBeRecalled.Type + "][" + MaskedId(fighterWaitingToBeRecalled.ID) + "|o][|g" + Math.Round(fighterWaitingToBeRecalled.ToEntity.Distance/1000, 0) + "k|o] Recalling [|g" + reason + "|o]");
                                     fighterWaitingToBeRecalled.RecallToTube();
                                     NextFighterCommand.AddOrUpdate(fighterWaitingToBeRecalled.ID, DateTime.Now.AddSeconds(7));
                                     continue;
@@ -862,7 +813,7 @@ namespace EveComFramework.SimpleDrone
 
                 if (OffgridFighters != null && OffgridFighters.Any(fighterId => (spamReturning || FighterReady(fighterId))))
                 {
-                    IEnumerable<Fighters.Fighter> offgridFightersWaitingToBeRecalled = Fighters.Active.Where(fighter =>(spamReturning || FighterReady(fighter.ID)) && OffgridFighters.Contains(fighter.ID)).ToList();
+                    IEnumerable<Fighters.Fighter> offgridFightersWaitingToBeRecalled = Fighters.Active.Where(fighter => (spamReturning || FighterReady(fighter.ID)) && OffgridFighters.Contains(fighter.ID)).ToList();
                     if (offgridFightersWaitingToBeRecalled.Any() && SafeToIssueFighterCommands())
                     {
                         foreach (Fighters.Fighter offgridFighterWaitingToBeRecalled in offgridFightersWaitingToBeRecalled)
@@ -898,7 +849,7 @@ namespace EveComFramework.SimpleDrone
 
         public bool CollectSentriesInSpace(List<Drone> recallTheseSentryDrones, string reason = "|oRecalling Sentry Drones: CollectSentriesInSpace")
         {
-            if (MyShip.ToEntity.Mode == EntityMode.Warping) return true;
+            if (Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping) return true;
 
             IEnumerable<Drone> sentriesInSpace = recallTheseSentryDrones.Where(a => a.State == EntityState.Incapacitated || DroneType.All.Any(b => b.ID == a.ID && b.Group == "Sentry Drones")).ToList();
             if (sentriesInSpace.Any())
@@ -929,13 +880,14 @@ namespace EveComFramework.SimpleDrone
 
         bool Recall(object[] Params)
         {
+            ClearCachedDataEveryPulse();
             if (!RecallDronesAndFighters()) return false;
             return true;
         }
 
         public bool RecallDrones(List<Drone> recallTheseDrones, string reason = "|oRecalling drones: Recall()")
         {
-            if (Session.InStation) return true;
+            if (Session.InStation || !Session.InSpace) return true;
 
             if (recallTheseDrones == null) return true;
 
@@ -978,8 +930,12 @@ namespace EveComFramework.SimpleDrone
             //
             if (AvailableFighters.Any())
             {
-                if(!RecallFighters(AvailableFighters, reason)) return false;
-                if (!SpeedUpFighters(ReturningFighters, "Burning Back")) return false;
+                bool RecallingFightersFinished = RecallFighters(AvailableFighters, reason, false, true);
+                bool SpeedingUpFightersFinsihed = SpeedUpFighters(ReturningFighters, "Burning Back");
+                if (!RecallingFightersFinished || !SpeedingUpFightersFinsihed)
+                {
+                    return false;
+                }
             }
 
             if (Fighters.Active.Any(i => i.ToEntity != null && i.ToEntity.Distance < 900000)) return false;
@@ -997,17 +953,22 @@ namespace EveComFramework.SimpleDrone
         {
             try
             {
-                if (Entity.All.All(b => b.GroupID != Group.ForceField))
+                if (Cache.Instance.AllEntities.All(b => b.GroupID != Group.ForceField))
                 {
-                    if (fightersThatNeedPropModOn != null && fightersThatNeedPropModOn.Any(a => a.ToEntity != null && a.ToEntity.Velocity.Magnitude < 3000 && a.HasPropmod() && a.Slot2 != null && a.Slot2.AllowsActivate && a.ToEntity.Distance > 15000 && a.State != Fighters.States.LANDING && a.State != Fighters.States.LAUNCHING))
+                    if (fightersThatNeedPropModOn != null && fightersThatNeedPropModOn.Any(a =>
+                                a.ToEntity != null && a.ToEntity.Velocity.Magnitude < 3000 && a.HasPropmod() &&
+                                a.Slot2 != null && a.Slot2.AllowsActivate && a.ToEntity.Distance > 15000 &&
+                                a.State != Fighters.States.LANDING && a.State != Fighters.States.LAUNCHING))
                     {
                         fightersThatNeedPropModOn = fightersThatNeedPropModOn.ToList();
-                        IEnumerable<Fighters.Fighter> availableFightersThatNeedPropModOn = fightersThatNeedPropModOn.Where(a => FighterReady(a.ID) && a.HasPropmod() && a.Slot2 != null && a.Slot2.AllowsActivate && a.ToEntity.Distance > 15000 && a.State != Fighters.States.LANDING && a.State != Fighters.States.LAUNCHING).ToList();
+                        IEnumerable<Fighters.Fighter> availableFightersThatNeedPropModOn = fightersThatNeedPropModOn.Where(a =>
+                                    FighterReady(a.ID) && a.HasPropmod() && a.Slot2 != null &&
+                                    a.Slot2.AllowsActivate && a.ToEntity.Distance > 15000 &&
+                                    a.State != Fighters.States.LANDING && a.State != Fighters.States.LAUNCHING).ToList();
                         if (availableFightersThatNeedPropModOn.Any(i => i.ToEntity != null))
                         {
                             foreach (Fighters.Fighter availableFighterThatNeedPropModOn in availableFightersThatNeedPropModOn)
                             {
-
                                 Console.Log("|oFighter [|g" + MaskedId(availableFighterThatNeedPropModOn.ID) + "|o] propmod on: [|g" + reason + "|o]");
                                 availableFighterThatNeedPropModOn.Slot2.ActivateOnSelf();
                                 NextFighterCommand.AddOrUpdate(availableFighterThatNeedPropModOn.ID, DateTime.Now.AddSeconds(2));
@@ -1037,7 +998,7 @@ namespace EveComFramework.SimpleDrone
         {
             if (Entity.Targeting.Count + Entity.Targets.Count >= Me.TrueMaxTargetLocks)
             {
-                if (MyShip.ToEntity.Mode == EntityMode.Warping) return false;
+                if (Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping) return false;
                 if (Entity.Targets.Any())
                 {
                     Entity unlockthis = Entity.Targets.OrderBy(i => i.IsNPC)
@@ -1059,6 +1020,7 @@ namespace EveComFramework.SimpleDrone
         }
 
         Vector3 LastTargetLocation = Vector3.origin;
+
         private bool LockManagement()
         {
             Entity entityToUseForClosestNpcMeasurement = null;
@@ -1069,27 +1031,32 @@ namespace EveComFramework.SimpleDrone
 
             if (entityToUseForClosestNpcMeasurement == null)
             {
-                entityToUseForClosestNpcMeasurement = MyShip.ToEntity;
+                entityToUseForClosestNpcMeasurement = Cache.Instance.MyShipAsEntity;
             }
 
             TargetCooldown = TargetCooldown.Where(a => a.Value >= DateTime.Now).ToDictionary(a => a.Key, a => a.Value);
             _rats.LockedAndLockingTargetList.ForEach(a => { TargetCooldown.AddOrUpdate(a.ID, DateTime.Now.AddSeconds(Config.TargetCooldown)); });
 
-            if (HostilePilot != null)
+            if (Cache.Instance.HostilePilot != null)
             {
                 //Console.Log("|Found HostilePilot");
-                if (!HostilePilot.LockedTarget && !HostilePilot.LockingTarget && HostilePilot.Exists && !HostilePilot.Released && !HostilePilot.Exploded && HostilePilot.Mode != EntityMode.Warping)
+                if (!Cache.Instance.HostilePilot.LockedTarget &&
+                    !Cache.Instance.HostilePilot.LockingTarget &&
+                    Cache.Instance.HostilePilot.Exists &&
+                    !Cache.Instance.HostilePilot.Released &&
+                    !Cache.Instance.HostilePilot.Exploded &&
+                    Cache.Instance.HostilePilot.Mode != EntityMode.Warping)
                 {
                     if (!UnlockTargetsAsNeeded()) return false;
-                    Console.Log("|oLocking HostilePilot [|-g" + HostilePilot.Name + "|o][|g" + MaskedId(HostilePilot.ID) + "|o][|g" + Math.Round(HostilePilot.Distance / 1000, 0) + "k|o]");
-                    HostilePilot.LockTarget();
+                    Console.Log("|oLocking HostilePilot [|-g" + Cache.Instance.HostilePilot.Name + "|o][|g" + MaskedId(Cache.Instance.HostilePilot.ID) + "|o][|g" + Math.Round(Cache.Instance.HostilePilot.Distance/1000, 0) + "k|o]");
+                    Cache.Instance.HostilePilot.LockTarget();
                     return false;
                 }
             }
-            else if (AnchoredBubble != null)
+            else if (Cache.Instance.AnchoredBubble != null && Config.AttackAnchoredBubble)
             {
                 //Console.Log("|Found AnchoredBubble");
-                if (!AnchoredBubble.LockedTarget && !AnchoredBubble.LockingTarget && !AnchoredBubble.Released && !AnchoredBubble.Exploded)
+                if (!Cache.Instance.AnchoredBubble.LockedTarget && !Cache.Instance.AnchoredBubble.LockingTarget && !Cache.Instance.AnchoredBubble.Released && !Cache.Instance.AnchoredBubble.Exploded)
                 {
                     if (Entity.Targeting.Count + Entity.Targets.Count >= Me.TrueMaxTargetLocks)
                     {
@@ -1100,41 +1067,41 @@ namespace EveComFramework.SimpleDrone
                         }
                         return false;
                     }
-                    Console.Log("|oLocking AnchoredBubble [|-g" + AnchoredBubble.Name + "|o][|g" + MaskedId(AnchoredBubble.ID) + "|o][|g" + Math.Round(AnchoredBubble.Distance / 1000, 0) + "k|o]");
-                    AnchoredBubble.LockTarget();
+                    Console.Log("|oLocking AnchoredBubble [|-g" + Cache.Instance.AnchoredBubble.Name + "|o][|g" + MaskedId(Cache.Instance.AnchoredBubble.ID) + "|o][|g" + Math.Round(Cache.Instance.AnchoredBubble.Distance/1000, 0) + "k|o]");
+                    Cache.Instance.AnchoredBubble.LockTarget();
                     return false;
                 }
             }
-            else if (WarpScrambling != null)
+            else if (Cache.Instance.WarpScrambling != null)
             {
                 //Console.Log("|Found WarpScrambling entity");
-                if (!WarpScrambling.LockedTarget && !WarpScrambling.LockingTarget && !WarpScrambling.Released && !WarpScrambling.Exploded && WarpScrambling.Mode != EntityMode.Warping)
+                if (!Cache.Instance.WarpScrambling.LockedTarget && !Cache.Instance.WarpScrambling.LockingTarget && !Cache.Instance.WarpScrambling.Released && !Cache.Instance.WarpScrambling.Exploded && Cache.Instance.WarpScrambling.Mode != EntityMode.Warping)
                 {
                     if (!UnlockTargetsAsNeeded()) return false;
-                    Console.Log("|oLocking WarpScrambling [|-g" + WarpScrambling.Name + "|o][|g" + MaskedId(WarpScrambling.ID) + "|o][|g" + Math.Round(WarpScrambling.Distance / 1000, 0) + "k|o]");
-                    WarpScrambling.LockTarget();
+                    Console.Log("|oLocking WarpScrambling [|-g" + Cache.Instance.WarpScrambling.Name + "|o][|g" + MaskedId(Cache.Instance.WarpScrambling.ID) + "|o][|g" + Math.Round(Cache.Instance.WarpScrambling.Distance/1000, 0) + "k|o]");
+                    Cache.Instance.WarpScrambling.LockTarget();
                     return false;
                 }
             }
-            else if (lcoToBlowUp != null)
+            else if (Cache.Instance.lcoToBlowUp != null)
             {
                 //Console.Log("|Found lcoToBlowUp entity");
-                if (!lcoToBlowUp.LockedTarget && !lcoToBlowUp.LockingTarget && !lcoToBlowUp.Released && !lcoToBlowUp.Exploded)
+                if (!Cache.Instance.lcoToBlowUp.LockedTarget && !Cache.Instance.lcoToBlowUp.LockingTarget && !Cache.Instance.lcoToBlowUp.Released && !Cache.Instance.lcoToBlowUp.Exploded)
                 {
                     if (!UnlockTargetsAsNeeded()) return false;
-                    Console.Log("|oLocking lcoToBlowUp [|-g" + lcoToBlowUp.Name + "|o][|g" + MaskedId(lcoToBlowUp.ID) + "|o][|g" + Math.Round(lcoToBlowUp.Distance / 1000, 0) + "k|o]");
-                    lcoToBlowUp.LockTarget();
+                    Console.Log("|oLocking lcoToBlowUp [|-g" + Cache.Instance.lcoToBlowUp.Name + "|o][|g" + MaskedId(Cache.Instance.lcoToBlowUp.ID) + "|o][|g" + Math.Round(Cache.Instance.lcoToBlowUp.Distance/1000, 0) + "k|o]");
+                    Cache.Instance.lcoToBlowUp.LockTarget();
                     return false;
                 }
             }
-            else if (Neuting != null)
+            else if (Cache.Instance.Neuting != null)
             {
                 //Console.Log("|Found Neuting entity");
-                if (!Neuting.LockedTarget && !Neuting.LockingTarget && !Neuting.Released && !Neuting.Exploded && Neuting.Mode != EntityMode.Warping)
+                if (!Cache.Instance.Neuting.LockedTarget && !Cache.Instance.Neuting.LockingTarget && !Cache.Instance.Neuting.Released && !Cache.Instance.Neuting.Exploded && Cache.Instance.Neuting.Mode != EntityMode.Warping)
                 {
                     if (!UnlockTargetsAsNeeded()) return false;
-                    Console.Log("|oLocking Neuts [|-g" + Neuting.Name + "|o][|g" + MaskedId(Neuting.ID) + "|o][|g" + Math.Round(Neuting.Distance / 1000, 0) + "k|o]");
-                    Neuting.LockTarget();
+                    Console.Log("|oLocking Neuts [|-g" + Cache.Instance.Neuting.Name + "|o][|g" + MaskedId(Cache.Instance.Neuting.ID) + "|o][|g" + Math.Round(Cache.Instance.Neuting.Distance/1000, 0) + "k|o]");
+                    Cache.Instance.Neuting.LockTarget();
                     return false;
                 }
             }
@@ -1144,7 +1111,7 @@ namespace EveComFramework.SimpleDrone
                 if (!ActiveTarget.LockedTarget && !ActiveTarget.LockingTarget)
                 {
                     if (!UnlockTargetsAsNeeded()) return false;
-                    Console.Log("|oLocking ActiveTarget [|-g" + ActiveTarget.Name + "|o][|g" + MaskedId(ActiveTarget.ID) + "|o][|g" + Math.Round(ActiveTarget.Distance / 1000, 0) + "k|o]");
+                    Console.Log("|oLocking ActiveTarget [|-g" + ActiveTarget.Name + "|o][|g" + MaskedId(ActiveTarget.ID) + "|o][|g" + Math.Round(ActiveTarget.Distance/1000, 0) + "k|o]");
                     ActiveTarget.LockTarget();
                     return false;
                 }
@@ -1159,8 +1126,11 @@ namespace EveComFramework.SimpleDrone
             {
                 int freeTargetSlots = Config.TargetSlots - _rats.LockedAndLockingTargetList.Count;
                 //Console.Log("|oActiveTarget is empty; picking a NewTarget");
-                IEnumerable<Entity> newTargets = _rats.UnlockedTargetList.OrderByDescending(i => PriorityTargets.Any() && PriorityTargets.Contains(i.Name)).ThenBy(i => i.DistanceTo(entityToUseForClosestNpcMeasurement)).Where(a => a.Exists && !a.Exploded && !a.Released && !TargetCooldown.ContainsKey(a.ID) && a.Distance < MyShip.MaxTargetRange && a.Mode != EntityMode.Warping).ToList();
-                if (newTargets.Any() && Entity.All.FirstOrDefault(a => a.IsJamming && a.IsTargetingMe) == null)
+                IEnumerable<Entity> newTargets = _rats.UnlockedTargetList.OrderByDescending(i => PriorityTargets.Any() && PriorityTargets.Contains(i.Name))
+                        .ThenBy(i => i.DistanceTo(entityToUseForClosestNpcMeasurement))
+                        .Where(a => a.Exists && !a.Exploded && !a.Released && !TargetCooldown.ContainsKey(a.ID) && a.Distance < MyShip.MaxTargetRange && a.Mode != EntityMode.Warping)
+                        .ToList();
+                if (newTargets.Any() && Cache.Instance.AllEntities.FirstOrDefault(a => a.IsJamming && a.IsTargetingMe) == null)
                 {
                     foreach (Entity newTarget in newTargets)
                     {
@@ -1198,51 +1168,51 @@ namespace EveComFramework.SimpleDrone
 
             if (entityToUseForClosestNpcMeasurement == null)
             {
-                entityToUseForClosestNpcMeasurement = MyShip.ToEntity;
+                entityToUseForClosestNpcMeasurement = Cache.Instance.MyShipAsEntity;
             }
 
-            if (HostilePilot != null)
+            if (Cache.Instance.HostilePilot != null)
             {
-                if (ActiveTarget != HostilePilot && HostilePilot.Distance < MaxRange)
+                if (ActiveTarget != Cache.Instance.HostilePilot && Cache.Instance.HostilePilot.Distance < MaxRange)
                 {
-                    Console.Log("|rHostile Pilot on Grid! |o[|g" + HostilePilot.Name + "|o][|g" + Math.Round(HostilePilot.Distance / 1000, 0) + "k|o][" + HostilePilot.Type + "]");
-                    ActiveTarget = HostilePilot;
+                    Console.Log("|rHostile Pilot on Grid! |o[|g" + Cache.Instance.HostilePilot.Name + "|o][|g" + Math.Round(Cache.Instance.HostilePilot.Distance/1000, 0) + "k|o][" + Cache.Instance.HostilePilot.Type + "]");
+                    ActiveTarget = Cache.Instance.HostilePilot;
                     return true;
                 }
             }
-            else if (AnchoredBubble != null)
+            else if (Cache.Instance.AnchoredBubble != null)
             {
-                if (ActiveTarget != AnchoredBubble && AnchoredBubble.Distance < MaxRange)
+                if (ActiveTarget != Cache.Instance.AnchoredBubble && Cache.Instance.AnchoredBubble.Distance < MaxRange)
                 {
-                    Console.Log("|rAnchored bubble on grid! Attacking it so that we dont keep getting stuck. |o[|g" + AnchoredBubble.Name + "|o][|g" + Math.Round(AnchoredBubble.Distance, 0) + "k|o]");
-                    ActiveTarget = AnchoredBubble;
+                    Console.Log("|rAnchored bubble on grid! Attacking it so that we dont keep getting stuck. |o[|g" + Cache.Instance.AnchoredBubble.Name + "|o][|g" + Math.Round(Cache.Instance.AnchoredBubble.Distance, 0) + "k|o]");
+                    ActiveTarget = Cache.Instance.AnchoredBubble;
                     return true;
                 }
             }
-            else if (WarpScrambling != null)
+            else if (Cache.Instance.WarpScrambling != null)
             {
-                if (ActiveTarget != WarpScrambling && WarpScrambling.Distance < MaxRange)
+                if (ActiveTarget != Cache.Instance.WarpScrambling && Cache.Instance.WarpScrambling.Distance < MaxRange)
                 {
-                    Console.Log("|rEntity on grid is/was warp scrambling! |o[|g" + WarpScrambling.Name + "|o][|g" + Math.Round(WarpScrambling.Distance / 1000, 0) + "k|o]");
-                    ActiveTarget = WarpScrambling;
+                    Console.Log("|rEntity on grid is/was warp scrambling! |o[|g" + Cache.Instance.WarpScrambling.Name + "|o][|g" + Math.Round(Cache.Instance.WarpScrambling.Distance/1000, 0) + "k|o]");
+                    ActiveTarget = Cache.Instance.WarpScrambling;
                     return true;
                 }
             }
-            else if (lcoToBlowUp != null)
+            else if (Cache.Instance.lcoToBlowUp != null)
             {
-                if (ActiveTarget != lcoToBlowUp && lcoToBlowUp.Distance < MaxRange)
+                if (ActiveTarget != Cache.Instance.lcoToBlowUp && Cache.Instance.lcoToBlowUp.Distance < MaxRange)
                 {
-                    Console.Log("|rLCO on grid is/was keeping us from safely warping off! |o[|g" + lcoToBlowUp.Name + "|o][|g" + Math.Round(lcoToBlowUp.Distance / 1000, 0) + "k|o]");
-                    ActiveTarget = lcoToBlowUp;
+                    Console.Log("|rLCO on grid is/was keeping us from safely warping off! |o[|g" + Cache.Instance.lcoToBlowUp.Name + "|o][|g" + Math.Round(Cache.Instance.lcoToBlowUp.Distance/1000, 0) + "k|o]");
+                    ActiveTarget = Cache.Instance.lcoToBlowUp;
                     return true;
                 }
             }
-            else if (Neuting != null)
+            else if (Cache.Instance.Neuting != null)
             {
-                if (ActiveTarget != Neuting && Neuting.Distance < MaxRange)
+                if (ActiveTarget != Cache.Instance.Neuting && Cache.Instance.Neuting.Distance < MaxRange)
                 {
-                    Console.Log("|rEntity on grid is/was neuting! |o[|g" + Neuting.Name + "|o][|g" + Math.Round(Neuting.Distance / 1000, 0) + "k|o]");
-                    ActiveTarget = Neuting;
+                    Console.Log("|rEntity on grid is/was neuting! |o[|g" + Cache.Instance.Neuting.Name + "|o][|g" + Math.Round(Cache.Instance.Neuting.Distance/1000, 0) + "k|o]");
+                    ActiveTarget = Cache.Instance.Neuting;
                     return true;
                 }
             }
@@ -1251,14 +1221,26 @@ namespace EveComFramework.SimpleDrone
             {
                 try
                 {
-                    List<Entity> AvailableTargets = Entity.All.ToList();
-                    if (LastTargetLocation != Vector3.origin) AvailableTargets = AvailableTargets.OrderBy(a => a.DistanceTo(LastTargetLocation)).ToList();
+                    List<Entity> availableTargets;
+                    //if (LastTargetLocation != Vector3.origin) AvailableTargets = AvailableTargets.OrderBy(a => a.DistanceTo(LastTargetLocation)).ToList();
                     ActiveTarget = null;
-                    AvailableTargets = _rats.LockedAndLockingTargetList.OrderBy(i => i.DistanceTo(entityToUseForClosestNpcMeasurement)).ToList();
-                    ActiveTarget = AvailableTargets.FirstOrDefault(a => PriorityTargets.Contains(a.Name) && !a.Exploded && !a.Released && (a.LockedTarget || a.LockingTarget) && !Triggers.Contains(a.Name)  && a.Distance < MaxRange);
+                    try
+                    {
+                        availableTargets = _rats.LockedAndLockingTargetList.OrderBy(i => i.DistanceTo(entityToUseForClosestNpcMeasurement)).ToList();
+                    }
+                    catch (Exception)
+                    {
+                        availableTargets = new List<Entity>();
+                    }
 
-                    if (LastTargetLocation != Vector3.origin) AvailableTargets = AvailableTargets.OrderBy(a => a.DistanceTo(LastTargetLocation)).ToList();
-                    if (AvailableTargets.Any() && ActiveTarget == null)
+                    if (availableTargets.Any())
+                    {
+                        ActiveTarget = availableTargets.FirstOrDefault(a => PriorityTargets.Contains(a.Name) && !a.Exploded && !a.Released && (a.LockedTarget || a.LockingTarget) && !Triggers.Contains(a.Name) && a.Distance < MaxRange);
+                        //if (LastTargetLocation != Vector3.origin) AvailableTargets = AvailableTargets.OrderBy(a => a.DistanceTo(LastTargetLocation)).ToList();
+                    }
+                    else ActiveTarget = null;
+
+                    if (availableTargets.Any() && ActiveTarget == null)
                     {
                         if (Config.PrivateTargets)
                         {
@@ -1267,8 +1249,8 @@ namespace EveComFramework.SimpleDrone
                                 if (entityToUseForClosestNpcMeasurement != null)
                                 {
                                     //ActiveTarget = AvailableTargets.FirstOrDefault(a => _ipc.ActiveTargets.ContainsValue(a.ID) && a.Distance < MaxRange);
-                                    ActiveTarget = AvailableTargets.Where(a => !Triggers.Contains(a.Name)).OrderBy(i => i.DistanceTo(entityToUseForClosestNpcMeasurement)).FirstOrDefault(a => _ipc.ActiveTargets.ContainsValue(a.ID) && a.Distance < MaxRange);
-                                    if (ActiveTarget == null) ActiveTarget = AvailableTargets.OrderBy(i => i.DistanceTo(entityToUseForClosestNpcMeasurement)).FirstOrDefault(a => _ipc.ActiveTargets.ContainsValue(a.ID) && a.Distance < MaxRange);
+                                    ActiveTarget = availableTargets.Where(a => !Triggers.Contains(a.Name)).OrderBy(i => i.DistanceTo(entityToUseForClosestNpcMeasurement)).FirstOrDefault(a => _ipc.ActiveTargets.ContainsValue(a.ID) && a.Distance < MaxRange);
+                                    if (ActiveTarget == null) ActiveTarget = availableTargets.OrderBy(i => i.DistanceTo(entityToUseForClosestNpcMeasurement)).FirstOrDefault(a => _ipc.ActiveTargets.ContainsValue(a.ID) && a.Distance < MaxRange);
                                 }
                             }
                             else
@@ -1283,8 +1265,8 @@ namespace EveComFramework.SimpleDrone
                         }
                         if (ActiveTarget == null && OutOfTargets)
                         {
-                            ActiveTarget = AvailableTargets.Where(a => !Triggers.Contains(a.Name)).FirstOrDefault(a => a.Distance < MaxRange && !a.Exploded && !a.Released);
-                            if (ActiveTarget == null) ActiveTarget = AvailableTargets.FirstOrDefault(a => a.Distance < MaxRange && !a.Exploded && !a.Released);
+                            ActiveTarget = availableTargets.Where(a => !Triggers.Contains(a.Name)).FirstOrDefault(a => a.Distance < MaxRange && !a.Exploded && !a.Released);
+                            if (ActiveTarget == null) ActiveTarget = availableTargets.FirstOrDefault(a => a.Distance < MaxRange && !a.Exploded && !a.Released);
                         }
                         if (ActiveTarget != null)
                         {
@@ -1302,8 +1284,8 @@ namespace EveComFramework.SimpleDrone
                 return false;
             }
 
-            if (ActiveTarget != null && ActiveTarget.Exists) LastTargetLocation = ActiveTarget.Position;
-            int intAttribute = 0;
+            //if (ActiveTarget != null && ActiveTarget.Exists) LastTargetLocation = ActiveTarget.Position;
+            //int intAttribute = 0;
             //foreach (KeyValuePair<string, object> a in Entity.ActiveTarget)
             //{
             //    intAttribute++;
@@ -1315,7 +1297,9 @@ namespace EveComFramework.SimpleDrone
 
         bool Control(object[] Params)
         {
-            if (!Session.InSpace || MyShip.ToEntity.Velocity.Magnitude > 8000)
+            ClearCachedDataEveryPulse();
+
+            if (!Session.InSpace || Cache.Instance.MyShipAsEntity.Velocity.Magnitude > 8000)
             {
                 return false;
             }
@@ -1326,20 +1310,20 @@ namespace EveComFramework.SimpleDrone
             }
 
             // If we're warping and drones are in space, recall them and stop the module
-            if (MyShip.ToEntity.Mode == EntityMode.Warping && MyShip.ToEntity.Velocity.Magnitude < 2000 && DronesInSpace.Any(droneInSpace => DroneReady(droneInSpace.ID)))
+            if (Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping && Cache.Instance.MyShipAsEntity.Velocity.Magnitude < 2000 && DronesInSpace.Any(droneInSpace => DroneReady(droneInSpace.ID)))
             {
                 RecallDrones(DronesInSpace.ToList(), "We are warping: pull drones!");
                 return true;
             }
 
             // If we're in a POS and fighters are in space, queue delayed stop of the module
-            if (Entity.All.Any(a => a.GroupID == Group.ForceField) && Fighters.Active.Any())
+            if (Cache.Instance.AllEntities.Any(a => a.GroupID == Group.ForceField) && Fighters.Active.Any())
             {
                 QueueState(FighterShutdown, 10000);
                 return true;
             }
 
-            if (MyShip.DronesToReconnect && MyShip.DroneBay.UsedCapacity < MyShip.DroneBay.MaxCapacity && MyShip.ToEntity.GroupID != Group.Capsule && TryReconnect)
+            if (MyShip.DronesToReconnect && MyShip.DroneBay.UsedCapacity < MyShip.DroneBay.MaxCapacity && Cache.Instance.MyShipAsEntity.GroupID != Group.Capsule && TryReconnect)
             {
                 MyShip.ReconnectToDrones();
                 DislodgeWaitFor(2);
@@ -1347,7 +1331,7 @@ namespace EveComFramework.SimpleDrone
                 return false;
             }
 
-            if (MyShip.ToEntity.Mode == EntityMode.Warping) return false;
+            if (Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping) return false;
 
             try
             {
@@ -1360,7 +1344,7 @@ namespace EveComFramework.SimpleDrone
             catch (Exception){}
 
 
-            if (!_rats.TargetList.Any() && !Entity.All.Any(a => PriorityTargets.Contains(a.Name)) && !Config.StayDeployedWithNoTargets)
+            if (!_rats.TargetList.Any() && !Cache.Instance.AllEntities.Any(a => PriorityTargets.Contains(a.Name)) && !Config.StayDeployedWithNoTargets)
             {
                 // Recall drones and fighters
                 if (!RecallDronesAndFighters("|oRecalling drones and fighters [|gNo rats available|o]")) return false;
@@ -1371,7 +1355,7 @@ namespace EveComFramework.SimpleDrone
             //
             if (ReturningFighters.Any()) if (!SpeedUpFighters(ReturningFighters, "Burning Back.")) return false;
 
-            if (Config.Mode == Mode.AfkHeavy && (_rats.TargetList.Any() || Entity.All.Any(a => PriorityTargets.Contains(a.Name))))
+            if (Config.Mode == Mode.AfkHeavy && (_rats.TargetList.Any() || Cache.Instance.AllEntities.Any(a => PriorityTargets.Contains(a.Name))))
             {
                 try
                 {
@@ -1446,8 +1430,12 @@ namespace EveComFramework.SimpleDrone
                 List<Fighters.Fighter> damagedFighters = AvailableFighters.Where(a => a.Health != null && a.Health < Config.FighterCriticalHealthLevel).ToList();
                 if (damagedFighters.Any())
                 {
-                    if (!RecallFighters(damagedFighters, "Low Health")) return false;
-                    if (!SpeedUpFighters(damagedFighters.Where(i => i.State == Fighters.States.RECALLING), "Recalling")) return false;
+                    bool RecallingFightersFinished = RecallFighters(damagedFighters, "Low Health", false, true);
+                    bool SpeedingUpFightersFinsihed = SpeedUpFighters(damagedFighters.Where(i => i.State == Fighters.States.RECALLING), "Recalling");
+                    if (!RecallingFightersFinished || !SpeedingUpFightersFinsihed)
+                    {
+                        return false;
+                    }
                 }
             }
             catch (Exception ex)
@@ -1491,8 +1479,12 @@ namespace EveComFramework.SimpleDrone
 
                         if (AvailableFighters.Any())
                         {
-                            if (!RecallFighters(AvailableFighters, "No ActiveTarget")) return false;
-                            if (ReturningFighters.Any()) if (!SpeedUpFighters(ReturningFighters, "Burning Back.")) return false;
+                            bool RecallingFightersFinished = RecallFighters(AvailableFighters, "No ActiveTarget", false, true);
+                            bool SpeedingUpFightersFinsihed = SpeedUpFighters(ReturningFighters, "Burning Back");
+                            if (!RecallingFightersFinished || !SpeedingUpFightersFinsihed)
+                            {
+                                return false;
+                            }
                         }
                     }
                 }
@@ -1754,8 +1746,8 @@ namespace EveComFramework.SimpleDrone
                             }
 
                             Console.Log("|oWe are missing fighters in a squadron and have none in the drone bay to add to the squadron: panic");
-                            if (!RecallFighters(AvailableFighters, "Low On Fighters: panicking")) return false;
-                            _securityCore.Panic();
+                            if (!RecallFighters(AvailableFighters, "Low On Fighters: panicking", false, true)) return false;
+                            Cache.Instance._securityCore.Panic();
                         }
                     }
                 }
@@ -1816,8 +1808,12 @@ namespace EveComFramework.SimpleDrone
                                 IEnumerable<Fighters.Fighter> fightersThatNeedToRefillRockets = Fighters.Active.Where(i => FighterReady(i.ID) && _fighterRocketSalvosLeft != null && _fighterRocketSalvosLeft.ContainsKey(i.ID) && (_fighterRocketSalvosLeft[i.ID] <= 0)).ToList();
                                 if (fightersThatNeedToRefillRockets.Any())
                                 {
-                                    if (!RecallFighters(fightersThatNeedToRefillRockets, "Refill Rockets")) return false;
-                                    if (!SpeedUpFighters(fightersThatNeedToRefillRockets.Where(i => i.State == Fighters.States.RECALLING), "returning")) return false;
+                                    bool RecallingFightersFinished = RecallFighters(AvailableFighters, "Refill Rockets", false, true);
+                                    bool SpeedingUpFightersFinsihed = SpeedUpFighters(fightersThatNeedToRefillRockets.Where(i => i.State == Fighters.States.RECALLING), "returning");
+                                    if (!RecallingFightersFinished || !SpeedingUpFightersFinsihed)
+                                    {
+                                        return false;
+                                    }
                                 }
                             }
                         }
@@ -1836,8 +1832,8 @@ namespace EveComFramework.SimpleDrone
                             bool slightPauseNeededAfterMissileAttack = false;
                             foreach (Fighters.Fighter fighterReadyToMissileAttack in fightersReadyToMissileAttack)
                             {
-                                Entity rocketTargetEntity = _rats.LockedTargetList.FirstOrDefault(a => HostilePilot != null && HostilePilot.ID == a.ID && fighterReadyToMissileAttack.ToEntity.DistanceTo(a) < (double)fighterReadyToMissileAttack["fighterAbilityMissilesRange"] - 2000);
-                                if (rocketTargetEntity == null) rocketTargetEntity = _rats.LockedTargetList.FirstOrDefault(a => WarpScrambling != null && WarpScrambling.ID == a.ID && fighterReadyToMissileAttack.ToEntity.DistanceTo(a) < (double)fighterReadyToMissileAttack["fighterAbilityMissilesRange"] - 2000);
+                                Entity rocketTargetEntity = _rats.LockedTargetList.FirstOrDefault(a => Cache.Instance.HostilePilot != null && Cache.Instance.HostilePilot.ID == a.ID && fighterReadyToMissileAttack.ToEntity.DistanceTo(a) < (double)fighterReadyToMissileAttack["fighterAbilityMissilesRange"] - 2000);
+                                if (rocketTargetEntity == null) rocketTargetEntity = _rats.LockedTargetList.FirstOrDefault(a => Cache.Instance.WarpScrambling != null && Cache.Instance.WarpScrambling.ID == a.ID && fighterReadyToMissileAttack.ToEntity.DistanceTo(a) < (double)fighterReadyToMissileAttack["fighterAbilityMissilesRange"] - 2000);
                                 if (rocketTargetEntity == null) rocketTargetEntity = _rats.LockedTargetList.OrderByDescending(FighterMissileTarget).FirstOrDefault(a => !Triggers.Contains(a.Name) && a.ArmorPct > 40 &&  (FighterMissileTarget(a) || (Config.UseFighterMissileAttackOnActiveTarget && a == ActiveTarget && !NPCFrigate(a))) && fighterReadyToMissileAttack.ToEntity.DistanceTo(a) < (double)fighterReadyToMissileAttack["fighterAbilityMissilesRange"] - 2000);
                                 if (rocketTargetEntity == null) rocketTargetEntity = _rats.LockedTargetList.OrderByDescending(FighterMissileTarget).FirstOrDefault(a => a.ArmorPct > 40 && (FighterMissileTarget(a) || (Config.UseFighterMissileAttackOnActiveTarget && a == ActiveTarget && !NPCFrigate(a))) && fighterReadyToMissileAttack.ToEntity.DistanceTo(a) < (double)fighterReadyToMissileAttack["fighterAbilityMissilesRange"] - 2000);
                                 if (rocketTargetEntity != null)
@@ -1889,7 +1885,7 @@ namespace EveComFramework.SimpleDrone
 
                         // Return fighters that are not moving (not responding to commands?)
                         IEnumerable<Fighters.Fighter> fightersThatShouldReturn = AvailableFighters.Where(a => (a.ToEntity != null && a.ToEntity.Velocity.Magnitude <= 0)).ToList();
-                        if (fightersThatShouldReturn.Any() && !Entity.All.Where(i => i.Distance < 100000).Any(i => i.LockingTarget))
+                        if (fightersThatShouldReturn.Any() && !Cache.Instance.AllEntities.Where(i => i.Distance < 100000).Any(i => i.LockingTarget))
                         {
                             foreach (var fighterThatShouldReturn in fightersThatShouldReturn)
                             {
@@ -1914,7 +1910,14 @@ namespace EveComFramework.SimpleDrone
 
         bool FighterShutdown(object[] Params)
         {
-            if (!RecallFighters(Fighters.Active, "FighterShutdown", false, true)) return false;
+            ClearCachedDataEveryPulse();
+            bool RecallingFightersFinished = RecallFighters(Fighters.Active, "FighterShutdown", false, true);
+            bool SpeedingUpFightersFinsihed = SpeedUpFighters(ReturningFighters, "returning");
+            if (!RecallingFightersFinished || !SpeedingUpFightersFinsihed)
+            {
+                return false;
+            }
+
             Console.Log("FighterShutdown completed.");
             return true;
         }

@@ -93,11 +93,11 @@ namespace EveComFramework.Stats
         {
             if (Session.Safe && Session.InSpace)
             {
-                Entity POS = Entity.All.FirstOrDefault(a => a.GroupID == Group.ControlTower && !ReportedPOS.Contains(a.ID));
+                Entity POS = Cache.Instance.AllEntities.FirstOrDefault(a => a.GroupID == Group.ControlTower && !ReportedPOS.Contains(a.ID));
                 if (POS != null)
                 {
-                    Entity ClosestMoon = Entity.All.Where(a => a.GroupID == Group.Moon).OrderBy(a => a.Distance).First();
-                    Entity ForceField = Entity.All.FirstOrDefault(a => a.GroupID == Group.ForceField);
+                    Entity ClosestMoon = Cache.Instance.AllEntities.Where(a => a.GroupID == Group.Moon).OrderBy(a => a.Distance).First();
+                    Entity ForceField = Cache.Instance.AllEntities.FirstOrDefault(a => a.GroupID == Group.ForceField);
 
                     String data = String.Format(@"GUID={0}&moonID={1}&corpID={2}&typeID={3}&online={4}", Config.guid, ClosestMoon.ID, POS.OwnerID, POS.TypeID, (ForceField != null ? 1 : 0));
                     Log.Log("Submit StarbasePresence data: " + data, LogType.DEBUG);
@@ -119,7 +119,7 @@ namespace EveComFramework.Stats
                     return false;
                 }
 
-                List<Entity> ReportCustomsOffices = Entity.All.Where(a => (a.TypeID == 2233 || a.TypeID == 4318) && !CustomsOffices.Contains(a.ID)).ToList();
+                List<Entity> ReportCustomsOffices = Cache.Instance.AllEntities.Where(a => (a.TypeID == 2233 || a.TypeID == 4318) && !CustomsOffices.Contains(a.ID)).ToList();
                 if (ReportCustomsOffices.Any())
                 {
                     String data = String.Format(@"GUID={0}&solarSystemID={1}", Config.guid, Session.SolarSystemID);
@@ -151,7 +151,7 @@ namespace EveComFramework.Stats
                     })).Start();
                 }
 
-                List<Entity> ReportStructures = Entity.All.Where(a => (a.CategoryID == Category.Starbase|| a.CategoryID == Category.Structure) && !ReportedStructures.Contains(a.ID) && !CustomsOffices.Contains(a.ID)).ToList();
+                List<Entity> ReportStructures = Cache.Instance.AllEntities.Where(a => (a.CategoryID == Category.Starbase|| a.CategoryID == Category.Structure) && !ReportedStructures.Contains(a.ID) && !CustomsOffices.Contains(a.ID)).ToList();
                 if (ReportStructures.Any())
                 {
                     String data = String.Format(@"GUID={0}&solarSystemID={1}", Config.guid, Session.SolarSystemID);

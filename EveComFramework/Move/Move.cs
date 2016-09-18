@@ -208,7 +208,7 @@ namespace EveComFramework.Move
             if (Bookmark.Dockable() && Bookmark.LocationID == Session.SolarSystemID)
             {
                 AutoModule.PrepareToDock();
-                QueueState(Dock, -1, Entity.All.FirstOrDefault(a => a.ID == Bookmark.ItemID));
+                QueueState(Dock, -1, Cache.Instance.AllEntities.FirstOrDefault(a => a.ID == Bookmark.ItemID));
             }
             else
             {
@@ -237,7 +237,7 @@ namespace EveComFramework.Move
             {
                 return false;
             }
-            if (MyShip.ToEntity.Mode == EntityMode.Warping)
+            if (Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping)
             {
                 return false;
             }
@@ -262,7 +262,7 @@ namespace EveComFramework.Move
                 if (Destination.Dockable() && Destination.LocationID == Session.SolarSystemID)
                 {
                     AutoModule.PrepareToDock();
-                    QueueState(Dock, -1, Entity.All.FirstOrDefault(a => a.ID == Destination.ItemID));
+                    QueueState(Dock, -1, Cache.Instance.AllEntities.FirstOrDefault(a => a.ID == Destination.ItemID));
                     return true;
                 }
                 else
@@ -271,13 +271,13 @@ namespace EveComFramework.Move
                     Log.Log(" |-g{0} (|w{1} km|-g)", Destination.Title, Distance);
                     Destination.WarpTo(Distance);
                     InsertState(BookmarkWarp, -1, Destination, Distance);
-                    WaitFor(10, () => MyShip.ToEntity.Mode == EntityMode.Warping);
+                    WaitFor(10, () => Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping);
                     return true;
                 }
             }
 
-            Entity LCO = Entity.All.FirstOrDefault(a => a.Collidable() && a.SurfaceDistance <= (double)(Config.WarpCollisionTrigger * 900));
-            Entity LCO2 = Entity.All.FirstOrDefault(a => a.Collidable() && a.SurfaceDistance <= (double)(Config.WarpCollisionTrigger * 500));
+            Entity LCO = Cache.Instance.AllEntities.FirstOrDefault(a => a.Collidable() && a.SurfaceDistance <= (double)(Config.WarpCollisionTrigger * 900));
+            Entity LCO2 = Cache.Instance.AllEntities.FirstOrDefault(a => a.Collidable() && a.SurfaceDistance <= (double)(Config.WarpCollisionTrigger * 500));
             if (LCO != null && Collision == null)
             {
                 Collision = LCO;
@@ -303,7 +303,7 @@ namespace EveComFramework.Move
                     if (Destination.Dockable() && Destination.LocationID == Session.SolarSystemID)
                     {
                         AutoModule.PrepareToDock();
-                        QueueState(Dock, -1, Entity.All.FirstOrDefault(a => a.ID == Destination.ItemID));
+                        QueueState(Dock, -1, Cache.Instance.AllEntities.FirstOrDefault(a => a.ID == Destination.ItemID));
                         return true;
                     }
                     else
@@ -312,7 +312,7 @@ namespace EveComFramework.Move
                         Log.Log(" |-g{0} (|w{1} km|-g)", Destination.Title, Distance);
                         Destination.WarpTo(Distance);
                         InsertState(BookmarkWarp, -1, Destination, Distance);
-                        WaitFor(10, () => MyShip.ToEntity.Mode == EntityMode.Warping);
+                        WaitFor(10, () => Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping);
                         return true;
                     }
                 }
@@ -353,7 +353,7 @@ namespace EveComFramework.Move
             {
                 return true;
             }
-            if (MyShip.ToEntity.Mode == EntityMode.Warping)
+            if (Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping)
             {
                 return false;
             }
@@ -368,12 +368,12 @@ namespace EveComFramework.Move
                 Log.Log(" |-g{0} (|w{1} km|-g)", Entity.Name, Distance);
                 Entity.WarpTo(Distance);
                 InsertState(ObjectWarp, -1, Entity, Distance);
-                WaitFor(10, () => MyShip.ToEntity.Mode == EntityMode.Warping);
+                WaitFor(10, () => Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping);
                 return true;
             }
 
-            Entity LCO = Entity.All.FirstOrDefault(a => a.Collidable() && a.SurfaceDistance <= (double)(Config.WarpCollisionTrigger * 900));
-            Entity LCO2 = Entity.All.FirstOrDefault(a => a.Collidable() && a.SurfaceDistance <= (double)(Config.WarpCollisionTrigger * 500));
+            Entity LCO = Cache.Instance.AllEntities.FirstOrDefault(a => a.Collidable() && a.SurfaceDistance <= (double)(Config.WarpCollisionTrigger * 900));
+            Entity LCO2 = Cache.Instance.AllEntities.FirstOrDefault(a => a.Collidable() && a.SurfaceDistance <= (double)(Config.WarpCollisionTrigger * 500));
             if (LCO != null && Collision == null)
             {
                 Collision = LCO;
@@ -400,7 +400,7 @@ namespace EveComFramework.Move
                     Log.Log(" |-g{0} (|w{1} km|-g)", Entity.Name, Distance);
                     Entity.WarpTo(Distance);
                     InsertState(ObjectWarp, -1, Entity, Distance);
-                    WaitFor(10, () => MyShip.ToEntity.Mode == EntityMode.Warping);
+                    WaitFor(10, () => Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping);
                 }
             }
             else if (Collision == LCO)
@@ -430,7 +430,7 @@ namespace EveComFramework.Move
 
         bool JumpThroughArray(object[] Params)
         {
-            Entity JumpPortalArray = Entity.All.FirstOrDefault(a => a.GroupID == Group.JumpPortalArray);
+            Entity JumpPortalArray = Cache.Instance.AllEntities.FirstOrDefault(a => a.GroupID == Group.JumpPortalArray);
             if (JumpPortalArray == null)
             {
                 Log.Log("|yNo Jump Portal Array on grid");
@@ -449,7 +449,7 @@ namespace EveComFramework.Move
             JumpPortalArray.JumpThroughPortal();
             InsertState(JumpThroughArray);
             int CurSystem = Session.SolarSystemID;
-            WaitFor(10, () => Session.SolarSystemID != CurSystem, () => MyShip.ToEntity.Mode == EntityMode.Approaching);
+            WaitFor(10, () => Session.SolarSystemID != CurSystem, () => Cache.Instance.MyShipAsEntity.Mode == EntityMode.Approaching);
             return true;
         }
 
@@ -472,7 +472,7 @@ namespace EveComFramework.Move
 
             Target.Activate();
 
-            WaitFor(30, () => MyShip.ToEntity.Mode == EntityMode.Warping);
+            WaitFor(30, () => Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping);
             return true;
         }
 
@@ -518,7 +518,7 @@ namespace EveComFramework.Move
                 return true;
             }
 
-            if (MyShip.ToEntity.Mode == EntityMode.Warping)
+            if (Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping)
             {
                 return false;
             }
@@ -535,7 +535,7 @@ namespace EveComFramework.Move
                         Log.Log("|oWarping");
                         Log.Log(" |-g{0}(|w{1} km|-g)", ApproachTarget.Name, ApproachDistance / 1000);
                         ApproachTarget.WarpTo(ApproachDistance);
-                        DislodgeWaitFor(10, () => MyShip.ToEntity.Mode == EntityMode.Warping);
+                        DislodgeWaitFor(10, () => Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping);
                         return false;
                     }
 
@@ -543,14 +543,14 @@ namespace EveComFramework.Move
                     Log.Log("|oApproaching");
                     Log.Log(" |-g{0}(|w{1} km|-g)", ApproachTarget.Name, ApproachDistance / 1000);
                     ApproachTarget.Approach();
-                    DislodgeWaitFor(10, () => MyShip.ToEntity.Mode == EntityMode.Approaching);
+                    DislodgeWaitFor(10, () => Cache.Instance.MyShipAsEntity.Mode == EntityMode.Approaching);
                     return false;
                 }
 
                 if (Config.ApproachCollisionPrevention)
                 {
                     // Else, if we're in trigger of a structure and aren't already orbiting a structure, orbit it and set it as our collision target
-                    Entity CollisionCheck = Entity.All.FirstOrDefault(a => (a.GroupID == Group.LargeCollidableObject || a.GroupID == Group.LargeCollidableShip || a.GroupID == Group.LargeCollidableStructure) && a.Type != "Beacon" && a.SurfaceDistance <= (double)(Config.ApproachCollisionTrigger * 900));
+                    Entity CollisionCheck = Cache.Instance.AllEntities.FirstOrDefault(a => (a.GroupID == Group.LargeCollidableObject || a.GroupID == Group.LargeCollidableShip || a.GroupID == Group.LargeCollidableStructure) && a.Type != "Beacon" && a.SurfaceDistance <= (double)(Config.ApproachCollisionTrigger * 900));
                     if (CollisionCheck != null && ApproachCollision == null)
                     {
                         ApproachCollision = CollisionCheck;
@@ -560,7 +560,7 @@ namespace EveComFramework.Move
                         return false;
                     }
                     // Else, if we're in half trigger of a structure that isn't our current collision target, change orbit and collision target to it
-                    CollisionCheck = Entity.All.FirstOrDefault(a => (a.GroupID == Group.LargeCollidableObject || a.GroupID == Group.LargeCollidableShip || a.GroupID == Group.LargeCollidableStructure) && a.Type != "Beacon" && a.SurfaceDistance <= (double)(Config.ApproachCollisionTrigger * 500));
+                    CollisionCheck = Cache.Instance.AllEntities.FirstOrDefault(a => (a.GroupID == Group.LargeCollidableObject || a.GroupID == Group.LargeCollidableShip || a.GroupID == Group.LargeCollidableStructure) && a.Type != "Beacon" && a.SurfaceDistance <= (double)(Config.ApproachCollisionTrigger * 500));
                     if (CollisionCheck != null && CollisionCheck != ApproachCollision)
                     {
                         ApproachCollision = CollisionCheck;
@@ -570,7 +570,7 @@ namespace EveComFramework.Move
                         return false;
                     }
                     // Else, if we're not within trigger of a structure and we have a collision target (orbiting a structure) change approach back to our approach target
-                    CollisionCheck = Entity.All.FirstOrDefault(a => (a.GroupID == Group.LargeCollidableObject || a.GroupID == Group.LargeCollidableShip || a.GroupID == Group.LargeCollidableStructure) && a.Type != "Beacon" && a.SurfaceDistance <= (double)(Config.ApproachCollisionTrigger * 900));
+                    CollisionCheck = Cache.Instance.AllEntities.FirstOrDefault(a => (a.GroupID == Group.LargeCollidableObject || a.GroupID == Group.LargeCollidableShip || a.GroupID == Group.LargeCollidableStructure) && a.Type != "Beacon" && a.SurfaceDistance <= (double)(Config.ApproachCollisionTrigger * 900));
                     if (CollisionCheck == null && ApproachCollision != null)
                     {
                         ApproachCollision = null;
@@ -583,7 +583,7 @@ namespace EveComFramework.Move
             }
             else
             {
-                if (MyShip.ToEntity.Velocity.Magnitude > 0)
+                if (Cache.Instance.MyShipAsEntity.Velocity.Magnitude > 0)
                 {
                     Command.CmdStopShip.Execute();
                 }
@@ -641,18 +641,18 @@ namespace EveComFramework.Move
             }
 
             // Start orbiting our orbit target if we're not currently orbiting anything
-            if (!Orbiting || MyShip.ToEntity.Mode != EntityMode.Orbiting)
+            if (!Orbiting || Cache.Instance.MyShipAsEntity.Mode != EntityMode.Orbiting)
             {
                 Log.Log("|oOrbiting");
                 Log.Log(" |-g{0}(|w{1} km|-g)", Target.Name, Distance / 1000);
                 Target.Orbit(Distance);
                 InsertState(OrbitState, -1, Target, Distance, true);
-                WaitFor(10, () => MyShip.ToEntity.Mode == EntityMode.Orbiting);
+                WaitFor(10, () => Cache.Instance.MyShipAsEntity.Mode == EntityMode.Orbiting);
             }
             else
             {
-                Entity LCO = Entity.All.FirstOrDefault(a => a.Collidable() && a.SurfaceDistance <= (double)(Config.OrbitCollisionTrigger * 900));
-                Entity LCO2 = Entity.All.FirstOrDefault(a => a.Collidable() && a.SurfaceDistance <= (double)(Config.OrbitCollisionTrigger * 500));
+                Entity LCO = Cache.Instance.AllEntities.FirstOrDefault(a => a.Collidable() && a.SurfaceDistance <= (double)(Config.OrbitCollisionTrigger * 900));
+                Entity LCO2 = Cache.Instance.AllEntities.FirstOrDefault(a => a.Collidable() && a.SurfaceDistance <= (double)(Config.OrbitCollisionTrigger * 500));
                 // Else, if we're in trigger of a structure and aren't already orbiting a structure, orbit it and set it as our collision target
                 if (Config.OrbitCollisionPrevention)
                 {
@@ -680,7 +680,7 @@ namespace EveComFramework.Move
                         Log.Log(" |-g{0}(|w{1} km|-g)", Target.Name, Distance / 1000);
                         Target.Orbit(Distance);
                         InsertState(OrbitState, -1, Target, Distance, true);
-                        WaitFor(10, () => MyShip.ToEntity.Mode == EntityMode.Orbiting);
+                        WaitFor(10, () => Cache.Instance.MyShipAsEntity.Mode == EntityMode.Orbiting);
                     }
                     else
                     {
@@ -716,12 +716,12 @@ namespace EveComFramework.Move
 
         bool Bubbled()
         {
-            if (MyShip.ToEntity.GroupID == Group.Interceptor) return false;
-            if (MyShip.ToEntity.TypeID == 34590) return false; // Victorieux Luxury Yacht
+            if (Cache.Instance.MyShipAsEntity.GroupID == Group.Interceptor) return false;
+            if (Cache.Instance.MyShipAsEntity.TypeID == 34590) return false; // Victorieux Luxury Yacht
             // @TODO: T3 Nullification Subsystem
-            if (!Entity.All.Any(a => Bubbles.Keys.Contains(a.TypeID))) return false;
-            if (!Entity.All.Any(a => a.Distance < Bubbles.Values.Max() && Bubbles.Keys.Contains(a.TypeID))) return false;
-            return Bubbles.Any(bubble => Entity.All.Any(a => a.TypeID == bubble.Key && a.Distance < bubble.Value));
+            if (!Cache.Instance.AllEntities.Any(a => Bubbles.Keys.Contains(a.TypeID))) return false;
+            if (!Cache.Instance.AllEntities.Any(a => a.Distance < Bubbles.Values.Max() && Bubbles.Keys.Contains(a.TypeID))) return false;
+            return Bubbles.Any(bubble => Cache.Instance.AllEntities.Any(a => a.TypeID == bubble.Key && a.Distance < bubble.Value));
         }
 
         bool AutoPilotPrep(object[] Params)
@@ -757,11 +757,11 @@ namespace EveComFramework.Move
             if (Session.InSpace)
             {
                 if (UndockWarp.Instance != null && !UndockWarp.Instance.Idle && UndockWarp.Instance.CurState.ToString() != "WaitStation") return false;
-                if (MyShip.ToEntity.Mode == EntityMode.Warping) return false;
-                Entity Sun = Entity.All.FirstOrDefault(a => a.GroupID == Group.Sun);
+                if (Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping) return false;
+                Entity Sun = Cache.Instance.AllEntities.FirstOrDefault(a => a.GroupID == Group.Sun);
                 if (MoonPatrol)
                 {
-                    Entity moon = Entity.All.OrderBy(a => a.Distance).FirstOrDefault(a => a.GroupID == Group.Moon && !checkedMoons.Contains(a.ID));
+                    Entity moon = Cache.Instance.AllEntities.OrderBy(a => a.Distance).FirstOrDefault(a => a.GroupID == Group.Moon && !checkedMoons.Contains(a.ID));
                     if (moon != null)
                     {
                         if (Bubbled())
@@ -772,7 +772,7 @@ namespace EveComFramework.Move
                                 Log.Log("|oAligning to |-g{0}", moon.Name);
                                 moon.AlignTo();
                                 InsertState(AutoPilot);
-                                WaitFor(10, () => MyShip.ToEntity.Mode != EntityMode.Stopped);
+                                WaitFor(10, () => Cache.Instance.MyShipAsEntity.Mode != EntityMode.Stopped);
                                 return true;
                             }
                             return false;
@@ -781,7 +781,7 @@ namespace EveComFramework.Move
                         moon.WarpTo(40000);
                         checkedMoons.Add(moon.ID);
                         InsertState(AutoPilot);
-                        WaitFor(10, () => MyShip.ToEntity.Mode != EntityMode.Stopped);
+                        WaitFor(10, () => Cache.Instance.MyShipAsEntity.Mode != EntityMode.Stopped);
                         return true;
                     }
                 }
@@ -796,7 +796,7 @@ namespace EveComFramework.Move
                             Log.Log("|oAligning to |-g{0}", Sun.Name);
                             Sun.AlignTo();
                             InsertState(AutoPilot);
-                            WaitFor(10, () => MyShip.ToEntity.Mode != EntityMode.Stopped);
+                            WaitFor(10, () => Cache.Instance.MyShipAsEntity.Mode != EntityMode.Stopped);
                             return true;
                         }
                         else
@@ -812,7 +812,7 @@ namespace EveComFramework.Move
                     Log.Log("|oWarping to |-g{0} |w(|y100 km|w)", Sun.Name);
                     Sun.WarpTo(100000);
                     InsertState(AutoPilot);
-                    WaitFor(10, () => MyShip.ToEntity.Mode == EntityMode.Warping);
+                    WaitFor(10, () => Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping);
                     return true;
                 }
                 if (Route.NextWaypoint.GroupID == Group.Stargate)
@@ -826,7 +826,7 @@ namespace EveComFramework.Move
                             Comms.Comms.Instance.ChatQueue.Enqueue("<Move> Bubble Detected! Aligning to " + Route.NextWaypoint.Name);
                             Route.NextWaypoint.AlignTo();
                             InsertState(AutoPilot);
-                            WaitFor(10, () => MyShip.ToEntity.Mode != EntityMode.Stopped);
+                            WaitFor(10, () => Cache.Instance.MyShipAsEntity.Mode != EntityMode.Stopped);
                             return true;
                         }
                         else
@@ -839,7 +839,7 @@ namespace EveComFramework.Move
                             return false;
                         }
                     }
-                    if (!Entity.All.Any(a => a.Dockable() && a.Distance < 150000)) DoInstaWarp();
+                    if (!Cache.Instance.AllEntities.Any(a => a.Dockable() && a.Distance < 150000)) DoInstaWarp();
                     if (Route.NextWaypoint.Distance < 2000 || Route.NextWaypoint.Distance > 150000)
                     {
                         Log.Log("|oJumping through to |-g{0}", Route.NextWaypoint.Name);
@@ -848,7 +848,7 @@ namespace EveComFramework.Move
                     }
                     else
                     {
-                        if (MyShip.ToEntity.Mode != EntityMode.Approaching)
+                        if (Cache.Instance.MyShipAsEntity.Mode != EntityMode.Approaching)
                         {
                             Log.Log("|oApproaching |-g{0}", Route.NextWaypoint.Name);
                             Comms.Comms.Instance.ChatQueue.Enqueue("<Move> Approaching " + Route.NextWaypoint.Name);
@@ -862,7 +862,7 @@ namespace EveComFramework.Move
                     }
                     int CurSystem = Session.SolarSystemID;
                     InsertState(AutoPilot);
-                    WaitFor(10, () => Session.SolarSystemID != CurSystem, () => MyShip.ToEntity.Mode != EntityMode.Stopped);
+                    WaitFor(10, () => Session.SolarSystemID != CurSystem, () => Cache.Instance.MyShipAsEntity.Mode != EntityMode.Stopped);
                     return true;
                 }
                 if (Route.NextWaypoint.GroupID == Group.Station || Route.NextWaypoint.GroupID == Group.MediumCitadel || Route.NextWaypoint.GroupID == Group.LargeCitadel || Route.NextWaypoint.GroupID == Group.XLargeCitadel || Route.NextWaypoint.GroupID == Group.XXLargeCitadel)
@@ -876,7 +876,7 @@ namespace EveComFramework.Move
                             Comms.Comms.Instance.ChatQueue.Enqueue("<Move> Bubble Detected! Aligning to " + Route.NextWaypoint.Name);
                             Route.NextWaypoint.AlignTo();
                             InsertState(AutoPilot);
-                            WaitFor(10, () => MyShip.ToEntity.Mode != EntityMode.Stopped);
+                            WaitFor(10, () => Cache.Instance.MyShipAsEntity.Mode != EntityMode.Stopped);
                             return true;
                         }
                         else
@@ -918,7 +918,7 @@ namespace EveComFramework.Move
             }
             if (!Config.WarpCollisionPrevention)
             {
-                if (!Entity.All.Any(a => a.Dockable() && a.Distance < 150000)) DoInstaWarp();
+                if (!Cache.Instance.AllEntities.Any(a => a.Dockable() && a.Distance < 150000)) DoInstaWarp();
                 Log.Log("|oDocking");
                 try
                 {
@@ -930,12 +930,12 @@ namespace EveComFramework.Move
                 }
                 Target.Dock();
                 InsertState(Dock, -1, Target);
-                WaitFor(10, () => Session.InStation, () => MyShip.ToEntity.Mode == EntityMode.Warping);
+                WaitFor(10, () => Session.InStation, () => Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping);
                 return true;
             }
 
-            Entity LCO = Entity.All.FirstOrDefault(a => a.Collidable() && a.SurfaceDistance <= (double)(Config.WarpCollisionTrigger * 900));
-            Entity LCO2 = Entity.All.FirstOrDefault(a => a.Collidable() && a.SurfaceDistance <= (double)(Config.WarpCollisionTrigger * 500));
+            Entity LCO = Cache.Instance.AllEntities.FirstOrDefault(a => a.Collidable() && a.SurfaceDistance <= (double)(Config.WarpCollisionTrigger * 900));
+            Entity LCO2 = Cache.Instance.AllEntities.FirstOrDefault(a => a.Collidable() && a.SurfaceDistance <= (double)(Config.WarpCollisionTrigger * 500));
 
             if (LCO != null && Collision == null)
             {
@@ -956,12 +956,12 @@ namespace EveComFramework.Move
             }
             else if (LCO == null)
             {
-                if (!Entity.All.Any(a => a.Dockable() && a.Distance < 150000)) DoInstaWarp();
+                if (!Cache.Instance.AllEntities.Any(a => a.Dockable() && a.Distance < 150000)) DoInstaWarp();
                 Log.Log("|oDocking");
                 Log.Log(" |-g{0}", Target.Name);
                 Target.Dock();
                 InsertState(Dock, -1, Target);
-                WaitFor(10, () => Session.InStation, () => MyShip.ToEntity.Mode == EntityMode.Warping);
+                WaitFor(10, () => Session.InStation, () => Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping);
             }
             else
             {
@@ -977,7 +977,7 @@ namespace EveComFramework.Move
 
         void DoInstaWarp()
         {
-            if (Config.InstaWarp && MyShip.ToEntity.Mode != EntityMode.Warping)
+            if (Config.InstaWarp && Cache.Instance.MyShipAsEntity.Mode != EntityMode.Warping)
             {
                 InstaWarpModule.Enabled(true);
             }
@@ -1008,7 +1008,7 @@ namespace EveComFramework.Move
 
         private InstaWarp()
         {
-            DefaultFrequency = 200;
+            DefaultFrequency = 400;
         }
         #endregion
         #region Actions
@@ -1034,7 +1034,7 @@ namespace EveComFramework.Move
         bool Prepare(object[] Params)
         {
             if (!Session.InSpace) return false;
-            return !MyShip.ToEntity.Cloaked;
+            return !Cache.Instance.MyShipAsEntity.Cloaked;
         }
 
         bool EnablePropmod(object[] Params)
@@ -1042,7 +1042,7 @@ namespace EveComFramework.Move
             try
             {
                 List<Module> propulsionModules =
-                    MyShip.Modules.Where(a => a.GroupID == Group.PropulsionModule && a.IsOnline).ToList();
+                    Cache.Instance.MyShipsModules.Where(a => a.GroupID == Group.PropulsionModule && a.IsOnline).ToList();
                 if (propulsionModules.Any())
                 {
                     if (propulsionModules.Any(a => a.AllowsActivate))
@@ -1101,7 +1101,7 @@ namespace EveComFramework.Move
 
         private UndockWarp()
         {
-            DefaultFrequency = 200;
+            DefaultFrequency = 400;
             if (Config.Enabled) QueueState(WaitStation);
         }
 

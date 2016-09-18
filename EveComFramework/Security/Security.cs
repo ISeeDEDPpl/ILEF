@@ -368,31 +368,31 @@ namespace EveComFramework.Security
                             if (Session.InSpace && MyShip.ToItem.GroupID == Group.Capsule) return FleeTrigger.Pod;
                             break;
                         case FleeTrigger.CapitalSpawn:
-                            if (Entity.All.Any(a => NPCClasses.All.Any(b => b.Key == a.GroupID && b.Value == "Capital"))) return FleeTrigger.CapitalSpawn;
+                            if (Cache.Instance.AllEntities.Any(a => NPCClasses.All.Any(b => b.Key == a.GroupID && b.Value == "Capital"))) return FleeTrigger.CapitalSpawn;
                             break;
                         case FleeTrigger.CynoGrid:
-							if (Session.InSpace && Entity.All.Any(a => a.Distance < 8000000 && (a.TypeID == 21094 || a.TypeID == 28650))) return FleeTrigger.CynoGrid;
+							if (Session.InSpace && Cache.Instance.AllEntities.Any(a => a.Distance < 8000000 && (a.TypeID == 21094 || a.TypeID == 28650))) return FleeTrigger.CynoGrid;
                             break;
                         case FleeTrigger.CynoSystem:
-							if (Session.InSpace && Entity.All.Any(a => a.TypeID == 21094 || a.TypeID == 28650)) return FleeTrigger.CynoSystem;
+							if (Session.InSpace && Cache.Instance.AllEntities.Any(a => a.TypeID == 21094 || a.TypeID == 28650)) return FleeTrigger.CynoSystem;
                             break;
                         case FleeTrigger.WhitelistedCharacterOnGrid:
-                            if (Entity.All.Any(ent => ent.IsPC && Config.WhiteList.Contains(ent.Name))) return FleeTrigger.WhitelistedCharacterOnGrid;
+                            if (Cache.Instance.AllEntities.Any(ent => ent.IsPC && Config.WhiteList.Contains(ent.Name))) return FleeTrigger.WhitelistedCharacterOnGrid;
                             break;
                         case FleeTrigger.BubbleOnPOSGrid:
-                            if (Entity.All.Any(a => a.GroupID == Group.ForceField && a.SurfaceDistance < 100000) && Entity.All.Any(a => a.GroupID == Group.MobileWarpDisruptor)) return FleeTrigger.BubbleOnPOSGrid;
+                            if (Cache.Instance.AllEntities.Any(a => a.GroupID == Group.ForceField && a.SurfaceDistance < 100000) && Cache.Instance.AllEntities.Any(a => a.GroupID == Group.MobileWarpDisruptor)) return FleeTrigger.BubbleOnPOSGrid;
                             break;
                         case FleeTrigger.SuspectLocal:
                             if (Local.Pilots.Any(a => a.IsSuspect)) return FleeTrigger.SuspectLocal;
                             break;
                         case FleeTrigger.SuspectGrid:
-                            if (Entity.All.Any(a => Local.Pilots.Any(b => b.IsSuspect && b.ID == a.Pilot.ID))) return FleeTrigger.SuspectGrid;
+                            if (Cache.Instance.AllEntities.Any(a => Local.Pilots.Any(b => b.IsSuspect && b.ID == a.Pilot.ID))) return FleeTrigger.SuspectGrid;
                             break;
                         case FleeTrigger.CriminalLocal:
                             if (Local.Pilots.Any(a => a.IsCriminal)) return FleeTrigger.CriminalLocal;
                             break;
                         case FleeTrigger.CriminalGrid:
-                            if (Entity.All.Any(a => Local.Pilots.Any(b => b.IsCriminal && b.ID == a.Pilot.ID))) return FleeTrigger.CriminalGrid;
+                            if (Cache.Instance.AllEntities.Any(a => Local.Pilots.Any(b => b.IsCriminal && b.ID == a.Pilot.ID))) return FleeTrigger.CriminalGrid;
                             break;
                         case FleeTrigger.NegativeStanding:
                             List<Pilot> NegativePilots = Local.Pilots.Where(a => a.DerivedStanding() < 0.0 && a.ID != Me.CharID).ToList();
@@ -445,7 +445,7 @@ namespace EveComFramework.Security
                         case FleeTrigger.Targeted:
                             if (Session.InSpace)
                             {
-                                List<Pilot> TargetingPilots = Local.Pilots.Where(a => Entity.All.FirstOrDefault(b => b.CharID == a.ID && b.IsTargetingMe) != null).ToList();
+                                List<Pilot> TargetingPilots = Local.Pilots.Where(a => Cache.Instance.AllEntities.FirstOrDefault(b => b.CharID == a.ID && b.IsTargetingMe) != null).ToList();
                                 if (!Config.TargetAlliance) { TargetingPilots.RemoveAll(a => a.AllianceID == Me.AllianceID); }
                                 if (!Config.TargetCorp) { TargetingPilots.RemoveAll(a => a.CorpID == Me.CorpID); }
                                 if (!Config.TargetFleet) { TargetingPilots.RemoveAll(a => a.IsFleetMember); }
@@ -461,10 +461,10 @@ namespace EveComFramework.Security
                             if (Session.InSpace && (MyShip.Capacitor / MyShip.MaxCapacitor * 100) < Config.CapThreshold) return FleeTrigger.CapacitorLow;
                             break;
                         case FleeTrigger.ShieldLow:
-                            if (Session.InSpace && MyShip.ToEntity.ShieldPct < Config.ShieldThreshold) return FleeTrigger.ShieldLow;
+                            if (Session.InSpace && Cache.Instance.MyShipAsEntity.ShieldPct < Config.ShieldThreshold) return FleeTrigger.ShieldLow;
                             break;
                         case FleeTrigger.ArmorLow:
-                            if (Session.InSpace && MyShip.ToEntity.ArmorPct < Config.ArmorThreshold) return FleeTrigger.ArmorLow;
+                            if (Session.InSpace && Cache.Instance.MyShipAsEntity.ArmorPct < Config.ArmorThreshold) return FleeTrigger.ArmorLow;
                             break;
                     }
                 }
@@ -536,9 +536,9 @@ namespace EveComFramework.Security
             {
                 if (Session.InFleet)
                 {
-                    return Entity.All.FirstOrDefault(a => ScramblingEntities.Contains(a.ID) && !a.Exploded && !a.Released && a.GroupID != Group.EncounterSurveillanceSystem);
+                    return Cache.Instance.AllEntities.FirstOrDefault(a => ScramblingEntities.Contains(a.ID) && !a.Exploded && !a.Released && a.GroupID != Group.EncounterSurveillanceSystem);
                 }
-                return Entity.All.FirstOrDefault(a => a.IsWarpScrambling && !a.Exploded && !a.Released && a.GroupID != Group.EncounterSurveillanceSystem);
+                return Cache.Instance.AllEntities.FirstOrDefault(a => a.IsWarpScrambling && !a.Exploded && !a.Released && a.GroupID != Group.EncounterSurveillanceSystem);
             }
         }
 
@@ -551,9 +551,9 @@ namespace EveComFramework.Security
             {
                 if (Session.InFleet)
                 {
-                    return Entity.All.FirstOrDefault(a => NeutingEntities.Contains(a.ID) && !a.Exploded && !a.Released && !Triggers.Contains(a.Name));
+                    return Cache.Instance.AllEntities.FirstOrDefault(a => NeutingEntities.Contains(a.ID) && !a.Exploded && !a.Released && !Triggers.Contains(a.Name));
                 }
-                return Entity.All.FirstOrDefault(a => (a.IsEnergyNeuting || a.IsEnergyStealing) && !a.Exploded && !a.Released && !Triggers.Contains(a.Name));
+                return Cache.Instance.AllEntities.FirstOrDefault(a => (a.IsEnergyNeuting || a.IsEnergyStealing) && !a.Exploded && !a.Released && !Triggers.Contains(a.Name));
             }
         }
 
@@ -646,17 +646,17 @@ namespace EveComFramework.Security
         {
             try
             {
-                if ((!Session.InSpace && !Session.InStation) || !Session.Safe || (Session.InSpace && Session.Safe && MyShip.ToEntity == null)) return false;
+                if ((!Session.InSpace && !Session.InStation) || !Session.Safe || (Session.InSpace && Session.Safe && Cache.Instance.MyShipAsEntity == null)) return false;
             }
             catch (Exception){return false;}
 
-            Entity WarpScrambling = Entity.All.FirstOrDefault(a => a.IsWarpScrambling);
+            Entity WarpScrambling = Cache.Instance.AllEntities.FirstOrDefault(a => a.IsWarpScrambling);
             if (WarpScrambling != null && WarpScrambling.GroupID != Group.EncounterSurveillanceSystem)
             {
                 LavishScript.ExecuteCommand("relay \"all\" -noredirect SecurityAddScrambler " + WarpScrambling.ID);
                 return false;
             }
-            Entity Neuting = Entity.All.FirstOrDefault(a => a.IsEnergyNeuting || a.IsEnergyStealing && !Triggers.Contains(a.Name));
+            Entity Neuting = Cache.Instance.AllEntities.FirstOrDefault(a => a.IsEnergyNeuting || a.IsEnergyStealing && !Triggers.Contains(a.Name));
             if (Neuting != null)
             {
                 LavishScript.ExecuteCommand("relay \"all\" -noredirect SecurityAddNeuter " + Neuting.ID);
@@ -718,7 +718,7 @@ namespace EveComFramework.Security
             //if (!Entity.All.Any(a => a.GroupID == Group.ForceField && a.SurfaceDistance < 100000))
             //{
                   //We are not yet cloaked
-            //    if (!EveCom.MyShip.ToEntity.Cloaked && //drones are on grid but very far away
+            //    if (!EveCom.Cache.Instance.MyShipAsEntity.Cloaked && //drones are on grid but very far away
             //    {
                     //abandon drones here so that we can cloak
                     //we need to auto-reconnect to the abandoned drones when we think it is safe again
@@ -726,8 +726,8 @@ namespace EveComFramework.Security
                     // FYI, I think reconnecting to drones (fighters) is currently broken!
             //    }
             //}
-            if (Trigger == FleeTrigger.ShieldLow && MyShip.Capacitor > AutoModule.AutoModule.Instance.Config.CapShieldBoosters && MyShip.Modules.Any(a => a.GroupID == Group.ShieldBooster && a.IsOnline)) AutoModule.AutoModule.Instance.Decloak = true;
-            if (Trigger == FleeTrigger.ArmorLow && MyShip.Capacitor > AutoModule.AutoModule.Instance.Config.CapArmorRepairs && MyShip.Modules.Any(a => a.GroupID == Group.ArmorRepairUnit && a.IsOnline)) AutoModule.AutoModule.Instance.Decloak = true;
+            if (Trigger == FleeTrigger.ShieldLow && MyShip.Capacitor > AutoModule.AutoModule.Instance.Config.CapShieldBoosters && Cache.Instance.MyShipsModules.Any(a => a.GroupID == Group.ShieldBooster && a.IsOnline)) AutoModule.AutoModule.Instance.Decloak = true;
+            if (Trigger == FleeTrigger.ArmorLow && MyShip.Capacitor > AutoModule.AutoModule.Instance.Config.CapArmorRepairs && Cache.Instance.MyShipsModules.Any(a => a.GroupID == Group.ArmorRepairUnit && a.IsOnline)) AutoModule.AutoModule.Instance.Decloak = true;
 
             if (SafeTrigger() != FleeTrigger.None) return false;
             if (Config.IncludeBroadcastTriggers && BroadcastSafe.ContainsValue(false)) return false;
@@ -789,9 +789,9 @@ namespace EveComFramework.Security
             }
             if (Config.AlternateStationFlee &&
                 (Trigger == FleeTrigger.ArmorLow || Trigger == FleeTrigger.ShieldLow || Trigger == FleeTrigger.CapacitorLow) &&
-                Entity.All.FirstOrDefault(a => a.GroupID == Group.Station) != null)
+                Cache.Instance.AllEntities.FirstOrDefault(a => a.GroupID == Group.Station) != null)
             {
-                Move.Object(Entity.All.FirstOrDefault(a => a.GroupID == Group.Station));
+                Move.Object(Cache.Instance.AllEntities.FirstOrDefault(a => a.GroupID == Group.Station));
                 return true;
             }
             foreach (FleeType FleeType in Config.Types)
@@ -799,7 +799,7 @@ namespace EveComFramework.Security
                 switch (FleeType)
                 {
                     case FleeType.NearestStation:
-                        Entity Station = Entity.All.FirstOrDefault(a => a.GroupID == Group.Station);
+                        Entity Station = Cache.Instance.AllEntities.FirstOrDefault(a => a.GroupID == Group.Station);
                         if (Station != null)
                         {
                             Move.Object(Station);
@@ -834,7 +834,7 @@ namespace EveComFramework.Security
 
         bool WaitFlee(object[] Params)
         {
-            Entity WarpScrambling = Entity.All.FirstOrDefault(a => a.IsWarpScrambling);
+            Entity WarpScrambling = Cache.Instance.AllEntities.FirstOrDefault(a => a.IsWarpScrambling);
             if ((WarpScrambling != null && WarpScrambling.GroupID != Group.EncounterSurveillanceSystem) || ValidScramble != null)
             {
                 if (WarpScrambling != null)
@@ -853,7 +853,7 @@ namespace EveComFramework.Security
                 }
                 return false;
             }
-            if (!Move.Idle || (Session.InSpace && MyShip.ToEntity.Mode == EntityMode.Warping))
+            if (!Move.Idle || (Session.InSpace && Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping))
             {
                 return false;
             }

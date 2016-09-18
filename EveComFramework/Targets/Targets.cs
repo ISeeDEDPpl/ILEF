@@ -18,7 +18,7 @@ namespace EveComFramework.Targets
 
         public Targets()
         {
-            DefaultFrequency = 50;
+            DefaultFrequency = 400;
             InsertState(Update);
         }
 
@@ -39,11 +39,11 @@ namespace EveComFramework.Targets
                     {
                         if (Ordering != null)
                         {
-                            _TargetList = Entity.All.Where(QueriesCompiled).Where(ent => ent.Exists && !ent.Exploded && !ent.Released).OrderBy(ent => ent, Ordering).ThenBy(ent => ent.Distance).ToList();
+                            _TargetList = Cache.Instance.AllEntities.Where(QueriesCompiled).Where(ent => ent.Exists && !ent.Exploded && !ent.Released).OrderBy(ent => ent, Ordering).ThenBy(ent => ent.Distance).ToList();
                         }
                         else
                         {
-                            _TargetList = Entity.All.Where(QueriesCompiled).Where(ent => ent.Exists && !ent.Exploded && !ent.Released).OrderBy(ent => ent.Distance).ToList();
+                            _TargetList = Cache.Instance.AllEntities.Where(QueriesCompiled).Where(ent => ent.Exists && !ent.Exploded && !ent.Released).OrderBy(ent => ent.Distance).ToList();
                         }
                     }
                     return _TargetList;
@@ -148,7 +148,7 @@ namespace EveComFramework.Targets
 
         public bool GetLocks(int Count = 2)
         {
-            if (MyShip.ToEntity.Mode == EntityMode.Warping) return false;
+            if (Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping) return false;
 
             if (Delays.Keys.Union(LockedAndLockingTargetList).Count() < Count)
             {
@@ -235,8 +235,8 @@ namespace EveComFramework.Targets
         {
             try
             {
-                if (!Session.InSpace || !Session.Safe || MyShip.ToEntity == null || MyShip.Capacitor == 0) return false;
-                LavishScript.ExecuteCommand(string.Format("relay \"all other\" Event[UpdateIPCPilots]:Execute[{0},{1},{2},{3},{4}]", Me.CharID, MyShip.ToEntity.HullPct, MyShip.ToEntity.ArmorPct, MyShip.ToEntity.ShieldPct, MyShip.Capacitor / MyShip.MaxCapacitor));
+                if (!Session.InSpace || !Session.Safe || Cache.Instance.MyShipAsEntity == null || MyShip.Capacitor == 0) return false;
+                LavishScript.ExecuteCommand(string.Format("relay \"all other\" Event[UpdateIPCPilots]:Execute[{0},{1},{2},{3},{4}]", Me.CharID, Cache.Instance.MyShipAsEntity.HullPct, Cache.Instance.MyShipAsEntity.ArmorPct, Cache.Instance.MyShipAsEntity.ShieldPct, MyShip.Capacitor / MyShip.MaxCapacitor));
                 return false;
             }
             catch (Exception)

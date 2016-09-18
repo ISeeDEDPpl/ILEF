@@ -267,5 +267,4 @@ namespace EveComFramework.KanedaToolkit
 
         #endregion
     }
-    
 }

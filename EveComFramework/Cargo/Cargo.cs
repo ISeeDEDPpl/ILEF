@@ -196,7 +196,7 @@ namespace EveComFramework.Cargo
 
         bool Compress(object[] Params)
         {
-            if (!Entity.All.Any(a => a.GroupID == Group.CompressionArray && a.SurfaceDistance < 3000) || Entity.All.Any(a => a.GroupID == Group.CompressionArray && a.SurfaceDistance >= 3000)) return true;
+            if (!Cache.Instance.AllEntities.Any(a => a.GroupID == Group.CompressionArray && a.SurfaceDistance < 3000) || Cache.Instance.AllEntities.Any(a => a.GroupID == Group.CompressionArray && a.SurfaceDistance >= 3000)) return true;
 
             foreach (Item item in CurrentCargoAction.Source().Items.Where(a => a.Compressible && (a.GroupID == Group.Ice || (a.CategoryID == Category.Asteroid && a.Quantity > 100))))
             {

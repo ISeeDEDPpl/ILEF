@@ -201,7 +201,7 @@ namespace EveComFramework.GroupControl
             {
                 if (Session.InSpace)
                 {
-                    return Entity.All.FirstOrDefault(a => a.Name == LeaderName);
+                    return Cache.Instance.AllEntities.FirstOrDefault(a => a.Name == LeaderName);
                 }
                 return null;
             }
