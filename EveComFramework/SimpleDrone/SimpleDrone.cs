@@ -409,7 +409,7 @@ namespace EveComFramework.SimpleDrone
                         _priorityTargets.AddRange(PriorityTargetsFromBehavior.ToList());
                     }
 
-                    if (Cache.Instance.MyShipAsEntity.Mode != EntityMode.Warping)
+                    if (Cache.Instance.MyShipAsEntity != null && Cache.Instance.MyShipAsEntity.Mode != EntityMode.Warping)
                     {
                         if (_rats.TargetList != null && _rats.TargetList.Any())
                         {
@@ -733,6 +733,7 @@ namespace EveComFramework.SimpleDrone
         {
             if (Session.InStation) return false;
             if (!Session.InSpace) return false;
+            if (Cache.Instance.MyShipAsEntity == null) return false;
             if (Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping) return false;
             if (Cache.Instance.MyShipAsEntity.Velocity.Magnitude > 10000) return false;
             return true;
@@ -849,7 +850,7 @@ namespace EveComFramework.SimpleDrone
 
         public bool CollectSentriesInSpace(List<Drone> recallTheseSentryDrones, string reason = "|oRecalling Sentry Drones: CollectSentriesInSpace")
         {
-            if (Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping) return true;
+            if (Cache.Instance.MyShipAsEntity != null && Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping) return true;
 
             IEnumerable<Drone> sentriesInSpace = recallTheseSentryDrones.Where(a => a.State == EntityState.Incapacitated || DroneType.All.Any(b => b.ID == a.ID && b.Group == "Sentry Drones")).ToList();
             if (sentriesInSpace.Any())
@@ -998,7 +999,7 @@ namespace EveComFramework.SimpleDrone
         {
             if (Entity.Targeting.Count + Entity.Targets.Count >= Me.TrueMaxTargetLocks)
             {
-                if (Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping) return false;
+                if (Cache.Instance.MyShipAsEntity != null && Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping) return false;
                 if (Entity.Targets.Any())
                 {
                     Entity unlockthis = Entity.Targets.OrderBy(i => i.IsNPC)
@@ -1029,7 +1030,7 @@ namespace EveComFramework.SimpleDrone
                 entityToUseForClosestNpcMeasurement = AvailableFighters.FirstOrDefault().ToEntity;
             }
 
-            if (entityToUseForClosestNpcMeasurement == null)
+            if (entityToUseForClosestNpcMeasurement == null && Cache.Instance.MyShipAsEntity != null)
             {
                 entityToUseForClosestNpcMeasurement = Cache.Instance.MyShipAsEntity;
             }
@@ -1299,7 +1300,7 @@ namespace EveComFramework.SimpleDrone
         {
             ClearCachedDataEveryPulse();
 
-            if (!Session.InSpace || Cache.Instance.MyShipAsEntity.Velocity.Magnitude > 8000)
+            if (!Session.InSpace || (Cache.Instance.MyShipAsEntity != null && Cache.Instance.MyShipAsEntity.Velocity.Magnitude > 8000))
             {
                 return false;
             }
@@ -1310,7 +1311,7 @@ namespace EveComFramework.SimpleDrone
             }
 
             // If we're warping and drones are in space, recall them and stop the module
-            if (Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping && Cache.Instance.MyShipAsEntity.Velocity.Magnitude < 2000 && DronesInSpace.Any(droneInSpace => DroneReady(droneInSpace.ID)))
+            if (Cache.Instance.MyShipAsEntity != null && Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping && Cache.Instance.MyShipAsEntity.Velocity.Magnitude < 2000 && DronesInSpace.Any(droneInSpace => DroneReady(droneInSpace.ID)))
             {
                 RecallDrones(DronesInSpace.ToList(), "We are warping: pull drones!");
                 return true;
@@ -1323,7 +1324,7 @@ namespace EveComFramework.SimpleDrone
                 return true;
             }
 
-            if (MyShip.DronesToReconnect && MyShip.DroneBay.UsedCapacity < MyShip.DroneBay.MaxCapacity && Cache.Instance.MyShipAsEntity.GroupID != Group.Capsule && TryReconnect)
+            if (MyShip.DronesToReconnect && MyShip.DroneBay.UsedCapacity < MyShip.DroneBay.MaxCapacity && Cache.Instance.MyShipAsEntity != null && Cache.Instance.MyShipAsEntity.GroupID != Group.Capsule && TryReconnect)
             {
                 MyShip.ReconnectToDrones();
                 DislodgeWaitFor(2);
@@ -1331,7 +1332,7 @@ namespace EveComFramework.SimpleDrone
                 return false;
             }
 
-            if (Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping) return false;
+            if (Cache.Instance.MyShipAsEntity != null && Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping) return false;
 
             try
             {

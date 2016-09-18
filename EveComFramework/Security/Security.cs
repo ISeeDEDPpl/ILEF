@@ -12,6 +12,7 @@ using EveComFramework.Data;
 
 namespace EveComFramework.Security
 {
+
     #region Enums
 
     public enum FleeTrigger
@@ -65,12 +66,14 @@ namespace EveComFramework.Security
             FleeTrigger.ShieldLow,
             FleeTrigger.ArmorLow,
         };
+
         public List<FleeType> Types = new List<FleeType>
         {
             FleeType.NearestStation,
             FleeType.SecureBookmark,
             FleeType.SafeBookmarks
         };
+
         public HashSet<String> WhiteList = new HashSet<string>();
         public bool NegativeAlliance = false;
         public bool NegativeCorp = false;
@@ -111,6 +114,7 @@ namespace EveComFramework.Security
         #region Instantiation
 
         static Security _Instance;
+
         /// <summary>
         /// Singletoner
         /// </summary>
@@ -140,18 +144,22 @@ namespace EveComFramework.Security
         SecurityAudio SecurityAudio = SecurityAudio.Instance;
         List<Bookmark> SafeSpots;
         DateTime _evecomSessionIsReady = DateTime.MinValue;
+
         /// <summary>
         /// Configuration for this class
         /// </summary>
         public SecuritySettings Config = new SecuritySettings();
+
         /// <summary>
         /// Logger for this class
         /// </summary>
         public Logger Log = new Logger("Security");
+
         /// <summary>
         /// Dictionary of lists of entity IDs for entities currently scrambling a fleet member keyed by fleet member ID
         /// </summary>
         public HashSet<long> ScramblingEntities = new HashSet<long>();
+
         /// <summary>
         /// Dictionary of lists of entity IDs for entities currently neuting a fleet member keyed by fleet member ID
         /// </summary>
@@ -169,6 +177,7 @@ namespace EveComFramework.Security
         #endregion
 
         #region LSCommands
+
         private int LSPanic(string[] args)
         {
             Panic();
@@ -180,6 +189,7 @@ namespace EveComFramework.Security
             ClearPanic();
             return 0;
         }
+
         #endregion
 
         #region Events
@@ -188,10 +198,12 @@ namespace EveComFramework.Security
         /// Event raised to alert a bot that a flee is in progress
         /// </summary>
         public event Action Alert;
+
         /// <summary>
         /// Event raised to alert a bot that it is safe after a flee
         /// </summary>
         public event Action ClearAlert;
+
         /// <summary>
         /// Event raised to alert a bot a flee was unsuccessful (usually due to a scramble)
         /// </summary>
@@ -259,6 +271,7 @@ namespace EveComFramework.Security
 
         private bool _isAlert = false;
         private bool _isPanic = false;
+
         /// <summary>
         /// Returns true if the bot is currently in panic state
         /// </summary>
@@ -807,13 +820,21 @@ namespace EveComFramework.Security
                         }
                         break;
                     case FleeType.SecureBookmark:
-                        Bookmark FleeTo = Bookmark.All.PreferredBookmark(a => a.Title == Config.SecureBookmark);
-                        if (FleeTo != null)
+                        try
                         {
-                            Move.Bookmark(FleeTo);
-                            return true;
+                            Bookmark FleeTo = Bookmark.All.PreferredBookmark(a => a.Title == Config.SecureBookmark);
+                            if (FleeTo != null)
+                            {
+                                Move.Bookmark(FleeTo);
+                                return true;
+                            }
+
+                            Log.Log("Warning: Bookmark not found! Looking for a SecureBookmark starting with [" + Config.SecureBookmark + "]");
                         }
-                        Log.Log("Warning: Bookmark not found!");
+                        catch (Exception)
+                        {
+                            Log.Log("Warning: Bookmark not found! Looking for a SecureBookmark starting with [" + Config.SecureBookmark + "]");
+                        }
                         break;
                     case FleeType.SafeBookmarks:
                         if (SafeSpots != null && !SafeSpots.Any())

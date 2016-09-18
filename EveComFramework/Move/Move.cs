@@ -233,7 +233,7 @@ namespace EveComFramework.Move
                 }
                 return true;
             }
-            if (!Session.InSpace)
+            if (!Session.InSpace || Cache.Instance.MyShipAsEntity == null)
             {
                 return false;
             }
@@ -353,7 +353,7 @@ namespace EveComFramework.Move
             {
                 return true;
             }
-            if (Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping)
+            if (Cache.Instance.MyShipAsEntity != null && Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping)
             {
                 return false;
             }
@@ -513,6 +513,11 @@ namespace EveComFramework.Move
 
         bool ApproachState(object[] Params)
         {
+            if (!Session.InSpace || Cache.Instance.MyShipAsEntity == null)
+            {
+                return false;
+            }
+
             if (ApproachTarget == null || !ApproachTarget.Exists || ApproachTarget.Exploded || ApproachTarget.Released)
             {
                 return true;
@@ -635,6 +640,11 @@ namespace EveComFramework.Move
             Entity Collision = null;
             if (Params.Count() > 3) { Collision = (Entity)Params[3]; }
 
+            if (!Session.InSpace || Cache.Instance.MyShipAsEntity == null)
+            {
+                return false;
+            }
+
             if (Target == null || !Target.Exists || Target.Exploded || Target.Released)
             {
                 return true;
@@ -746,6 +756,11 @@ namespace EveComFramework.Move
 
         bool AutoPilot(object[] Params)
         {
+            if (!Session.InSpace || Cache.Instance.MyShipAsEntity == null)
+            {
+                return false;
+            }
+
             if (Route.Path == null || Route.Path[0] == -1 || QueueAutoPilotDeactivation)
             {
                 QueueAutoPilotDeactivation = false;
@@ -900,7 +915,10 @@ namespace EveComFramework.Move
 
         bool Dock(object[] Params)
         {
-            if (!Session.InSpace) return true;
+            if (!Session.InSpace || Cache.Instance.MyShipAsEntity == null)
+            {
+                return true;
+            }
 
             Entity Target = (Entity)Params[0];
             Entity Collision = null;

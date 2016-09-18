@@ -148,7 +148,7 @@ namespace EveComFramework.Targets
 
         public bool GetLocks(int Count = 2)
         {
-            if (Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping) return false;
+            if (Cache.Instance.MyShipAsEntity != null && Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping) return false;
 
             if (Delays.Keys.Union(LockedAndLockingTargetList).Count() < Count)
             {
