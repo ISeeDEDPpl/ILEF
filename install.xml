@@ -13,7 +13,7 @@
 		</File>
 		<File>
 			<Get>EveComFramework/bin/Debug/EveComFramework.pdb</Get>
-			<Put>IrcDotNet.dll</Put>
+			<Put>EveComFramework.pdb</Put>
 		</File>
 		<File>
 			<Get>EveComFramework/bin/Release/IrcDotNet.dll</Get>
