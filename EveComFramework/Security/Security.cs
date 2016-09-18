@@ -214,8 +214,6 @@ namespace EveComFramework.Security
                     Comms.Panic += Panic;
                     Comms.ClearPanic += ClearPanic;
                     SecurityAudio.Enabled(true);
-                    LavishScript.Commands.AddCommand("Panic", LSPanic);
-                    LavishScript.Commands.AddCommand("ClearPanic", LSClearPanic);
                     QueueState(WaitForEve, 2000);
                     QueueState(CheckSafe);
                 }
@@ -255,6 +253,8 @@ namespace EveComFramework.Security
             LavishScript.Commands.AddCommand("SecurityAddNeuter", NeutingEntitiesUpdate);
             LavishScript.Commands.AddCommand("SecurityBroadcastTrigger", BroadcastTrigger);
             LavishScript.Commands.AddCommand("SecurityClearBroadcastTrigger", ClearBroadcastTrigger);
+            LavishScript.Commands.AddCommand("Panic", LSPanic);
+            LavishScript.Commands.AddCommand("ClearPanic", LSClearPanic);
         }
 
         private bool _isAlert = false;
