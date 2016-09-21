@@ -340,13 +340,22 @@ namespace EveComFramework.Security
             {
                 try
                 {
-                    Log.Log("Received broadcasted trigger [" + args[1] + "][" + args[2] + "][" + args[3] + "],  processing");
                     Clear();
                     TriggerAlert();
                     QueueState(RecallDrones);
                     QueueState(Flee, -1, FleeTrigger.Forced);
                     ReportTrigger(FleeTrigger.Forced);
                     BroadcastSafe[args[1]] = false;
+                    //
+                    // debug logging
+                    //
+                    string arg1 = string.Empty;
+                    if (args[1] != null) arg1 = args[1];
+                    string arg2 = string.Empty;
+                    if (args[2] != null) arg2 = args[2];
+                    string arg3 = string.Empty;
+                    if (args[3] != null) arg3 = args[3];
+                    Log.Log("Received broadcasted trigger [" + arg1 + "][" + arg2 + "][" + arg3 + "],  processing");
                 }
                 catch (Exception ex)
                 {
