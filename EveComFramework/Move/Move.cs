@@ -69,6 +69,7 @@ namespace EveComFramework.Move
         public decimal OrbitCollisionOrbit = 10;
         public bool InstaWarp = false;
         public List<JumpbridgeData> Jumpbridges = new List<JumpbridgeData>();
+        public bool WaitForCloakReactivationTimer = false;
     }
 
     /// <summary>
@@ -752,6 +753,10 @@ namespace EveComFramework.Move
             {
                 if (UndockWarp.Instance != null && !UndockWarp.Instance.Idle && UndockWarp.Instance.CurState.ToString() != "WaitStation") return false;
                 if (MyShip.ToEntity.Mode == EntityMode.Warping) return false;
+
+                if (Config.WaitForCloakReactivationTimer &&
+                    MyShip.Modules.Any(m => (m.TypeID == 11578 || m.TypeID == 20563) && m.OnCooldown) && Session.JumpCloakTimer > Session.Now) return false;
+
                 Entity Sun = Entity.All.FirstOrDefault(a => a.GroupID == Group.Sun);
                 if (MoonPatrol)
                 {
@@ -838,7 +843,7 @@ namespace EveComFramework.Move
                     {
                         Log.Log("|oJumping through to |-g{0}", Route.NextWaypoint.Name);
                         Comms.Comms.Instance.ChatQueue.Enqueue("<Move> Jumping through to " + Route.NextWaypoint.Name);
-                        Route.NextWaypoint.Jump();        
+                        Route.NextWaypoint.Jump();
                     }
                     else
                     {
@@ -854,9 +859,9 @@ namespace EveComFramework.Move
                     {
                         if (Route.Path.FirstOrDefault() == Route.Waypoints.FirstOrDefault()) QueueAutoPilotDeactivation = true;
                     }
-                    long CurSystem = Session.SolarSystem.ID;
+                    long curSystem = Session.SolarSystem.ID;
                     InsertState(AutoPilot);
-                    WaitFor(10, () => Session.SolarSystem.ID != CurSystem, () => MyShip.ToEntity.Mode != EntityMode.Stopped);
+                    WaitFor(10, () => Session.SolarSystem.ID != curSystem, () => MyShip.ToEntity.Mode != EntityMode.Stopped);
                     return true;
                 }
                 if (Route.NextWaypoint.GroupID == Group.Station || Route.NextWaypoint.GroupID == Group.MediumCitadel || Route.NextWaypoint.GroupID == Group.LargeCitadel || Route.NextWaypoint.GroupID == Group.XLargeCitadel || Route.NextWaypoint.GroupID == Group.XXLargeCitadel)
