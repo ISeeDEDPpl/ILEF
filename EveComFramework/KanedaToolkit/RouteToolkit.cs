@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using EveComFramework.Data;
+using EveCom;
 
 namespace EveComFramework.KanedaToolkit
 {
@@ -16,7 +16,7 @@ namespace EveComFramework.KanedaToolkit
         /// <returns>minimum security status</returns>
         public static double RouteSecurity(List<long> routeList)
         {
-            return SolarSystem.All.Where(a => routeList.Contains(a.ID)).Select(a => a.Security).Min();
+            return SolarSystem.All.Where(a => routeList.Contains(a.ID)).Select(a => a.SecurityStatus).Min();
         }
     }
 }

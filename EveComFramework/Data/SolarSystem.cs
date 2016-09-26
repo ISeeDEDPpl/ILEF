@@ -12,7 +12,7 @@ namespace EveComFramework.Data
     /// <summary>
     /// This class provides static information about solar systems (without pulling data from Eve)
     /// </summary>
-    [Obsolete("This will get removed as soon as SolarSystem.All is implemented in EveCom itself.")]
+    [Obsolete("This is provided by EveCom.SolarSystem now. It will get removed after 2016-10-01 UTC midnight.", true)]
     public class SolarSystem
     {
         /// <summary>
