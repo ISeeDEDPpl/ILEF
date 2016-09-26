@@ -609,7 +609,7 @@ namespace EveComFramework.Security
                 case FleeTrigger.CriminalGrid:
                 case FleeTrigger.SuspectLocal:
                 case FleeTrigger.SuspectGrid:
-                    if (Config.BroadcastTrigger) LavishScript.ExecuteCommand("relay \"" + Config.ISRelayTarget + "\" -noredirect SecurityBroadcastTrigger " + Me.CharID + " " + Session.SolarSystemID);
+                    if (Config.BroadcastTrigger) LavishScript.ExecuteCommand("relay \"" + Config.ISRelayTarget + "\" -noredirect SecurityBroadcastTrigger " + Me.CharID + " " + Session.SolarSystem.ID);
                     goto case FleeTrigger.Pod;
                 case FleeTrigger.CapitalSpawn:
                 case FleeTrigger.CynoGrid:
@@ -669,7 +669,7 @@ namespace EveComFramework.Security
             if (Reported != FleeTrigger.None)
             {
                 Log.Log("|oNew flee condition");
-                if (Config.BroadcastTrigger && (Reported == FleeTrigger.NegativeStanding || Reported == FleeTrigger.NeutralStanding || Reported == FleeTrigger.Paranoid)) { LavishScript.ExecuteCommand("relay \"" + Config.ISRelayTarget + "\" -noredirect SecurityBroadcastTrigger " + Me.CharID + " " + Session.SolarSystemID); }
+                if (Config.BroadcastTrigger && (Reported == FleeTrigger.NegativeStanding || Reported == FleeTrigger.NeutralStanding || Reported == FleeTrigger.Paranoid)) { LavishScript.ExecuteCommand("relay \"" + Config.ISRelayTarget + "\" -noredirect SecurityBroadcastTrigger " + Me.CharID + " " + Session.SolarSystem.ID); }
                 ReportTrigger(Reported);
                 Log.Log(" |-gWaiting for safety");
                 Comms.ChatQueue.Enqueue("<Security> New flee condition, waiting for safety");
@@ -736,7 +736,7 @@ namespace EveComFramework.Security
                     case FleeType.SafeBookmarks:
                         if (!SafeSpots.Any())
                         {
-                            SafeSpots = Bookmark.All.Where(a => a.Title.Contains(Config.SafeSubstring) && a.LocationID == Session.SolarSystemID).ToList();
+                            SafeSpots = Bookmark.All.Where(a => a.Title.Contains(Config.SafeSubstring) && a.LocationID == Session.SolarSystem.ID).ToList();
                         }
                         if (SafeSpots.Any())
                         {
@@ -790,7 +790,7 @@ namespace EveComFramework.Security
             }
             if (Config.BroadcastTrigger)
             {
-                LavishScript.ExecuteCommand("relay \"" + Config.ISRelayTarget + "\" -noredirect SecurityClearBroadcastTrigger " + Me.CharID + " " + Session.SolarSystemID);
+                LavishScript.ExecuteCommand("relay \"" + Config.ISRelayTarget + "\" -noredirect SecurityClearBroadcastTrigger " + Me.CharID + " " + Session.SolarSystem.ID);
             }
             QueueState(CheckSafe);
             return true;
@@ -851,7 +851,7 @@ namespace EveComFramework.Security
         SpeechSynthesizer Speech = new SpeechSynthesizer();
         Queue<string> SpeechQueue = new Queue<string>();
         public SecurityAudioSettings Config = new SecurityAudioSettings();
-        int SolarSystem = -1;
+        long SolarSystem = -1;
         List<Pilot> PilotCache = new List<Pilot>();
         Security Core;
         int LocalCache;
@@ -902,10 +902,10 @@ namespace EveComFramework.Security
                 Core.Alert += Alert;
             }
             if ((!Session.InSpace && !Session.InStation) || !Session.Safe) return false;
-            if (Session.SolarSystemID != SolarSystem)
+            if (Session.SolarSystem.ID != SolarSystem)
             {
                 PilotCache = Local.Pilots;
-                SolarSystem = Session.SolarSystemID;
+                SolarSystem = Session.SolarSystem.ID;
             }
             List<Pilot> newPilots = Local.Pilots.Where(a => !PilotCache.Contains(a)).ToList();
             foreach (Pilot pilot in newPilots)

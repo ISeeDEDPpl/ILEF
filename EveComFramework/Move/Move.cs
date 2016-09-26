@@ -194,7 +194,7 @@ namespace EveComFramework.Move
                 QueueState(BookmarkPrep, -1, Bookmark, Distance);
                 return true;
             }
-            if (Bookmark.LocationID != Session.SolarSystemID)
+            if (Bookmark.LocationID != Session.SolarSystem.ID)
             {
                 if (Route.Path.Last() != Bookmark.LocationID)
                 {
@@ -204,7 +204,7 @@ namespace EveComFramework.Move
                 }
                 QueueState(AutoPilot, 2000);
             }
-            if (Bookmark.Dockable() && Bookmark.LocationID == Session.SolarSystemID)
+            if (Bookmark.Dockable() && Bookmark.LocationID == Session.SolarSystem.ID)
             {
                 QueueState(Dock, -1, Entity.All.FirstOrDefault(a => a.ID == Bookmark.ItemID));
             }
@@ -239,7 +239,7 @@ namespace EveComFramework.Move
             {
                 return false;
             }
-            if (Destination.LocationID != Session.SolarSystemID)
+            if (Destination.LocationID != Session.SolarSystem.ID)
             {
                 if (Route.Path.Last() != Destination.LocationID)
                 {
@@ -257,7 +257,7 @@ namespace EveComFramework.Move
             if (!Config.WarpCollisionPrevention)
             {
                 DoInstaWarp();
-                if (Destination.Dockable() && Destination.LocationID == Session.SolarSystemID)
+                if (Destination.Dockable() && Destination.LocationID == Session.SolarSystem.ID)
                 {
                     QueueState(Dock, -1, Entity.All.FirstOrDefault(a => a.ID == Destination.ItemID));
                     return true;
@@ -297,7 +297,7 @@ namespace EveComFramework.Move
                 if (Destination.Exists && Destination.CanWarpTo)
                 {
                     DoInstaWarp();
-                    if (Destination.Dockable() && Destination.LocationID == Session.SolarSystemID)
+                    if (Destination.Dockable() && Destination.LocationID == Session.SolarSystem.ID)
                     {
                         QueueState(Dock, -1, Entity.All.FirstOrDefault(a => a.ID == Destination.ItemID));
                         return true;
@@ -442,8 +442,8 @@ namespace EveComFramework.Move
             Log.Log(" |-g{0}", JumpPortalArray.Name);
             JumpPortalArray.JumpThroughPortal();
             InsertState(JumpThroughArray);
-            int CurSystem = Session.SolarSystemID;
-            WaitFor(10, () => Session.SolarSystemID != CurSystem, () => MyShip.ToEntity.Mode == EntityMode.Approaching);
+            long CurSystem = Session.SolarSystem.ID;
+            WaitFor(10, () => Session.SolarSystem.ID != CurSystem, () => MyShip.ToEntity.Mode == EntityMode.Approaching);
             return true;
         }
 
@@ -854,9 +854,9 @@ namespace EveComFramework.Move
                     {
                         if (Route.Path.FirstOrDefault() == Route.Waypoints.FirstOrDefault()) QueueAutoPilotDeactivation = true;
                     }
-                    int CurSystem = Session.SolarSystemID;
+                    long CurSystem = Session.SolarSystem.ID;
                     InsertState(AutoPilot);
-                    WaitFor(10, () => Session.SolarSystemID != CurSystem, () => MyShip.ToEntity.Mode != EntityMode.Stopped);
+                    WaitFor(10, () => Session.SolarSystem.ID != CurSystem, () => MyShip.ToEntity.Mode != EntityMode.Stopped);
                     return true;
                 }
                 if (Route.NextWaypoint.GroupID == Group.Station || Route.NextWaypoint.GroupID == Group.MediumCitadel || Route.NextWaypoint.GroupID == Group.LargeCitadel || Route.NextWaypoint.GroupID == Group.XLargeCitadel || Route.NextWaypoint.GroupID == Group.XXLargeCitadel)
@@ -1130,7 +1130,7 @@ namespace EveComFramework.Move
             }
             if (Session.InSpace)
             {
-                Bookmark undock = Bookmark.All.FirstOrDefault(a => a.Title.Contains(Config.Substring) && a.LocationID == Session.SolarSystemID && a.Distance < Config.MaxDistance);
+                Bookmark undock = Bookmark.All.FirstOrDefault(a => a.Title.Contains(Config.Substring) && a.LocationID == Session.SolarSystem.ID && a.Distance < Config.MaxDistance);
                 if (undock != null) undock.WarpTo(0);
                 QueueState(WaitStation);
                 return true;

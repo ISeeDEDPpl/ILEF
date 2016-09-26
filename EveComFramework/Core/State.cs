@@ -32,10 +32,7 @@ namespace EveComFramework.Core
             /// The name of the state
             /// </summary>
             /// <returns>Name</returns>
-            public override string ToString()
-            {
-                return State.Method.Name;
-            }
+            public override string ToString() => State.Method.Name;
         }
 
         /// <summary>
@@ -59,7 +56,7 @@ namespace EveComFramework.Core
         /// <summary>
         /// Returns true if there are no items in the state queue waiting to be processed
         /// </summary>
-        public bool Idle { get { return CurState == null; } }
+        public bool Idle => CurState == null;
 
         /// <summary>
         /// Logger for the State class
@@ -94,12 +91,7 @@ namespace EveComFramework.Core
         public void QueueState(Func<object[], bool> State, int Frequency = -1, params object[] Params)
         {
             States.AddFirst(new StateQueue(State, ((Frequency == -1) ? DefaultFrequency : Frequency), Params));
-            if (CurState == null)
-            {
-                CurState = States.Last();
-                NextPulse = DateTime.Now.AddMilliseconds(CurState.Frequency);
-                States.RemoveLast();
-            }
+            StartQueueIfEmpty();
         }
 
         /// <summary>
@@ -111,6 +103,11 @@ namespace EveComFramework.Core
         public void InsertState(Func<object[], bool> State, int Frequency = -1, params object[] Params)
         {
             States.AddLast(new StateQueue(State, ((Frequency == -1) ? DefaultFrequency : Frequency), Params));
+            StartQueueIfEmpty();
+        }
+
+        private void StartQueueIfEmpty()
+        {
             if (CurState == null)
             {
                 CurState = States.Last();
@@ -131,7 +128,7 @@ namespace EveComFramework.Core
             {
                 States.AddLast(CurState);
             }
-            CurState = new StateQueue(State, ((Frequency == -1) ? DefaultFrequency : Frequency), Params);
+            CurState = new StateQueue(State, Frequency == -1 ? DefaultFrequency : Frequency, Params);
         }
 
         /// <summary>

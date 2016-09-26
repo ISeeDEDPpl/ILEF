@@ -62,7 +62,7 @@ namespace EveComFramework.Security
 
         private String ApplyArgs(String s)
         {
-            s = s.Replace(":solarSystem", Session.SolarSystemID.ToString());
+            s = s.Replace(":solarSystem", Session.SolarSystem.ID.ToString());
             s = s.Replace(":characterID", Me.CharID.ToString());
             s = s.Replace(":pilotList", String.Join(",", Local.Pilots.Select(a => a.Name)));
             return s;

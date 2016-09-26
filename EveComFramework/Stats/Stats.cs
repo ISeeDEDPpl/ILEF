@@ -47,12 +47,12 @@ namespace EveComFramework.Stats
         #region Variables
         public StatsSettings Config = new StatsSettings();
         readonly Logger Log = new Logger("Stats");
-        private String StatsHost = "http://104.238.149.13/evecom-stats/";
+        private string StatsHost = "http://104.238.149.13/evecom-stats/";
         #endregion
 
         #region States
 
-        bool Control(Object[] Params)
+        bool Control(object[] Params)
         {
             // no data submission allowed
             if (Config.optOut) return true;
@@ -67,10 +67,10 @@ namespace EveComFramework.Stats
             // Wait for proper session state
             if (!Session.InSpace && !Session.InSpace) return false;
 
-            String data = String.Format(@"GUID={0}&regionID={1}&allianceID={2}&groupID={3}", Config.guid, Session.RegionID, Me.AllianceID, (int)MyShip.ToItem.GroupID);
+            string data = string.Format(@"GUID={0}&regionID={1}&allianceID={2}&groupID={3}", Config.guid, Session.Region.ID, Me.AllianceID, (int)MyShip.ToItem.GroupID);
             if (Config.optIn) // Please do not enable this unless you know what you are doing and that you need to enable this
             {
-                data = data + String.Format(@"&solarSystemID={0}&characterID={1}&typeID={2}", Session.SolarSystemID, Me.CharID, MyShip.ToItem.TypeID);
+                data = data + string.Format(@"&solarSystemID={0}&characterID={1}&typeID={2}", Session.SolarSystem.ID, Me.CharID, MyShip.ToItem.TypeID);
                 QueueState(DatabaseFeeder);
             }
 
@@ -99,7 +99,7 @@ namespace EveComFramework.Stats
                     Entity ClosestMoon = Entity.All.Where(a => a.GroupID == Group.Moon).OrderBy(a => a.Distance).First();
                     Entity ForceField = Entity.All.FirstOrDefault(a => a.GroupID == Group.ForceField);
 
-                    String data = String.Format(@"GUID={0}&moonID={1}&corpID={2}&typeID={3}&online={4}", Config.guid, ClosestMoon.ID, POS.OwnerID, POS.TypeID, (ForceField != null ? 1 : 0));
+                    string data = string.Format(@"GUID={0}&moonID={1}&corpID={2}&typeID={3}&online={4}", Config.guid, ClosestMoon.ID, POS.OwnerID, POS.TypeID, (ForceField != null ? 1 : 0));
                     Log.Log("Submit StarbasePresence data: " + data, LogType.DEBUG);
                     (new Thread(() =>
                     {
@@ -122,11 +122,11 @@ namespace EveComFramework.Stats
                 List<Entity> ReportCustomsOffices = Entity.All.Where(a => (a.TypeID == 2233 || a.TypeID == 4318) && !CustomsOffices.Contains(a.ID)).ToList();
                 if (ReportCustomsOffices.Any())
                 {
-                    String data = String.Format(@"GUID={0}&solarSystemID={1}", Config.guid, Session.SolarSystemID);
+                    string data = string.Format(@"GUID={0}&solarSystemID={1}", Config.guid, Session.SolarSystem.ID);
 
                     foreach (Entity POCO in ReportCustomsOffices)
                     {
-                        data += String.Format(@"&ownerID[]={0}&itemID[]={1}&typeID[]={2}&x[]={3}&y[]={4}&z[]={5}",
+                        data += string.Format(@"&ownerID[]={0}&itemID[]={1}&typeID[]={2}&x[]={3}&y[]={4}&z[]={5}",
                             POCO.OwnerID, POCO.ID, POCO.TypeID,
                             POCO.Position.X.ToString(CultureInfo.InvariantCulture),
                             POCO.Position.Y.ToString(CultureInfo.InvariantCulture),
@@ -154,14 +154,14 @@ namespace EveComFramework.Stats
                 List<Entity> ReportStructures = Entity.All.Where(a => (a.CategoryID == Category.Starbase|| a.CategoryID == Category.Structure) && !ReportedStructures.Contains(a.ID) && !CustomsOffices.Contains(a.ID)).ToList();
                 if (ReportStructures.Any())
                 {
-                    String data = String.Format(@"GUID={0}&solarSystemID={1}", Config.guid, Session.SolarSystemID);
+                    string data = string.Format(@"GUID={0}&solarSystemID={1}", Config.guid, Session.SolarSystem.ID);
 
                     foreach (Entity structure in ReportStructures)
                     {
                         if (data.Length < 2048)
                         {
                             EVEFrame.Log(structure.Type + " " + structure.CategoryID.ToString());
-                            data += String.Format(@"&ownerID[]={0}&itemID[]={1}&typeID[]={2}&x[]={3}&y[]={4}&z[]={5}",
+                            data += string.Format(@"&ownerID[]={0}&itemID[]={1}&typeID[]={2}&x[]={3}&y[]={4}&z[]={5}",
                                 structure.OwnerID, structure.ID, structure.TypeID,
                                 structure.Position.X.ToString(CultureInfo.InvariantCulture),
                                 structure.Position.Y.ToString(CultureInfo.InvariantCulture),
@@ -200,7 +200,7 @@ namespace EveComFramework.Stats
             {
                 WebClient client = new WebClient();
                 client.Headers.Add("Content-Type", "binary/octet-stream");
-                Byte[] result = client.UploadFile(StatsHost + "uploadlog.php", "POST", uploadFile);
+                byte[] result = client.UploadFile(StatsHost + "uploadlog.php", "POST", uploadFile);
                 return true;
             }
             catch (Exception ex)

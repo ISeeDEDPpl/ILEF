@@ -47,7 +47,7 @@ namespace EveComFramework.Security
         {
             if (!Session.InSpace && !Session.InStation) return false;
 
-            if (solarSystem == Session.SolarSystemID && localPilots != null)
+            if (solarSystem == Session.SolarSystem.ID && localPilots != null)
             {
                 if (localPilots.Count != Local.Pilots.Count || Local.Pilots.Any(p => !localPilots.Contains(p)) || localPilots.Any(p => !Local.Pilots.Contains(p)))
                 {
@@ -60,7 +60,7 @@ namespace EveComFramework.Security
                 }
             }
 
-            solarSystem = Session.SolarSystemID;
+            solarSystem = Session.SolarSystem.ID;
             localPilots = Local.Pilots;
 
             return false;
