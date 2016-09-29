@@ -168,6 +168,10 @@ namespace EveComFramework.Cargo
             QueueState(Traveling);
             QueueState(WarpFleetMember);
             QueueState(Traveling);
+            if(CurrentCargoAction.Action == Load || CurrentCargoAction.Action == Unload)
+            {
+                QueueState(LoadUnloadPrime);
+            }
             QueueState(CurrentCargoAction.Action);
             if (CurrentCargoAction.Compress)
             {
@@ -224,12 +228,12 @@ namespace EveComFramework.Cargo
             return true;
         }
 
-        bool Load(object[] Params)
+        private bool LoadUnloadPrime(object[] Params)
         {
             if (!CurrentCargoAction.Target().IsPrimed)
             {
 #if DEBUG
-                Log.Log("Calling Prime() on Target", LogType.DEBUG);
+                Log.Log("Calling Prime() on Target of Type " + CurrentCargoAction.Source().GetType().FullName, LogType.DEBUG);
 #endif
                 CurrentCargoAction.Target().Prime();
                 return false;
@@ -237,11 +241,16 @@ namespace EveComFramework.Cargo
             if (!CurrentCargoAction.Source().IsPrimed)
             {
 #if DEBUG
-                Log.Log("Calling Prime() on Source", LogType.DEBUG);
+                Log.Log("Calling Prime() on Source of Type "+ CurrentCargoAction.Source().GetType().FullName, LogType.DEBUG);
 #endif
                 CurrentCargoAction.Source().Prime();
                 return false;
             }
+            return true;
+        }
+
+        private bool Load(object[] Params)
+        {
             Log.Log("|oLoading");
             try
             {
@@ -291,22 +300,6 @@ namespace EveComFramework.Cargo
 
         bool Unload(object[] Params)
         {
-            if (!CurrentCargoAction.Target().IsPrimed)
-            {
-#if DEBUG
-                Log.Log("Calling Prime() on Target", LogType.DEBUG);
-#endif
-                CurrentCargoAction.Target().Prime();
-                return false;
-            }
-            if (!CurrentCargoAction.Source().IsPrimed)
-            {
-#if DEBUG
-                Log.Log("Calling Prime() on Source", LogType.DEBUG);
-#endif
-                CurrentCargoAction.Source().Prime();
-                return false;
-            }
             Log.Log("|oUnloading");
             try
             {

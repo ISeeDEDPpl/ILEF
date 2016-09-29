@@ -56,6 +56,7 @@ namespace EveComFramework.GroupControl
         public List<ActiveMember> ActiveMembers;
     }
 
+    [Obsolete("Please stop using this. It is no longer supported and will be nuked with CCPs upcoming november release.")]
     public class GroupControl : State
     {
         #region Variables

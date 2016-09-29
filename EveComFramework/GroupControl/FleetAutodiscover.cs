@@ -1,11 +1,13 @@
 ﻿using EveCom;
 using LavishScriptAPI;
+using System;
 
 namespace EveComFramework.GroupControl
 {
     /// <summary>
     /// Fleet autodiscovery
     /// </summary>
+    [Obsolete("Given the upcoming changes to gang links, please stop using this. It was never completed and will be nuked with CCPs upcoming november release.")]
     public class FleetAutodiscover
     {
         /// <summary>

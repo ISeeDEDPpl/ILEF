@@ -4,6 +4,7 @@ using System.Windows.Forms;
 
 namespace EveComFramework.GroupControl.UI
 {
+    [Obsolete("Please stop using this. It is no longer supported and will be nuked with CCPs upcoming november release.")]
     public partial class Debug : Form
     {
         public Debug()
