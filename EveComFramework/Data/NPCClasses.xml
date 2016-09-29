@@ -24,6 +24,7 @@
   <Group ID="567" Class="Frigate" Group="Asteroid Sansha's Nation Frigate" />
   <Group ID="568" Class="Hauler" Group="Asteroid Sansha's Nation Hauler" />
   <Group ID="569" Class="Officer" Group="Asteroid Sansha's Nation Officer" />
+  <Group ID="570" Class="BattleShip" Group="Asteroid Serpentis Battleship" />
   <Group ID="571" Class="Cruiser" Group="Asteroid Serpentis Cruiser" />
   <Group ID="572" Class="Frigate" Group="Asteroid Serpentis Frigate" />
   <Group ID="573" Class="Hauler" Group="Asteroid Serpentis Hauler" />
@@ -39,11 +40,12 @@
   <Group ID="583" Class="Destroyer" Group="Asteroid Serpentis Destroyer" />
   <Group ID="584" Class="BattleCruiser" Group="Asteroid Serpentis BattleCruiser" />
   <Group ID="593" Class="BattleCruiser" Group="Deadspace Angel Cartel BattleCruiser" />
-  <Group ID="594" Class="Battleship" Group="Deadspace Angel Cartel Battleship" />
+  <Group ID="594" Class="BattleShip" Group="Deadspace Angel Cartel Battleship" />
   <Group ID="595" Class="Cruiser" Group="Deadspace Angel Cartel Cruiser" />
   <Group ID="596" Class="Destroyer" Group="Deadspace Angel Cartel Destroyer" />
   <Group ID="597" Class="Frigate" Group="Deadspace Angel Cartel Frigate" />
   <Group ID="602" Class="BattleCruiser" Group="Deadspace Blood Raiders BattleCruiser" />
+  <Group ID="603" Class="BattleShip" Group="Deadspace Blood Raiders BattleShip" />
   <Group ID="604" Class="Cruiser" Group="Deadspace Blood Raiders Cruiser" />
   <Group ID="605" Class="Destroyer" Group="Deadspace Blood Raiders Destroyer" />
   <Group ID="606" Class="Frigate" Group="Deadspace Blood Raiders Frigate" />
@@ -53,10 +55,12 @@
   <Group ID="614" Class="Destroyer" Group="Deadspace Guristas Destroyer" />
   <Group ID="615" Class="Frigate" Group="Deadspace Guristas Frigate" />
   <Group ID="620" Class="BattleCruiser" Group="Deadspace Sansha's Nation BattleCruiser" />
+  <Group ID="621" Class="BattleShip" Group="Deadspace Sansha's Nation Battleship" />
   <Group ID="622" Class="Cruiser" Group="Deadspace Sansha's Nation Cruiser" />
   <Group ID="623" Class="Destroyer" Group="Deadspace Sansha's Nation Destroyer" />
   <Group ID="624" Class="Frigate" Group="Deadspace Sansha's Nation Frigate" />
   <Group ID="629" Class="BattleCruiser" Group="Deadspace Serpentis BattleCruiser" />
+  <Group ID="630" Class="BattleShip" Group="Deadspace Serpentis Battleship" />
   <Group ID="631" Class="Cruiser" Group="Deadspace Serpentis Cruiser" />
   <Group ID="632" Class="Destroyer" Group="Deadspace Serpentis Destroyer" />
   <Group ID="633" Class="Frigate" Group="Deadspace Serpentis Frigate" />
@@ -89,7 +93,7 @@
   <Group ID="704" Class="Other" Group="Mission Mordu Other" />
   <Group ID="705" Class="Cruiser" Group="Mission Minmatar Republic Cruiser" />
   <Group ID="755" Class="BattleCruiser" Group="Asteroid Rogue Group BattleCruiser" />
-  <Group ID="756" Class="BattleShip" Group="Asteroid Rogue Group BattleShip" />
+  <Group ID="756" Class="BattleShip" Group="Asteroid Rogue Drone Battleship" />
   <Group ID="757" Class="Cruiser" Group="Asteroid Rogue Group Cruiser" />
   <Group ID="758" Class="Destroyer" Group="Asteroid Rogue Group Destroyer" />
   <Group ID="759" Class="Frigate" Group="Asteroid Rogue Group Frigate" />
@@ -108,7 +112,7 @@
   <Group ID="799" Class="Destroyer" Group="Asteroid Guristas Commander Destroyer" />
   <Group ID="800" Class="Frigate" Group="Asteroid Guristas Commander Frigate" />
   <Group ID="801" Class="BattleCruiser" Group="Deadspace Rogue Group BattleCruiser" />
-  <Group ID="802" Class="BattleShip" Group="Deadspace Rogue Group BattleShip" />
+  <Group ID="802" Class="BattleShip" Group="Deadspace Rogue Drone Battleship" />
   <Group ID="803" Class="Cruiser" Group="Deadspace Rogue Group Cruiser" />
   <Group ID="804" Class="Destroyer" Group="Deadspace Rogue Group Destroyer" />
   <Group ID="805" Class="Frigate" Group="Deadspace Rogue Group Frigate" />
@@ -132,6 +136,7 @@
   <Group ID="828" Class="Cruiser" Group="Mission Generic Battle Cruisers" />
   <Group ID="829" Class="Destroyer" Group="Mission Generic Destroyers" />
   <Group ID="843" Class="BattleCruiser" Group="Asteroid Rogue Group Commander BattleCruiser" />
+  <Group ID="844" Class="BattleShip" Group="Asteroid Rogue Drone Commander Battleship" />
   <Group ID="845" Class="Cruiser" Group="Asteroid Rogue Group Commander Cruiser" />
   <Group ID="846" Class="Destroyer" Group="Asteroid Rogue Group Commander Destroyer" />
   <Group ID="847" Class="Frigate" Group="Asteroid Rogue Group Commander Frigate" />
