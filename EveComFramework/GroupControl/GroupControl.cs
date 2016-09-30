@@ -590,6 +590,7 @@ namespace EveComFramework.GroupControl
         #endregion
     }
 
+    [Obsolete("Please stop using this. It is no longer supported and will be nuked with CCPs upcoming november release.")]
     public class WatchForFleetInvites : State
     {
         public Logger Log = new Logger("FleetInvite");

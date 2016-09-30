@@ -119,7 +119,7 @@ namespace EveComFramework.KanedaToolkit
             return (double)fighter["maxTargetRange"] - 10;
         }
 
-        public static double GetSkillBonus()
+        private static double GetSkillBonus()
         {
             Skill DroneSharpshooting = Skill.All.FirstOrDefault(a=>a.TypeID == 23606);
             if(DroneSharpshooting != null)
