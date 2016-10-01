@@ -298,13 +298,22 @@ public class LoginLocalSettings : Settings
             {
                 if (_curProfile != null)
                 {
-                    if (DateTime.Now > GlobalState.SessionStart[_curProfile.CharacterID].AddHours(Config.LogoutHours).AddMinutes(LogoutDelta) ||
-                    Session.Now.AddMinutes(Config.Downtime + DowntimeDelta) > Session.NextDowntime)
+                    try
                     {
-                        if (LogOut != null)
+                        if (DateTime.Now >
+                            GlobalState.SessionStart[_curProfile.CharacterID].AddHours(Config.LogoutHours)
+                                .AddMinutes(LogoutDelta) ||
+                            Session.Now.AddMinutes(Config.Downtime + DowntimeDelta) > Session.NextDowntime)
                         {
-                            LogOut();
+                            if (LogOut != null)
+                            {
+                                LogOut();
+                            }
+                            return true;
                         }
+                    }
+                    catch (Exception)
+                    {
                         return true;
                     }
                 }
