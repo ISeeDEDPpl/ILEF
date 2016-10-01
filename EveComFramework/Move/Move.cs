@@ -72,6 +72,7 @@ namespace EveComFramework.Move
         public decimal OrbitCollisionOrbit = 10;
         public bool InstaWarp = false;
         public List<JumpbridgeData> Jumpbridges = new List<JumpbridgeData>();
+        public bool WaitForCloakReactivationTimer = false;
     }
 
     /// <summary>
@@ -773,6 +774,10 @@ namespace EveComFramework.Move
             {
                 if (UndockWarp.Instance != null && !UndockWarp.Instance.Idle && UndockWarp.Instance.CurState.ToString() != "WaitStation") return false;
                 if (Cache.Instance.MyShipAsEntity.Mode == EntityMode.Warping) return false;
+
+                if (Config.WaitForCloakReactivationTimer &&
+                    MyShip.Modules.Any(m => (m.TypeID == 11578 || m.TypeID == 20563) && m.OnCooldown) && Session.JumpCloakTimer > Session.Now) return false;
+
                 Entity Sun = Cache.Instance.AllEntities.FirstOrDefault(a => a.GroupID == Group.Sun);
                 if (MoonPatrol)
                 {
@@ -875,9 +880,9 @@ namespace EveComFramework.Move
                     {
                         if (Route.Path.FirstOrDefault() == Route.Waypoints.FirstOrDefault()) QueueAutoPilotDeactivation = true;
                     }
-                    long CurSystem = Session.SolarSystem.ID;
+                    long curSystem = Session.SolarSystem.ID;
                     InsertState(AutoPilot);
-                    WaitFor(10, () => Session.SolarSystemID != CurSystem, () => Cache.Instance.MyShipAsEntity.Mode != EntityMode.Stopped);
+                    WaitFor(10, () => Session.SolarSystemID != curSystem, () => Cache.Instance.MyShipAsEntity.Mode != EntityMode.Stopped);
                     return true;
                 }
                 if (Route.NextWaypoint.GroupID == Group.Station || Route.NextWaypoint.GroupID == Group.MediumCitadel || Route.NextWaypoint.GroupID == Group.LargeCitadel || Route.NextWaypoint.GroupID == Group.XLargeCitadel || Route.NextWaypoint.GroupID == Group.XXLargeCitadel)
