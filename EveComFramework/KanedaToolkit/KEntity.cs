@@ -18,9 +18,11 @@ namespace EveComFramework.KanedaToolkit
             if (Session.InFleet && entity.IsPC && Fleet.Members.Any(a => a.Name == entity.Name)) return true;
             if (entity.CategoryID == Category.Asteroid || entity.CategoryID == Category.Structure ||
                 entity.CategoryID == Category.Station || entity.GroupID == Group.CargoContainer ||
-                entity.GroupID == Group.Wreck || entity.GroupID == Group.MediumCitadel ||
-                entity.GroupID == Group.LargeCitadel || entity.GroupID == Group.XLargeCitadel ||
-                entity.GroupID == Group.XXLargeCitadel) return true;
+                entity.GroupID == Group.Wreck || entity.GroupID == Group.Citadel)
+            {
+                return true;
+            }
+
             return false;
         }
 
@@ -41,12 +43,10 @@ namespace EveComFramework.KanedaToolkit
         public static bool Dockable(this Entity entity)
         {
 
-            if (entity.GroupID == Group.XLargeCitadel || entity.GroupID == Group.XXLargeCitadel) return true;
+            if (entity.GroupID == Group.Citadel) return true;
             if (MyShip.ToEntity.GroupID == Group.Titan || MyShip.ToEntity.GroupID == Group.Supercarrier) return false;
             if (entity.GroupID == Group.Station) return true;
-            if (entity.GroupID == Group.LargeCitadel) return true;
             if (MyShip.ToEntity.GroupID == Group.Carrier || MyShip.ToEntity.GroupID == Group.Dreadnought || MyShip.ToEntity.GroupID == Group.ForceAuxiliary) return false;
-            if (entity.GroupID == Group.MediumCitadel) return true;
             return false;
         }
 

@@ -450,7 +450,7 @@ namespace EveComFramework.Move
             JumpPortalArray.JumpThroughPortal();
             InsertState(JumpThroughArray);
             long CurSystem = Session.SolarSystem.ID;
-            WaitFor(10, () => Session.SolarSystemID != CurSystem, () => Cache.Instance.MyShipAsEntity.Mode == EntityMode.Approaching);
+            WaitFor(10, () => Session.SolarSystem.ID != CurSystem, () => Cache.Instance.MyShipAsEntity.Mode == EntityMode.Approaching);
             return true;
         }
 
@@ -882,10 +882,10 @@ namespace EveComFramework.Move
                     }
                     long curSystem = Session.SolarSystem.ID;
                     InsertState(AutoPilot);
-                    WaitFor(10, () => Session.SolarSystemID != curSystem, () => Cache.Instance.MyShipAsEntity.Mode != EntityMode.Stopped);
+                    WaitFor(10, () => Session.SolarSystem.ID != curSystem, () => Cache.Instance.MyShipAsEntity.Mode != EntityMode.Stopped);
                     return true;
                 }
-                if (Route.NextWaypoint.GroupID == Group.Station || Route.NextWaypoint.GroupID == Group.MediumCitadel || Route.NextWaypoint.GroupID == Group.LargeCitadel || Route.NextWaypoint.GroupID == Group.XLargeCitadel || Route.NextWaypoint.GroupID == Group.XXLargeCitadel)
+                if (Route.NextWaypoint.GroupID == Group.Station || Route.NextWaypoint.GroupID == Group.Citadel)
                 {
                     if (Bubbled() && Route.NextWaypoint.Distance > 2000)
                     {

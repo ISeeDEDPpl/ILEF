@@ -102,7 +102,7 @@ namespace EveComFramework.Core
 
                     if (_hostilePilot == null)
                     {
-                        _hostilePilots = AllEntities.Where(i => i.Distance < 60000 && i.CategoryID != Category.Charge && i.GroupID != Group.Drone && i.GroupID != Group.FighterDrone && i.GroupID != Group.FighterBomber && i.GroupID != Group.Wreck).Where(a => Local.Pilots.Any(pilot => pilot.ID == a.OwnerID && pilot.Hostile())).ToList();
+                        _hostilePilots = AllEntities.Where(i => i.Distance < 60000 && i.CategoryID != Category.Charge && i.GroupID != Group.Drones && i.GroupID != Group.FighterDrone && i.GroupID != Group.FighterBomber && i.GroupID != Group.Wreck).Where(a => Local.Pilots.Any(pilot => pilot.ID == a.OwnerID && pilot.Hostile())).ToList();
                         if (_hostilePilots.Any())
                         {
                                 _hostilePilot = _hostilePilots.OrderByDescending(i => i.IsWarpScrambling)
@@ -119,7 +119,7 @@ namespace EveComFramework.Core
 
                         if (_hostilePilot == null)
                         {
-                                _hostilePilots = AllEntities.Where(i => i.CategoryID != Category.Charge && i.GroupID != Group.Drone && i.GroupID != Group.FighterDrone && i.GroupID != Group.FighterBomber && i.GroupID != Group.Wreck).Where(a => Local.Pilots.Any(pilot => pilot.ID == a.OwnerID && pilot.Hostile())).ToList();
+                                _hostilePilots = AllEntities.Where(i => i.CategoryID != Category.Charge && i.GroupID != Group.Drones && i.GroupID != Group.FighterDrone && i.GroupID != Group.FighterBomber && i.GroupID != Group.Wreck).Where(a => Local.Pilots.Any(pilot => pilot.ID == a.OwnerID && pilot.Hostile())).ToList();
                                 if (_hostilePilots.Any())
                                 {
                                     _hostilePilot = _hostilePilots.OrderByDescending(i => i.IsWarpScrambling)
@@ -319,7 +319,7 @@ namespace EveComFramework.Core
             if (Bookmarks == null || BookmarkUpdate < DateTime.Now)
             {
                 Bookmarks = Bookmark.All.OrderBy(a => a.Title).Select(a => a.Title).ToArray();
-                CitadelBookmarks = Bookmark.All.Where(a => a.GroupID == Group.MediumCitadel || a.GroupID == Group.LargeCitadel || a.GroupID == Group.XLargeCitadel || a.GroupID == Group.XXLargeCitadel).Select(a => a.Title).ToArray();
+                CitadelBookmarks = Bookmark.All.Where(a => a.GroupID == Group.Citadel).Select(a => a.Title).ToArray();
                 BookmarkUpdate = DateTime.Now.AddMinutes(1);
             }
             if (Session.InFleet) FleetMembers = Fleet.Members.Select(a => a.Name).ToArray();
