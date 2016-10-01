@@ -384,10 +384,10 @@ namespace EveComFramework.Security
                             if (Cache.Instance.AllEntities.Any(a => NPCClasses.All.Any(b => b.Key == a.GroupID && b.Value == "Capital"))) return FleeTrigger.CapitalSpawn;
                             break;
                         case FleeTrigger.CynoGrid:
-							if (Session.InSpace && Cache.Instance.AllEntities.Any(a => a.Distance < 8000000 && (a.TypeID == 21094 || a.TypeID == 28650))) return FleeTrigger.CynoGrid;
+                            if (Session.InSpace && Cache.Instance.AllEntities.Any(a => a.Distance < Constants.GridsizeMaxDistance && (a.TypeID == 21094 || a.TypeID == 28650))) return FleeTrigger.CynoGrid;
                             break;
                         case FleeTrigger.CynoSystem:
-							if (Session.InSpace && Cache.Instance.AllEntities.Any(a => a.TypeID == 21094 || a.TypeID == 28650)) return FleeTrigger.CynoSystem;
+                            if (Session.InSpace && Cache.Instance.AllEntities.Any(a => a.TypeID == 21094 || a.TypeID == 28650)) return FleeTrigger.CynoSystem;
                             break;
                         case FleeTrigger.WhitelistedCharacterOnGrid:
                             if (Cache.Instance.AllEntities.Any(ent => ent.IsPC && Config.WhiteList.Contains(ent.Name))) return FleeTrigger.WhitelistedCharacterOnGrid;
@@ -690,7 +690,7 @@ namespace EveComFramework.Security
                 case FleeTrigger.CriminalGrid:
                 case FleeTrigger.SuspectLocal:
                 case FleeTrigger.SuspectGrid:
-                    if (Config.BroadcastTrigger) LavishScript.ExecuteCommand("relay \"" + Config.ISRelayTarget + "\" -noredirect SecurityBroadcastTrigger " + Me.CharID + " " + Session.SolarSystemID);
+                    if (Config.BroadcastTrigger) LavishScript.ExecuteCommand("relay \"" + Config.ISRelayTarget + "\" -noredirect SecurityBroadcastTrigger " + Me.CharID + " " + Session.SolarSystem.ID);
                     goto case FleeTrigger.Pod;
                 case FleeTrigger.CapitalSpawn:
                 case FleeTrigger.CynoGrid:
@@ -763,7 +763,7 @@ namespace EveComFramework.Security
             if (Reported != FleeTrigger.None)
             {
                 Log.Log("|oNew flee condition");
-                if (Config.BroadcastTrigger && (Reported == FleeTrigger.NegativeStanding || Reported == FleeTrigger.NeutralStanding || Reported == FleeTrigger.Paranoid)) { LavishScript.ExecuteCommand("relay \"" + Config.ISRelayTarget + "\" -noredirect SecurityBroadcastTrigger " + Me.CharID + " " + Session.SolarSystemID); }
+                if (Config.BroadcastTrigger && (Reported == FleeTrigger.NegativeStanding || Reported == FleeTrigger.NeutralStanding || Reported == FleeTrigger.Paranoid)) { LavishScript.ExecuteCommand("relay \"" + Config.ISRelayTarget + "\" -noredirect SecurityBroadcastTrigger " + Me.CharID + " " + Session.SolarSystem.ID); }
                 ReportTrigger(Reported);
                 Log.Log(" |-gWaiting for safety");
                 Comms.ChatQueue.Enqueue("<Security> New flee condition, waiting for safety");
@@ -839,7 +839,7 @@ namespace EveComFramework.Security
                     case FleeType.SafeBookmarks:
                         if (SafeSpots != null && !SafeSpots.Any())
                         {
-                            SafeSpots = Bookmark.All.Where(a => a.Title.Contains(Config.SafeSubstring) && a.LocationID == Session.SolarSystemID).ToList();
+                            SafeSpots = Bookmark.All.Where(a => a.Title.Contains(Config.SafeSubstring) && a.LocationID == Session.SolarSystem.ID).ToList();
                         }
                         if (SafeSpots != null && SafeSpots.Any())
                         {
@@ -894,7 +894,7 @@ namespace EveComFramework.Security
             }
             if (Config.BroadcastTrigger)
             {
-                LavishScript.ExecuteCommand("relay \"" + Config.ISRelayTarget + "\" -noredirect SecurityClearBroadcastTrigger " + Me.CharID + " " + Session.SolarSystemID);
+                LavishScript.ExecuteCommand("relay \"" + Config.ISRelayTarget + "\" -noredirect SecurityClearBroadcastTrigger " + Me.CharID + " " + Session.SolarSystem.ID);
             }
             QueueState(CheckSafe);
             return true;
@@ -956,7 +956,7 @@ namespace EveComFramework.Security
         SpeechSynthesizer Speech = new SpeechSynthesizer();
         Queue<string> SpeechQueue = new Queue<string>();
         public SecurityAudioSettings Config = new SecurityAudioSettings();
-        int SolarSystem = -1;
+        long SolarSystem = -1;
         List<Pilot> PilotCache = new List<Pilot>();
         Security Core;
         int LocalCache;
@@ -1016,10 +1016,10 @@ namespace EveComFramework.Security
                 Console.Log("Exception [" + ex + "]");
             }
 
-            if (Session.SolarSystemID != SolarSystem)
+            if (Session.SolarSystem.ID != SolarSystem)
             {
                 PilotCache = Local.Pilots;
-                SolarSystem = Session.SolarSystemID;
+                SolarSystem = Session.SolarSystem.ID;
             }
             List<Pilot> newPilots = Local.Pilots.Where(a => !PilotCache.Contains(a)).ToList();
             foreach (Pilot pilot in newPilots)

@@ -87,13 +87,13 @@ namespace EveComFramework.Comms
         Targets.Targets NonFleetPlayers = new Targets.Targets();
         List<Entity> NonFleetMemberOnGrid = new List<Entity>();
         List<Pilot> PilotCache = new List<Pilot>();
-        int SolarSystem = -1;
+        long SolarSystem = -1;
 
         public ChatChannel LocalChat
         {
             get
             {
-                return ChatChannel.All.FirstOrDefault(a => a.ID.Contains(Session.SolarSystemID.ToString()));
+                return ChatChannel.All.FirstOrDefault(a => a.ID.Contains(Session.SolarSystem.ID.ToString()));
             }
         }
 
@@ -105,7 +105,7 @@ namespace EveComFramework.Comms
             }
         }
 
-        public ChatChannel ByName(String name)
+        public ChatChannel ByName(string name)
         {
             if(name == "Local") return LocalChat;
             if(name == "Fleet") return FleetChat;
@@ -423,10 +423,10 @@ namespace EveComFramework.Comms
 
             if (!Session.Safe || (!Session.InSpace && !Session.InStation)) return false;
 
-            if (Session.SolarSystemID != SolarSystem)
+            if (Session.SolarSystem.ID != SolarSystem)
             {
                 PilotCache = Local.Pilots;
-                SolarSystem = Session.SolarSystemID;
+                SolarSystem = Session.SolarSystem.ID;
             }
 
             List<Pilot> newPilots = Local.Pilots.Where(a => !PilotCache.Contains(a)).ToList();
@@ -605,7 +605,7 @@ namespace EveComFramework.Comms
             return string.Format("{0:0.00} isk", val);
         }
 
-        public static bool MatchMessageAnom(String message, String anom)
+        public static bool MatchMessageAnom(string message, string anom)
         {
             if (message.StartsWith("^") || message.StartsWith("*"))
             {
@@ -615,8 +615,8 @@ namespace EveComFramework.Comms
             {
                 message = message.Substring(0, message.Length-1);
             }
-            String anomShort = anom.Substring(0, 3);
-            String anomDigit = anom.Substring(4, 3);
+            string anomShort = anom.Substring(0, 3);
+            string anomDigit = anom.Substring(4, 3);
             if (message.ToUpper() == anom) return true;
             if (message.ToUpper() == anomShort) return true;
             if (message.ToUpper() == anomDigit) return true;

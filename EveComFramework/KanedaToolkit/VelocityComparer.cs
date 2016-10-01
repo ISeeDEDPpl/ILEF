@@ -4,7 +4,6 @@ using EveCom;
 
 namespace EveComFramework.KanedaToolkit
 {
-
     public class VelocityComparer : Comparer<Entity>
     {
         public override int Compare(Entity x, Entity y)
@@ -27,5 +26,4 @@ namespace EveComFramework.KanedaToolkit
             return 0;
         }
     }
-
 }

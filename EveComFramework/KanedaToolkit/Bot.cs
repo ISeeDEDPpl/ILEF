@@ -81,7 +81,7 @@ namespace EveComFramework.KanedaToolkit
     public class BotUI : Form
     {
         protected Bot Bot = null;
-        private Timer wuTimer = new Timer();
+        private readonly Timer wuTimer = new Timer();
 
         public BotUI()
         {

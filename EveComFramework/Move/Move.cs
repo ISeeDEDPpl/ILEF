@@ -195,7 +195,7 @@ namespace EveComFramework.Move
                 QueueState(BookmarkPrep, -1, Bookmark, Distance);
                 return true;
             }
-            if (Bookmark.LocationID != Session.SolarSystemID)
+            if (Bookmark.LocationID != Session.SolarSystem.ID)
             {
                 if (Route.Path.Last() != Bookmark.LocationID)
                 {
@@ -205,7 +205,7 @@ namespace EveComFramework.Move
                 }
                 QueueState(AutoPilot, 2000);
             }
-            if (Bookmark.Dockable() && Bookmark.LocationID == Session.SolarSystemID)
+            if (Bookmark.Dockable() && Bookmark.LocationID == Session.SolarSystem.ID)
             {
                 AutoModule.PrepareToDock();
                 QueueState(Dock, -1, Cache.Instance.AllEntities.FirstOrDefault(a => a.ID == Bookmark.ItemID));
@@ -241,7 +241,7 @@ namespace EveComFramework.Move
             {
                 return false;
             }
-            if (Destination.LocationID != Session.SolarSystemID)
+            if (Destination.LocationID != Session.SolarSystem.ID)
             {
                 if (Route.Path.Last() != Destination.LocationID)
                 {
@@ -252,14 +252,14 @@ namespace EveComFramework.Move
                 DislodgeCurState(AutoPilot, 2000);
                 return false;
             }
-            if (Destination.Distance < 150000 && Destination.Distance > 0)
+            if (Destination.Distance < Constants.WarpMinDistance && Destination.Distance > 0)
             {
                 return true;
             }
             if (!Config.WarpCollisionPrevention)
             {
                 DoInstaWarp();
-                if (Destination.Dockable() && Destination.LocationID == Session.SolarSystemID)
+                if (Destination.Dockable() && Destination.LocationID == Session.SolarSystem.ID)
                 {
                     AutoModule.PrepareToDock();
                     QueueState(Dock, -1, Cache.Instance.AllEntities.FirstOrDefault(a => a.ID == Destination.ItemID));
@@ -300,7 +300,7 @@ namespace EveComFramework.Move
                 if (Destination.Exists && Destination.CanWarpTo)
                 {
                     DoInstaWarp();
-                    if (Destination.Dockable() && Destination.LocationID == Session.SolarSystemID)
+                    if (Destination.Dockable() && Destination.LocationID == Session.SolarSystem.ID)
                     {
                         AutoModule.PrepareToDock();
                         QueueState(Dock, -1, Cache.Instance.AllEntities.FirstOrDefault(a => a.ID == Destination.ItemID));
@@ -357,7 +357,7 @@ namespace EveComFramework.Move
             {
                 return false;
             }
-            if (Entity.Distance < 150000 && Entity.Distance > 0)
+            if (Entity.Distance < Constants.WarpMinDistance && Entity.Distance > 0)
             {
                 return true;
             }
@@ -393,7 +393,7 @@ namespace EveComFramework.Move
             }
             else if (LCO == null)
             {
-                if (Entity.Exists && Entity.Distance > 150000)
+                if (Entity.Exists && Entity.Distance > Constants.WarpMinDistance)
                 {
                     DoInstaWarp();
                     Log.Log("|oWarping");
@@ -448,7 +448,7 @@ namespace EveComFramework.Move
             Log.Log(" |-g{0}", JumpPortalArray.Name);
             JumpPortalArray.JumpThroughPortal();
             InsertState(JumpThroughArray);
-            int CurSystem = Session.SolarSystemID;
+            long CurSystem = Session.SolarSystem.ID;
             WaitFor(10, () => Session.SolarSystemID != CurSystem, () => Cache.Instance.MyShipAsEntity.Mode == EntityMode.Approaching);
             return true;
         }
@@ -534,7 +534,7 @@ namespace EveComFramework.Move
                 // Start approaching our approach target if we're not currently approaching anything
                 if (!Approaching && ApproachCollision == null)
                 {
-                    if (ApproachTarget.SurfaceDistance > 150000 && ApproachTarget.Warpable())
+                    if (ApproachTarget.SurfaceDistance > Constants.WarpMinDistance && ApproachTarget.Warpable())
                     {
                         DoInstaWarp();
                         Log.Log("|oWarping");
@@ -854,8 +854,8 @@ namespace EveComFramework.Move
                             return false;
                         }
                     }
-                    if (!Cache.Instance.AllEntities.Any(a => a.Dockable() && a.Distance < 150000)) DoInstaWarp();
-                    if (Route.NextWaypoint.Distance < 2000 || Route.NextWaypoint.Distance > 150000)
+                    if (!Cache.Instance.AllEntities.Any(a => a.Dockable() && a.Distance < Constants.WarpMinDistance)) DoInstaWarp();
+                    if (Route.NextWaypoint.Distance < 2000 || Route.NextWaypoint.Distance > Constants.WarpMinDistance)
                     {
                         Log.Log("|oJumping through to |-g{0}", Route.NextWaypoint.Name);
                         Comms.Comms.Instance.ChatQueue.Enqueue("<Move> Jumping through to " + Route.NextWaypoint.Name);
@@ -875,7 +875,7 @@ namespace EveComFramework.Move
                     {
                         if (Route.Path.FirstOrDefault() == Route.Waypoints.FirstOrDefault()) QueueAutoPilotDeactivation = true;
                     }
-                    int CurSystem = Session.SolarSystemID;
+                    long CurSystem = Session.SolarSystem.ID;
                     InsertState(AutoPilot);
                     WaitFor(10, () => Session.SolarSystemID != CurSystem, () => Cache.Instance.MyShipAsEntity.Mode != EntityMode.Stopped);
                     return true;
@@ -936,7 +936,7 @@ namespace EveComFramework.Move
             }
             if (!Config.WarpCollisionPrevention)
             {
-                if (!Cache.Instance.AllEntities.Any(a => a.Dockable() && a.Distance < 150000)) DoInstaWarp();
+                if (!Cache.Instance.AllEntities.Any(a => a.Dockable() && a.Distance < Constants.WarpMinDistance)) DoInstaWarp();
                 Log.Log("|oDocking");
                 try
                 {
@@ -974,7 +974,7 @@ namespace EveComFramework.Move
             }
             else if (LCO == null)
             {
-                if (!Cache.Instance.AllEntities.Any(a => a.Dockable() && a.Distance < 150000)) DoInstaWarp();
+                if (!Cache.Instance.AllEntities.Any(a => a.Dockable() && a.Distance < Constants.WarpMinDistance)) DoInstaWarp();
                 Log.Log("|oDocking");
                 Log.Log(" |-g{0}", Target.Name);
                 Target.Dock();
@@ -1168,7 +1168,7 @@ namespace EveComFramework.Move
             }
             if (Session.InSpace)
             {
-                Bookmark undock = Bookmark.All.FirstOrDefault(a => a.Title.Contains(Config.Substring) && a.LocationID == Session.SolarSystemID && a.Distance < Config.MaxDistance);
+                Bookmark undock = Bookmark.All.FirstOrDefault(a => a.Title.Contains(Config.Substring) && a.LocationID == Session.SolarSystem.ID && a.Distance < Config.MaxDistance);
                 if (undock != null) undock.WarpTo(0);
                 QueueState(WaitStation);
                 return true;

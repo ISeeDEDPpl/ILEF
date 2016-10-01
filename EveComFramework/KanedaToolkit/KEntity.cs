@@ -14,7 +14,7 @@ namespace EveComFramework.KanedaToolkit
         /// </summary>
         public static bool Warpable(this Entity entity)
         {
-            if (entity.SurfaceDistance <= 150000) return false;
+            if (entity.SurfaceDistance <= Constants.WarpMinDistance) return false;
             if (Session.InFleet && entity.IsPC && Fleet.Members.Any(a => a.Name == entity.Name)) return true;
             if (entity.CategoryID == Category.Asteroid || entity.CategoryID == Category.Structure ||
                 entity.CategoryID == Category.Station || entity.GroupID == Group.CargoContainer ||

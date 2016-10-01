@@ -17,7 +17,7 @@ namespace EveComFramework.GroupControl
 
             try
             {
-                LavishScript.ExecuteCommand("relay \"all other\" FleetAutodiscoverRequest " + Me.CharID + " " + Session.SolarSystemID);
+                LavishScript.ExecuteCommand("relay \"all other\" FleetAutodiscoverRequest " + Me.CharID + " " + Session.SolarSystem.ID);
             }
             catch { }
         }
