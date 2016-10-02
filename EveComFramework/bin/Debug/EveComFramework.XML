@@ -903,6 +903,26 @@
             Does this fighter require ammo and is out of ammo?
             </summary>
         </member>
+        <member name="M:EveComFramework.KanedaToolkit.KFighter.OptimalRange(EveCom.Fighters.Fighter)">
+            <summary>
+            Optimal range of normal attack of this fighter
+            </summary>
+        </member>
+        <member name="M:EveComFramework.KanedaToolkit.KFighter.FalloffRange(EveCom.Fighters.Fighter)">
+            <summary>
+            Falloff range of normal attack of this fighter
+            </summary>
+        </member>
+        <member name="M:EveComFramework.KanedaToolkit.KFighter.MissileOptimalRange(EveCom.Fighters.Fighter)">
+            <summary>
+            Falloff range of missile attack of this fighter
+            </summary>
+        </member>
+        <member name="M:EveComFramework.KanedaToolkit.KFighter.MaxTargetRange(EveCom.Fighters.Fighter)">
+            <summary>
+            max target range of this fighter
+            </summary>
+        </member>
         <member name="T:EveComFramework.KanedaToolkit.RouteToolkit">
             <summary>
             Route Toolkit
