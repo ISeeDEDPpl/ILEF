@@ -1,5 +1,6 @@
 ﻿using EveCom;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace EveComFramework.KanedaToolkit
 {
@@ -84,5 +85,49 @@ namespace EveComFramework.KanedaToolkit
             }
             return false;
         }
+
+        /// <summary>
+        /// Optimal range of normal attack of this fighter
+        /// </summary>
+        public static double OptimalRange(this Fighters.Fighter fighter)
+        {
+            return (double)fighter["fighterAbilityAttackMissileRangeOptimal"] * GetSkillBonus();
+        }
+
+        /// <summary>
+        /// Falloff range of normal attack of this fighter
+        /// </summary>
+        public static double FalloffRange(this Fighters.Fighter fighter)
+        {
+            return (double)fighter["fighterAbilityAttackMissileRangeFalloff"] * GetSkillBonus();
+        }
+
+        /// <summary>
+        /// Falloff range of missile attack of this fighter
+        /// </summary>
+        public static double MissileOptimalRange(this Fighters.Fighter fighter)
+        {
+            if (!fighter.HasMissiles()) return 0.0;
+            return (double)fighter["fighterAbilityMissilesRange"] * GetSkillBonus();
+        }
+
+        /// <summary>
+        /// max target range of this fighter
+        /// </summary>
+        public static double MaxTargetRange(this Fighters.Fighter fighter)
+        {
+            return (double)fighter["maxTargetRange"] - 10;
+        }
+
+        public static double GetSkillBonus()
+        {
+            Skill DroneSharpshooting = Skill.All.FirstOrDefault(a=>a.TypeID == 23606);
+            if(DroneSharpshooting != null)
+            {
+                return 1 + 0.05 * DroneSharpshooting.SkillLevel;
+            }
+            return 1.0;
+        }
+
     }
 }
