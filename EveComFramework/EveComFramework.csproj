@@ -85,7 +85,6 @@
     <Compile Include="Data\NPCClass.cs" />
     <Compile Include="Data\NPCTypes.cs" />
     <Compile Include="Data\PriorityTargets.cs" />
-    <Compile Include="Data\SolarSystem.cs" />
     <Compile Include="Data\StaticStations.cs" />
     <Compile Include="Data\Dungeon.cs" />
     <Compile Include="Data\InvType.cs" />
@@ -189,7 +188,6 @@
     <EmbeddedResource Include="Data\NPCClasses.xml" />
     <EmbeddedResource Include="Data\NPCTypes.xml" />
     <EmbeddedResource Include="Data\PriorityTargets.xml" />
-    <EmbeddedResource Include="Data\SolarSystems.xml" />
     <EmbeddedResource Include="Data\StaticStations.xml" />
     <EmbeddedResource Include="Data\Dungeons.xml" />
     <EmbeddedResource Include="Data\InvTypes.xml" />
