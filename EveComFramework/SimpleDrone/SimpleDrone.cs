@@ -555,7 +555,7 @@ namespace EveComFramework.SimpleDrone
             {
                 if (Idle)
                 {
-                    //LastTargetLocation = Cache.Instance.MyShipAsEntity.Position;
+                    Console.Log("SimpleDrone enabled", LogType.DEBUG);
                     TryReconnect = true;
                     QueueState(WaitForEve, 2000);
                     QueueState(Control);
@@ -563,6 +563,7 @@ namespace EveComFramework.SimpleDrone
             }
             else
             {
+                Console.Log("SimpleDrone disabled", LogType.DEBUG);
                 Clear();
                 QueueState(Recall);
                 Config.Save();
