@@ -1804,7 +1804,7 @@ namespace EveComFramework.SimpleDrone
                     //
                     try
                     {
-                        if (Config.RefillRockets)
+                        if (Config.RefillRockets || Cache.Instance.AllEntities.Any(a => Data.NPCClasses.All.Any(b => b.Key == a.GroupID && b.Value == "Capital")))
                         {
                             if (AvailableFighters.Any(i => _fighterRocketSalvosLeft != null && _fighterRocketSalvosLeft.ContainsKey(i.ID) && (_fighterRocketSalvosLeft[i.ID] <= 0)))
                             {
