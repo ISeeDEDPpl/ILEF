@@ -1,5 +1,5 @@
 ﻿#pragma warning disable 1591
-using ILoveEVE;
+using ILEF.Caching;
 
 namespace ILEF.KanedaToolkit
 {
@@ -36,16 +36,16 @@ namespace ILEF.KanedaToolkit
 
         public static bool Hostile(this Pilot pilot)
         {
-            if (Me.CorpID > 999999 && pilot.CorpID == Me.CorpID) return false;
-            if (Me.AllianceID > 0 && pilot.AllianceID == Me.AllianceID) return false;
+            if (QMCache.Instance.DirectEve.Session.CorporationId > 999999 && pilot.CorpID == QMCache.Instance.DirectEve.Session.CorporationId) return false;
+            if (QMCache.Instance.DirectEve.Session.AllianceId > 0 && pilot.AllianceID == QMCache.Instance.DirectEve.Session.AllianceId) return false;
             if (pilot.DerivedStanding() > 0.0) return false;
             return true;
         }
 
         public static string StandingsStatus(this Pilot pilot)
         {
-            if (Me.CorpID > 999999 && pilot.CorpID == Me.CorpID) return "blue";
-            if (Me.AllianceID > 0 && pilot.AllianceID == Me.AllianceID) return "blue";
+            if (QMCache.Instance.DirectEve.Session.CorporationId > 999999 && pilot.CorpID == QMCache.Instance.DirectEve.Session.CorporationId) return "blue";
+            if (QMCache.Instance.DirectEve.Session.AllianceId > 0 && pilot.AllianceID == QMCache.Instance.DirectEve.Session.AllianceId) return "blue";
             if (pilot.DerivedStanding() > 0.0) return "blue";
             if (pilot.DerivedStanding() < 0.0) return "red";
             return "neutral";
